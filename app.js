@@ -84,3 +84,33 @@ document.addEventListener("click",e=>{
 });
 const originalBuildHandler=$("buildBtn")?.onclick;
 if(originalBuildHandler)$("buildBtn").onclick=async()=>{await originalBuildHandler();if(state.blueprint)saveHistory(state.blueprint)};
+
+/* Reliable touch controls for dashboard tabs and blueprint actions */
+function wireTouchAction(el,fn){
+ if(!el)return;
+ let last=0;
+ const run=e=>{const now=Date.now();if(now-last<350)return;last=now;if(e&&e.cancelable)e.preventDefault();fn(e)};
+ el.addEventListener("pointerup",run,{passive:false});
+ el.addEventListener("click",run,{passive:false});
+}
+document.addEventListener("DOMContentLoaded",()=>{
+ const tabs=document.querySelectorAll(".tabs .tab");
+ tabs.forEach((tab,i)=>wireTouchAction(tab,()=>{
+  tabs.forEach(t=>t.classList.remove("active"));tab.classList.add("active");
+  if(i===0){$("blueprintSection")?.scrollIntoView({behavior:"smooth",block:"start"});}
+  else {$("scenes")?.scrollIntoView({behavior:"smooth",block:"start"});}
+ }));
+ wireTouchAction($("editBtn"),()=>{
+  const p=$("createPanel");if(!p)return;
+  p.classList.toggle("hidden");
+  if(!p.classList.contains("hidden"))p.scrollIntoView({behavior:"smooth",block:"start"});
+ });
+ wireTouchAction($("generateMovieBtn"),()=>{
+  $("scenes")?.scrollIntoView({behavior:"smooth",block:"start"});
+  status("status",state.blueprint?"Choose a shot below and tap Open Shot to continue.":"Build a movie blueprint first.");
+ });
+ document.querySelectorAll(".outline-btn,.gold-btn,.tab,.nav-item,.character,.shot button").forEach(el=>{
+  el.style.touchAction="manipulation";
+  el.style.webkitTapHighlightColor="transparent";
+ });
+});
