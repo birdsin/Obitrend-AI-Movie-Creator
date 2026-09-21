@@ -47,3 +47,31 @@
  .field-grid{grid-template-columns:1fr}
  .shot-grid{grid-template-columns:1fr}
 }
+.menu-workspace{background:linear-gradient(150deg,#0d141e,#0a1018);border:1px solid #2a3442;border-radius:14px;margin-bottom:17px;padding:17px 18px;box-shadow:0 15px 45px rgba(0,0,0,.16)}
+.menu-workspace-head{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;border-bottom:1px solid #27313e;padding-bottom:14px}
+.menu-workspace-head h2{margin:7px 0 3px;font-size:21px}
+.menu-workspace-head p{margin:0;color:#9fa9b7;font-size:12px}
+.menu-workspace-body{padding-top:14px;display:grid;gap:10px}
+.menu-card{display:flex;justify-content:space-between;align-items:center;gap:15px;background:#0f1721;border:1px solid #2b3745;border-radius:10px;padding:13px}
+.menu-card h3{margin:0 0 5px;color:#f0c450;font-size:14px}
+.menu-card p{margin:0;color:#b9c1cc;font-size:11px;line-height:1.45}
+.menu-action{cursor:pointer;white-space:nowrap}
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.menu-form label{display:block;color:#c9ced6;font-size:12px;margin:5px 0 6px}
+.menu-form textarea{width:100%;min-height:110px;background:#0a1018;border:1px solid #2b3543;border-radius:8px;color:#fff;padding:12px;font:inherit;resize:vertical}
+.empty-menu{padding:28px;text-align:center;border:1px dashed #394453;border-radius:10px;color:#929dad;font-size:13px}
+.credit-box{display:flex;align-items:center;gap:16px;padding:20px;border:1px solid #a78330;border-radius:12px;background:linear-gradient(135deg,#17150f,#0c1118)}
+.credit-box strong{font-size:40px;color:var(--gold2)}
+.credit-box span{color:#c6ccd5;font-size:13px}
+.settings-list{display:grid;gap:10px}
+.setting-row{display:flex;align-items:center;justify-content:space-between;background:#0f1721;border:1px solid #2b3745;border-radius:9px;padding:14px;color:#dce1e8;font-size:13px}
+.setting-row input{accent-color:#e4b94f;width:20px;height:20px}
+.nav-item.selected{background:#151b24}
+@media(max-width:720px){
+ .menu-workspace{padding:14px;margin-bottom:14px}
+ .menu-workspace-head{gap:8px}
+ .menu-workspace-head h2{font-size:18px}
+ .menu-grid{grid-template-columns:1fr}
+ .menu-card{align-items:flex-start}
+ .menu-card .menu-action{margin-left:auto}
+}
