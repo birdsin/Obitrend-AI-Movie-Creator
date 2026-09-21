@@ -19,7 +19,7 @@ module.exports=async function(req,res){
   const count=length<=5?4:length<=15?8:12;
   const system="You are a professional film development system. Create a concise production-ready movie blueprint. Preserve character, wardrobe, location and visual continuity. Do not reproduce existing copyrighted films or characters.";
   const user="Story idea: "+prompt+"\nGenre: "+genre+"\nVisual style: "+style+"\nAspect ratio: "+ratio+"\nTarget length: "+length+" minutes.\nCreate exactly "+count+" scenes and exactly 2 short practical shots per scene. Keep dialogue concise and camera directions filmable.";
-  const body={model:process.env.OPENAI_MOVIE_MODEL||"gpt-5.6-luna",messages:[{role:"system",content:system},{role:"user",content:user}],response_format:{type:"json_schema",json_schema:{name:"movie_blueprint",strict:true,schema}},max_tokens:8000};
+  const body={model:process.env.OPENAI_MOVIE_MODEL||"gpt-5.6-luna",messages:[{role:"system",content:system},{role:"user",content:user}],response_format:{type:"json_schema",json_schema:{name:"movie_blueprint",strict:true,schema}},max_completion_tokens:8000};
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),45000);
   let r;
   try{
