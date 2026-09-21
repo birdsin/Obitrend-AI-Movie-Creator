@@ -15,7 +15,7 @@ function renderBlueprint(b){
   $("characters").innerHTML=chars.map((c,ci)=>{
     const pos=CHARACTER_SPRITE_POSITIONS[ci%CHARACTER_SPRITE_POSITIONS.length];
     return "<div class=\\"character\\" data-character=\\""+ci+"\\" tabindex=\\"0\\" role=\\"button\\" aria-label=\\"Select "+esc(c.name)+"\\">"+
-      "<div class=\\"character-photo-frame\\"><img class=\\"character-photo character-photo-sprite\\" src=\\""+CHARACTER_SPRITE+"\\" alt=\\""+esc(c.name)+"\\" loading=\\"eager\\" decoding=\\"async\\" style=\\"object-position:"+pos+";\\"></div>"+
+      "<div class=\\"character-photo-frame\\"><img class=\\"character-photo character-photo-sprite sprite-\"+ (ci%4) + \"\\" src=\\""+CHARACTER_SPRITE+"\\" alt=\\""+esc(c.name)+"\\" loading=\\"eager\\" decoding=\\"async\\" style=\\"object-position:"+pos+";\\"></div>"+
       "<div class=\\"character-body\\"><h3>"+esc(c.name)+"</h3><p class=\\"character-role\\">"+esc(c.role||"Character")+"</p><p class=\\"character-description\\">"+esc(c.appearance)+"<br>"+esc(c.wardrobe)+"</p></div></div>";
   }).join("");
   $("characterCount").textContent="("+chars.length+")";
