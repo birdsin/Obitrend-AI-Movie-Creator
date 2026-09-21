@@ -13,3 +13,74 @@ async function pollTask(id){for(let i=0;i<90;i++){status("shotStatus","Generatin
 function showVideo(url){$("videoPlaceholder").classList.add("hidden");$("shotVideo").src=url;$("shotVideo").classList.remove("hidden");$("shotVideo").load()}
 
 window.addEventListener("DOMContentLoaded",()=>{if(state.blueprint)renderBlueprint(state.blueprint)});
+
+const MENU_DATA={
+ templates:[
+  ["The Rejected Boy","A poor boy rejected by his relatives fights through hardship and builds a new life."],
+  ["The Last Journey","A family discovers a hidden truth during one unforgettable journey."],
+  ["Dreams of Lagos","A young creator pursues a dream in Lagos while facing pressure from home."],
+  ["The Comeback","After losing everything, a determined person rebuilds their life from nothing."]
+ ],
+ models:["Cinematic realism","Luxury fashion film","Dark thriller","Warm romantic cinema","Epic blockbuster","Documentary realism"],
+ backgrounds:["Lagos city","Luxury hotel","Family house","Modern city street","Beach resort","Village","Airport","Restaurant","Night city"],
+ colors:["Black","White","Red","Navy Blue","Oxblood","Brown","Gold","Cream","Emerald","Sky Blue"]
+};
+function menuOpen(title,subtitle,html){
+ const w=$("menuWorkspace"); if(!w)return;
+ $("menuWorkspaceTitle").textContent=title;$("menuWorkspaceSubtitle").textContent=subtitle||"";$("menuWorkspaceBody").innerHTML=html;
+ w.classList.remove("hidden");w.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function menuClose(){$("menuWorkspace")?.classList.add("hidden")}
+function menuButton(label,action,cls="outline-btn"){return '<button class="'+cls+' menu-action" data-menu-action="'+esc(action)+'">'+esc(label)+'</button>'}
+function renderMenuCard(title,text,action){
+ return '<div class="menu-card"><div><h3>'+esc(title)+'</h3><p>'+esc(text)+'</p></div>'+menuButton("Open",action)+'</div>'
+}
+function saveHistory(b){
+ try{
+  const h=JSON.parse(localStorage.getItem("obitrend_movie_history")||"[]");
+  h.unshift({title:b.title||"Untitled Movie",genre:b.genre||"",length:b.length||"",created:new Date().toISOString(),blueprint:b});
+  localStorage.setItem("obitrend_movie_history",JSON.stringify(h.slice(0,20)));
+ }catch(e){}
+}
+function openMenu(name){
+ const closeDrawer=()=>$("sidebar")?.classList.remove("open");
+ closeDrawer();
+ const actions={
+  home:()=>{menuClose();window.scrollTo({top:0,behavior:"smooth"})},
+  "create-image":()=>menuOpen("Create Image","Create a cinematic still from your movie concept.",
+   '<div class="menu-form"><label>Movie image idea</label><textarea id="menuImagePrompt" placeholder="Describe the cinematic frame you want..."></textarea><div class="menu-grid">'+renderMenuCard("Character Poster","Create a character-focused movie poster concept.","poster")+renderMenuCard("Cinematic Still","Create a detailed still-frame prompt from your story.","still")+'</div><div id="menuActionStatus" class="status"></div></div>'),
+  "create-video":()=>{menuClose();$("scenes")?.scrollIntoView({behavior:"smooth",block:"start"});status("status",state.blueprint?"Choose any shot and open Shot Studio to generate video.":"Build a movie blueprint first, then generate video shots.")},
+  creations:()=>{
+   let h=[];try{h=JSON.parse(localStorage.getItem("obitrend_movie_history")||"[]")}catch(e){}
+   const body=h.length?h.map((x,i)=>'<div class="menu-card"><div><h3>'+esc(x.title)+'</h3><p>'+esc(x.genre)+' · '+esc(x.length)+' minutes · '+new Date(x.created).toLocaleString()+'</p></div>'+menuButton("Open","history:"+i)+'</div>').join(""):'<div class="empty-menu">No saved movies yet. Build your first movie blueprint.</div>';
+   menuOpen("My Creations","Your saved movie projects on this device.",body);
+  },
+  templates:()=>menuOpen("Templates","Start quickly from a ready-made movie concept.",MENU_DATA.templates.map((x,i)=>renderMenuCard(x[0],x[1],"template:"+i)).join("")),
+  models:()=>menuOpen("Model Styles","Choose the visual direction for your next movie.",MENU_DATA.models.map((x,i)=>renderMenuCard(x,"Use this visual style for the next blueprint.","model:"+i)).join("")),
+  backgrounds:()=>menuOpen("Backgrounds","Choose the world where your movie takes place.",MENU_DATA.backgrounds.map((x,i)=>renderMenuCard(x,"Use this setting in your next movie concept.","background:"+i)).join("")),
+  colors:()=>menuOpen("Outfit Colors","Choose a wardrobe color direction for your movie.",MENU_DATA.colors.map((x,i)=>renderMenuCard(x,"Use this wardrobe color direction.","color:"+i)).join("")),
+  pro:()=>menuOpen("Pro Plans","Premium movie creation options.",renderMenuCard("Weekly Pro","20 movie credits · 7 days","pro:weekly")+renderMenuCard("Monthly Pro","80 movie credits · 30 days","pro:monthly")+'<div class="status">Payment can be connected to your existing billing flow when the movie subscription backend is enabled.</div>'),
+  credits:()=>menuOpen("My Credits","Your current movie studio credit balance.",'<div class="credit-box"><strong>47</strong><span>Credits available</span></div>'+renderMenuCard("How credits work","Credits are used when generating movie shots.","credits-info")),
+  settings:()=>menuOpen("Settings","Movie Creator settings are saved on this device.",'<div class="settings-list"><label class="setting-row"><span>Save movie history</span><input id="settingHistory" type="checkbox" checked></label><button class="outline-btn menu-action" data-menu-action="clear-history">Clear saved history</button><button class="outline-btn menu-action" data-menu-action="clear-project">Clear current project</button></div><div id="menuActionStatus" class="status"></div>'),
+  help:()=>menuOpen("Help & Support","Quick help for the Movie Creator.",renderMenuCard("How do I create a movie?","Open Create Image, enter an idea, then build your cinematic blueprint.","help:create")+renderMenuCard("How do I generate video?","Open Create Video, choose a shot, then use Generate This Shot.","help:video")+renderMenuCard("Generation failed?","Your blueprint stays saved so you can try the shot again.","help:error"))
+ };
+ (actions[name]||actions.home)();
+}
+document.querySelectorAll(".nav-item").forEach(a=>a.addEventListener("click",e=>{const href=a.getAttribute("href")||"#home";if(href.startsWith("#")){e.preventDefault();openMenu(href.slice(1));document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("selected"));a.classList.add("selected")}}));
+$("menuWorkspaceClose")?.addEventListener("click",menuClose);
+document.addEventListener("click",e=>{
+ const b=e.target.closest("[data-menu-action]");if(!b)return;const action=b.dataset.menuAction;
+ if(action.startsWith("template:")){const x=MENU_DATA.templates[+action.split(":")[1]];$("moviePrompt").value=x[1];$("createPanel").classList.remove("hidden");menuClose();$("createPanel").scrollIntoView({behavior:"smooth"});return}
+ if(action.startsWith("model:")){localStorage.setItem("obitrend_movie_model_style",MENU_DATA.models[+action.split(":")[1]]);$("visualStyle").value=MENU_DATA.models[+action.split(":")[1]];status("status","Model style selected: "+MENU_DATA.models[+action.split(":")[1]]);return}
+ if(action.startsWith("background:")){localStorage.setItem("obitrend_movie_background",MENU_DATA.backgrounds[+action.split(":")[1]]);status("status","Background selected: "+MENU_DATA.backgrounds[+action.split(":")[1]]);return}
+ if(action.startsWith("color:")){localStorage.setItem("obitrend_movie_color",MENU_DATA.colors[+action.split(":")[1]]);status("status","Outfit color selected: "+MENU_DATA.colors[+action.split(":")[1]]);return}
+ if(action==="poster"||action==="still"){const p=$("menuImagePrompt")?.value.trim()||state.blueprint?.logline||"Create a cinematic movie frame";$("menuActionStatus").textContent=(action==="poster"?"Poster prompt ready: ":"Cinematic still prompt ready: ")+p;return}
+ if(action.startsWith("history:")){let h=[];try{h=JSON.parse(localStorage.getItem("obitrend_movie_history")||"[]")}catch(e){}const x=h[+action.split(":")[1]];if(x?.blueprint){state.blueprint=x.blueprint;renderBlueprint(x.blueprint);menuClose();window.scrollTo({top:0,behavior:"smooth"})}return}
+ if(action.startsWith("pro:")){status("status","Selected "+(action.endsWith("weekly")?"Weekly":"Monthly")+" Pro plan. Payment setup can be connected here.");return}
+ if(action==="credits-info"){const s=$("menuActionStatus");if(s)s.textContent="Movie credits are consumed by video-shot generation.";return}
+ if(action==="clear-history"){localStorage.removeItem("obitrend_movie_history");const s=$("menuActionStatus");if(s)s.textContent="Saved movie history cleared.";return}
+ if(action==="clear-project"){localStorage.removeItem("obitrend_movie_blueprint");state.blueprint=demoBlueprint;renderBlueprint(state.blueprint);const s=$("menuActionStatus");if(s)s.textContent="Current project reset.";return}
+ if(action.startsWith("help:")){const s=$("menuActionStatus");if(s)s.textContent=action.endsWith("create")?"Enter a movie idea, choose options, and tap Build Movie Blueprint.":action.endsWith("video")?"Open a shot and tap Generate This Shot. The status area shows progress.":"Your project blueprint remains saved while a shot is being generated."}
+});
+const originalBuildHandler=$("buildBtn")?.onclick;
+if(originalBuildHandler)$("buildBtn").onclick=async()=>{await originalBuildHandler();if(state.blueprint)saveHistory(state.blueprint)};
