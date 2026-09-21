@@ -1,0 +1,7 @@
+{
+  "name": "obitrend-ai-movie-creator",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Standalone OBITREND AI Movie Creator",
+  "scripts": {"dev": "vercel dev"}
+}
