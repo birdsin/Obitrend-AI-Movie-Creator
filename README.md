@@ -17,3 +17,5 @@ Environment variables:
 - RUNWAY_MODEL (optional)
 
 This repository is intentionally separate from the existing OBITREND image/video generation application.
+
+<!-- production restore trigger -->
