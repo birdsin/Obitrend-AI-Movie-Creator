@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#08090d"><title>OBITREND AI Movie Creator</title><link rel="stylesheet" href="/styles.css"></head>
+<body><div class="app-shell">
+<header class="topbar"><div class="brand"><div class="brand-mark">O</div><div><strong>OBITREND</strong><span>AI MOVIE CREATOR</span></div></div><div class="top-actions"><span class="status-dot"></span>Movie Studio</div></header>
+<main class="workspace">
+<section class="hero"><div class="eyebrow">AI FILMMAKING STUDIO</div><h1>Turn an idea into a movie.</h1><p>Build a cinematic blueprint with characters, scenes, shots, dialogue, camera direction and continuity — then generate shots from the production board.</p></section>
+<section class="creator-grid"><div class="panel prompt-panel"><div class="panel-head"><div><h2>New Movie</h2><p>Describe the story you want to create.</p></div><span class="badge">AI</span></div>
+<label for="moviePrompt">Movie idea</label><textarea id="moviePrompt" placeholder="Example: A young Nigerian fashion designer discovers a mysterious camera that can reveal people's hidden memories..."></textarea>
+<div class="field-grid"><div><label for="length">Length</label><select id="length"><option value="5">5 minutes</option><option value="15" selected>15 minutes</option><option value="30">30 minutes</option></select></div>
+<div><label for="genre">Genre</label><select id="genre"><option>Drama</option><option>Action</option><option>Comedy</option><option>Romance</option><option>Thriller</option><option>Sci-Fi</option><option>Fantasy</option><option>Documentary</option></select></div>
+<div><label for="visualStyle">Visual style</label><select id="visualStyle"><option>Cinematic realism</option><option>Luxury fashion film</option><option>Dark thriller</option><option>Warm romantic cinema</option><option>Epic blockbuster</option><option>Documentary realism</option></select></div>
+<div><label for="ratio">Aspect ratio</label><select id="ratio"><option value="16:9">16:9 Landscape</option><option value="9:16">9:16 Vertical</option><option value="1:1">1:1 Square</option></select></div></div>
+<button id="buildBtn" class="primary-btn">Build Movie Blueprint <span>→</span></button><div id="status" class="status"></div></div>
+<div class="panel guide-panel"><div class="panel-head"><div><h2>Production System</h2><p>One project, one continuity bible.</p></div></div><div class="system-list">
+<div><b>01</b><span><strong>Story blueprint</strong><small>Title, logline, genre and visual direction.</small></span></div>
+<div><b>02</b><span><strong>Characters</strong><small>Appearance, wardrobe, personality and continuity.</small></span></div>
+<div><b>03</b><span><strong>Scenes & shots</strong><small>Camera, lens, movement, lighting and sound.</small></span></div>
+<div><b>04</b><span><strong>Shot generation</strong><small>Generate each cinematic shot from the board.</small></span></div></div></div></section>
+<section id="blueprintSection" class="hidden"><div class="section-head"><div><div class="eyebrow">PRODUCTION BOARD</div><h2 id="movieTitle">Movie Blueprint</h2><p id="movieLogline"></p></div><button id="newMovieBtn" class="ghost-btn">New Movie</button></div><div id="movieMeta" class="meta-row"></div><div id="characters" class="character-grid"></div><div id="scenes" class="scene-list"></div></section>
+<section id="shotStudio" class="panel shot-studio hidden"><div class="section-head"><div><div class="eyebrow">SHOT STUDIO</div><h2 id="shotTitle">Generate Shot</h2><p id="shotDescription"></p></div><button id="closeStudio" class="ghost-btn">Close</button></div><div class="shot-grid"><div class="shot-details" id="shotDetails"></div><div class="video-card"><div id="videoPlaceholder" class="video-placeholder"><span>🎬</span><p>Your generated shot will appear here.</p></div><video id="shotVideo" controls playsinline class="hidden"></video></div></div><button id="generateShotBtn" class="primary-btn">Generate This Shot <span>✦</span></button><div id="shotStatus" class="status"></div></section>
+</main></div><script src="/app.js"></script></body></html>
