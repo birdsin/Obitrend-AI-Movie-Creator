@@ -106,8 +106,12 @@ document.addEventListener("DOMContentLoaded",()=>{
   if(!p.classList.contains("hidden"))p.scrollIntoView({behavior:"smooth",block:"start"});
  });
  wireTouchAction($("generateMovieBtn"),()=>{
-  $("scenes")?.scrollIntoView({behavior:"smooth",block:"start"});
-  status("status",state.blueprint?"Choose a shot below and tap Open Shot to continue.":"Build a movie blueprint first.");
+  if(!state.blueprint){status("status","Build a movie blueprint first.");$("createPanel")?.classList.remove("hidden");$("createPanel")?.scrollIntoView({behavior:"smooth",block:"start"});return;}
+  const scenes=state.blueprint.scenes||[];
+  if(!scenes.length){status("status","No movie scenes are available yet.");return;}
+  const shots=scenes[0].shots||[];
+  if(!shots.length){status("status","No shots are available for this movie.");return;}
+  openShot(0,0);
  });
  document.querySelectorAll(".outline-btn,.gold-btn,.tab,.nav-item,.character,.shot button").forEach(el=>{
   el.style.touchAction="manipulation";
