@@ -14,14 +14,14 @@ function renderBlueprint(b){
   const chars=b.characters||[];
   $("characters").innerHTML=chars.map((c,ci)=>{
     const pos=CHARACTER_SPRITE_POSITIONS[ci%CHARACTER_SPRITE_POSITIONS.length];
-    return "<div class=\\"character\\" data-character=\\""+ci+"\\" tabindex=\\"0\\" role=\\"button\\" aria-label=\\"Select "+esc(c.name)+"\\">"+
-      "<div class=\\"character-photo-frame\\"><img class=\\"character-photo character-photo-sprite sprite-\"+ (ci%4) + \"\\" src=\\""+CHARACTER_SPRITE+"\\" alt=\\""+esc(c.name)+"\\" loading=\\"eager\\" decoding=\\"async\\" style=\\"object-position:"+pos+";\\"></div>"+
-      "<div class=\\"character-body\\"><h3>"+esc(c.name)+"</h3><p class=\\"character-role\\">"+esc(c.role||"Character")+"</p><p class=\\"character-description\\">"+esc(c.appearance)+"<br>"+esc(c.wardrobe)+"</p></div></div>";
+    return "<div class=\"character\" data-character=\""+ci+"\" tabindex=\"0\" role=\"button\" aria-label=\"Select "+esc(c.name)+"\">"+
+      "<div class=\"character-photo-frame\"><img class=\"character-photo character-photo-sprite sprite-\"+ (ci%4) + \"\" src=\""+CHARACTER_SPRITE+"\" alt=\""+esc(c.name)+"\" loading=\"eager\" decoding=\"async\" style=\"object-position:"+pos+";\"></div>"+
+      "<div class=\"character-body\"><h3>"+esc(c.name)+"</h3><p class=\"character-role\">"+esc(c.role||"Character")+"</p><p class=\"character-description\">"+esc(c.appearance)+"<br>"+esc(c.wardrobe)+"</p></div></div>";
   }).join("");
   $("characterCount").textContent="("+chars.length+")";
   const totalShots=(b.scenes||[]).reduce((n,x)=>n+(x.shots||[]).length,0);
   $("sceneCount").textContent="("+(b.scenes||[]).length+" Scenes · "+totalShots+" Shots)";
-  $("scenes").innerHTML=(b.scenes||[]).map((x,si)=>"<article class=\\"scene\\"><h3><span style=\\"color:#e4b84d\\">Scene "+(si+1)+":</span> "+esc(x.heading)+"</h3><div class=\\"scene-meta\\">Location: "+esc(x.location)+" &nbsp; | &nbsp; Duration: "+esc(x.duration)+"</div><div class=\\"shots\\">"+(x.shots||[]).map((sh,hi)=>"<div class=\\"shot\\"><div class=\\"shot-info\\"><strong><span style=\\"color:#e4b84d\\">Shot "+(hi+1)+":</span> "+esc(sh.framing)+"</strong><span>Type: "+esc(sh.framing)+" · Angle: "+esc(sh.angle)+"</span></div><button data-s=\\""+si+"\\" data-h=\\""+hi+"\\">Open Shot</button></div>").join("")+"</div></article>").join("");
+  $("scenes").innerHTML=(b.scenes||[]).map((x,si)=>"<article class=\"scene\"><h3><span style=\"color:#e4b84d\">Scene "+(si+1)+":</span> "+esc(x.heading)+"</h3><div class=\"scene-meta\">Location: "+esc(x.location)+" &nbsp; | &nbsp; Duration: "+esc(x.duration)+"</div><div class=\"shots\">"+(x.shots||[]).map((sh,hi)=>"<div class=\"shot\"><div class=\"shot-info\"><strong><span style=\"color:#e4b84d\">Shot "+(hi+1)+":</span> "+esc(sh.framing)+"</strong><span>Type: "+esc(sh.framing)+" · Angle: "+esc(sh.angle)+"</span></div><button data-s=\""+si+"\" data-h=\""+hi+"\">Open Shot</button></div>").join("")+"</div></article>").join("");
   document.querySelectorAll(".shot button").forEach(x=>x.onclick=()=>openShot(+x.dataset.s,+x.dataset.h));
   if(typeof buildAssemblyQueue==="function")buildAssemblyQueue();
   document.querySelectorAll(".character").forEach(x=>{
