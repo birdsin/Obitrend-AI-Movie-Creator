@@ -118,3 +118,60 @@ document.addEventListener("DOMContentLoaded",()=>{
   el.style.webkitTapHighlightColor="transparent";
  });
 });
+
+const assemblyState={queue:[],running:false,urls:{}};
+function buildAssemblyQueue(){
+ assemblyState.queue=[];
+ (state.blueprint?.scenes||[]).forEach((scene,si)=>(scene.shots||[]).forEach((shot,hi)=>assemblyState.queue.push({si,hi,scene,shot,key:si+"-"+hi,state:"waiting",url:null})));
+ renderAssembly();
+}
+function renderAssembly(){
+ const q=$("assemblyQueue"),bar=$("assemblyProgressBar"),pct=$("assemblyProgress");
+ if(!q)return;
+ if(!assemblyState.queue.length){q.innerHTML='<div class="empty-menu">Build a movie blueprint first.</div>';if(bar)bar.style.width="0%";if(pct)pct.textContent="0%";return}
+ const done=assemblyState.queue.filter(x=>x.state==="ready").length;
+ const percent=Math.round(done/assemblyState.queue.length*100);
+ if(bar)bar.style.width=percent+"%";if(pct)pct.textContent=percent+"%";
+ q.innerHTML=assemblyState.queue.map((x,i)=>{
+  const status=x.state==="ready"?"Ready":x.state==="generating"?"Generating…":x.state==="failed"?"Failed":"Waiting";
+  const media=x.url?'<video controls playsinline src="'+esc(x.url)+'"></video>':'';
+  return '<div class="assembly-item '+x.state+'"><div class="assembly-number">'+(i+1)+'</div><div><h3>Scene '+(x.si+1)+' · Shot '+(x.hi+1)+' — '+esc(x.shot.framing||"Cinematic shot")+'</h3><p>'+esc(x.scene.heading||"")+'</p></div><div class="assembly-state">'+status+'</div>'+media+'</div>'
+ }).join("");
+}
+async function generateAssemblyItem(item){
+ item.state="generating";renderAssembly();
+ const r=await fetch("/api/generate-shot",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({blueprint:state.blueprint,sceneIndex:item.si,shotIndex:item.hi,ratio:$("ratio").value})});
+ const d=await r.json();
+ if(!r.ok)throw new Error(d.error||"Shot generation failed.");
+ if(d.videoUrl)return d.videoUrl;
+ if(!d.taskId)throw new Error("The video provider did not return a task.");
+ for(let i=0;i<90;i++){
+  $("assemblyStatus").textContent="Generating Scene "+(item.si+1)+" Shot "+(item.hi+1)+"… "+Math.min(99,Math.round((i+1)/90*100))+"%";
+  await new Promise(r=>setTimeout(r,5000));
+  const s=await fetch("/api/generate-shot?taskId="+encodeURIComponent(d.taskId));const x=await s.json();
+  if(!s.ok)throw new Error(x.error||"Video status check failed.");
+  if(x.status==="SUCCEEDED"&&x.videoUrl)return x.videoUrl;
+  if(x.status==="FAILED"||x.status==="CANCELED")throw new Error("The shot could not be generated.");
+ }
+ throw new Error("Generation is taking longer than expected.");
+}
+async function runAssembly(full){
+ if(assemblyState.running||!state.blueprint)return;
+ if(!assemblyState.queue.length)buildAssemblyQueue();
+ const items=assemblyState.queue.filter(x=>x.state!=="ready");
+ const targets=full?items:items.slice(0,1);
+ if(!targets.length){$("assemblyStatus").textContent="All movie shots are already generated.";return}
+ assemblyState.running=true;
+ $("generateNextShotBtn").disabled=true;$("generateFullMovieBtn").disabled=true;
+ try{
+  for(const item of targets){
+   try{item.url=await generateAssemblyItem(item);item.state="ready";assemblyState.urls[item.key]=item.url;renderAssembly();$("assemblyStatus").textContent="Scene "+(item.si+1)+" Shot "+(item.hi+1)+" ready.";localStorage.setItem("obitrend_movie_assembly",JSON.stringify(assemblyState.urls))}
+   catch(e){item.state="failed";renderAssembly();$("assemblyStatus").textContent=e.message;break}
+  }
+ }finally{assemblyState.running=false;$("generateNextShotBtn").disabled=false;$("generateFullMovieBtn").disabled=false;renderAssembly()}
+}
+document.addEventListener("DOMContentLoaded",()=>{
+ $("generateNextShotBtn")?.addEventListener("click",()=>runAssembly(false));
+ $("generateFullMovieBtn")?.addEventListener("click",()=>runAssembly(true));
+ if(state.blueprint){buildAssemblyQueue();try{const saved=JSON.parse(localStorage.getItem("obitrend_movie_assembly")||"{}");assemblyState.queue.forEach(x=>{if(saved[x.key]){x.url=saved[x.key];x.state="ready"}});renderAssembly()}catch(e){}}
+});
