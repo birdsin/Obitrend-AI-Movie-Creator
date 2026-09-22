@@ -202,3 +202,63 @@ document.addEventListener("DOMContentLoaded",()=>{
  $("generateFullMovieBtn")?.addEventListener("click",()=>runAssembly(true));
  if(state.blueprint){buildAssemblyQueue();try{const saved=JSON.parse(localStorage.getItem("obitrend_movie_assembly")||"{}");assemblyState.queue.forEach(x=>{if(saved[x.key]){x.url=saved[x.key];x.state="ready"}});renderAssembly()}catch(e){}}
 });
+
+/* Navigation dropdown menus — touch-safe and independent from the existing workspace menu */
+(function(){
+  function closeNavDropdowns(except){
+    document.querySelectorAll(".nav-dropdown.open").forEach(p=>{if(p!==except)p.classList.remove("open")});
+    document.querySelectorAll(".nav-chevron.open").forEach(b=>{if(!except||b.closest(".nav-group")?.querySelector(".nav-dropdown")!==except)b.classList.remove("open")});
+  }
+  document.querySelectorAll(".nav-chevron").forEach(btn=>{
+    btn.addEventListener("click",e=>{
+      e.preventDefault();e.stopPropagation();
+      const panel=btn.closest(".nav-group")?.querySelector(".nav-dropdown");
+      if(!panel)return;
+      const opening=!panel.classList.contains("open");
+      closeNavDropdowns(panel);
+      panel.classList.toggle("open",opening);
+      btn.classList.toggle("open",opening);
+    },{passive:false});
+  });
+  document.addEventListener("click",e=>{
+    if(e.target.closest(".sidebar")||e.target.closest(".nav-dropdown"))return;
+    closeNavDropdowns();
+  });
+  document.addEventListener("click",e=>{
+    const b=e.target.closest(".nav-dropdown [data-menu-action]");
+    if(!b)return;
+    e.preventDefault();e.stopPropagation();
+    const action=b.dataset.menuAction;
+    closeNavDropdowns();
+    const go=(name)=>openMenu(name);
+    if(action==="home:dashboard"){go("home");return}
+    if(action==="home:blueprint"){menuClose();$("blueprintSection")?.scrollIntoView({behavior:"smooth",block:"start"});return}
+    if(action==="home:recent"){go("creations");return}
+    if(action==="create-image:poster"||action==="create-image:still"||action==="create-image:character"){
+      menuOpen("Create Image","Create a cinematic image from your movie concept.",
+        '<div class="menu-form"><label>Movie image idea</label><textarea id="menuImagePrompt" placeholder="Describe the cinematic frame you want..."></textarea><div class="menu-grid">'+
+        renderMenuCard("Movie Poster","Create a poster concept for your story.","poster")+
+        renderMenuCard("Cinematic Still","Create a detailed still-frame concept.","still")+
+        renderMenuCard("Character Frame","Create a character-focused frame.","character")+
+        '</div><div id="menuActionStatus" class="status"></div></div>');
+      return;
+    }
+    if(action==="create-video:shot"){go("create-video");return}
+    if(action==="create-video:full"){$("movieAssembly")?.scrollIntoView({behavior:"smooth",block:"start"});status("status","Movie Assembly is ready. Use Generate Full Movie to generate the shots in story order.");return}
+    if(action==="create-video:studio"){
+      const scenes=state.blueprint?.scenes||[];const shots=scenes[0]?.shots||[];
+      if(shots.length)openShot(0,0);else{status("status","Build a movie blueprint first, then open Shot Studio.");$("createPanel")?.classList.remove("hidden");$("createPanel")?.scrollIntoView({behavior:"smooth",block:"start"})}
+      return;
+    }
+    if(action==="creations:movies"||action==="creations:history"){go("creations");return}
+    if(action==="creations:shots"){$("movieAssembly")?.scrollIntoView({behavior:"smooth",block:"start"});return}
+    if(action.startsWith("templates:")){
+      const map={drama:0,action:1,romance:2,thriller:3};const i=map[action.split(":")[1]]??0;const x=MENU_DATA.templates[i]||MENU_DATA.templates[0];
+      $("moviePrompt").value=x[1];$("createPanel").classList.remove("hidden");$("createPanel").scrollIntoView({behavior:"smooth",block:"start"});status("status","Template selected: "+x[0]);return;
+    }
+    if(action==="credits:balance"){go("credits");return}
+    if(action==="credits:usage"){go("credits");status("status","Credits usage is shown in My Credits.");return}
+    if(action==="credits:info"){go("credits");return}
+    if(action==="settings:general"||action==="settings:history"||action==="settings:reset"){go("settings");return}
+  },true);
+})();
