@@ -258,7 +258,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     if(action==="create-video:full"){$("movieAssembly")?.scrollIntoView({behavior:"smooth",block:"start"});status("status","Movie Assembly is ready. Use Generate Full Movie to generate the shots in story order.");return}
     if(action==="create-video:studio"){
       const scenes=state.blueprint?.scenes||[];const shots=scenes[0]?.shots||[];
-      if(shots.length)openShot(0,0);else{status("status","Build a movie blueprint first, then open Shot Studio.");$("createPanel")?.classList.remove("hidden");$("createPanel")?.scrollIntoView({behavior:"smooth",block:"start")}
+      if(shots.length)openShot(0,0);else{status("status","Build a movie blueprint first, then open Shot Studio.");$("createPanel")?.classList.remove("hidden");$("createPanel")?.scrollIntoView({behavior:"smooth",block:"start");}
       return;
     }
     if(action==="creations:movies"||action==="creations:history"){openMenu("creations");return}
