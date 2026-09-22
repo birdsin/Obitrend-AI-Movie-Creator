@@ -336,3 +336,82 @@
   .nav-dropdown button{min-height:40px;font-size:13px;padding:9px 11px}
   .nav-chevron{right:8px}
 }
+
+
+/* REAL APP MOBILE MENU POSITIONING — FULL DRAWER */
+@media(max-width:720px){
+  body:has(.sidebar.open){overflow:hidden}
+  .layout{position:relative}
+  .sidebar{
+    left:-100%;
+    top:68px;
+    bottom:0;
+    width:100%;
+    max-width:none;
+    flex:0 0 100%;
+    padding:14px 12px 24px;
+    border-right:0;
+    background:#080d15;
+    box-shadow:18px 0 45px rgba(0,0,0,.55);
+    overflow-x:hidden;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    z-index:60;
+  }
+  .sidebar.open{left:0}
+  .sidebar.open + .dashboard{
+    position:relative;
+  }
+  .sidebar.open + .dashboard:before{
+    content:"";
+    position:fixed;
+    left:0;
+    right:0;
+    top:68px;
+    bottom:0;
+    background:rgba(0,0,0,.62);
+    z-index:55;
+    pointer-events:none;
+  }
+  .sidebar nav{
+    width:100%;
+    overflow:visible;
+  }
+  .sidebar .nav-item{
+    width:100%;
+    min-height:49px;
+  }
+  .sidebar .nav-dropdown{
+    left:0;
+    right:0;
+    top:49px;
+    width:100%;
+    max-width:none;
+  }
+  .sidebar #menuWorkspace{
+    position:absolute;
+    left:8px;
+    right:8px;
+    top:8px;
+    width:auto;
+    max-width:none;
+    max-height:calc(100vh - 84px);
+    margin:0;
+    overflow-x:hidden;
+    overflow-y:auto;
+    z-index:1200;
+    box-shadow:0 22px 55px rgba(0,0,0,.72);
+  }
+  .sidebar #menuWorkspace .menu-workspace-head{
+    position:sticky;
+    top:0;
+    z-index:2;
+    background:#0d141e;
+  }
+  .sidebar #menuWorkspace .menu-workspace-body{
+    padding-bottom:12px;
+  }
+  .sidebar #menuWorkspace .menu-card{
+    width:100%;
+  }
+}
