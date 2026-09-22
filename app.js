@@ -70,8 +70,6 @@ function saveHistory(b){
  }catch(e){}
 }
 function openMenu(name){
- const closeDrawer=()=>$("sidebar")?.classList.remove("open");
- closeDrawer();
  const actions={
   home:()=>{menuClose();window.scrollTo({top:0,behavior:"smooth"})},
   "create-image":()=>menuOpen("Create Image","Create a cinematic still from your movie concept.",
