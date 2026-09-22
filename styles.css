@@ -47,6 +47,17 @@
  .field-grid{grid-template-columns:1fr}
  .shot-grid{grid-template-columns:1fr}
 }
+.sidebar #menuWorkspace{
+  position:absolute;
+  left:8px;
+  right:8px;
+  top:8px;
+  margin:0;
+  max-height:calc(100vh - 84px);
+  overflow-y:auto;
+  z-index:1200;
+  box-shadow:0 20px 45px rgba(0,0,0,.65);
+}
 .menu-workspace{background:linear-gradient(150deg,#0d141e,#0a1018);border:1px solid #2a3442;border-radius:14px;margin-bottom:17px;padding:17px 18px;box-shadow:0 15px 45px rgba(0,0,0,.16)}
 .menu-workspace-head{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;border-bottom:1px solid #27313e;padding-bottom:14px}
 .menu-workspace-head h2{margin:7px 0 3px;font-size:21px}
