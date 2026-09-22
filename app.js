@@ -93,7 +93,7 @@ function openMenu(name){
  };
  (actions[name]||actions.home)();
 }
-document.querySelectorAll(".nav-item").forEach(a=>a.addEventListener("click",e=>{const href=a.getAttribute("href")||"#home";if(href.startsWith("#")){e.preventDefault();openMenu(href.slice(1));document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("selected"));a.classList.add("selected")}}));
+document.querySelectorAll(".nav-item").forEach(a=>a.addEventListener("click",e=>{if(a.closest(".nav-group")?.querySelector(".nav-dropdown"))return;const href=a.getAttribute("href")||"#home";if(href.startsWith("#")){e.preventDefault();openMenu(href.slice(1));document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("selected"));a.classList.add("selected")}}));
 $("menuWorkspaceClose")?.addEventListener("click",menuClose);
 document.addEventListener("click",e=>{
  const b=e.target.closest("[data-menu-action]");if(!b)return;const action=b.dataset.menuAction;
