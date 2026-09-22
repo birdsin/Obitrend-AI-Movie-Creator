@@ -53,11 +53,17 @@ const MENU_DATA={
  colors:["Black","White","Red","Navy Blue","Oxblood","Brown","Gold","Cream","Emerald","Sky Blue"]
 };
 function menuOpen(title,subtitle,html){
- const w=$("menuWorkspace"); if(!w)return;
+ const w=$("menuWorkspace"); const sidebar=$("sidebar"); if(!w||!sidebar)return;
+ if(!sidebar.contains(w))sidebar.appendChild(w);
  $("menuWorkspaceTitle").textContent=title;$("menuWorkspaceSubtitle").textContent=subtitle||"";$("menuWorkspaceBody").innerHTML=html;
- w.classList.remove("hidden");w.scrollIntoView({behavior:"smooth",block:"start"});
+ w.classList.remove("hidden");
 }
-function menuClose(){$("menuWorkspace")?.classList.add("hidden")}
+function menuClose(){
+ const w=$("menuWorkspace"); if(!w)return;
+ w.classList.add("hidden");
+ const anchor=$("blueprintSection");
+ if(anchor&&w.parentElement!==anchor.parentElement)anchor.parentElement.insertBefore(w,anchor);
+}
 function menuButton(label,action,cls="outline-btn"){return '<button class="'+cls+' menu-action" data-menu-action="'+esc(action)+'">'+esc(label)+'</button>'}
 function renderMenuCard(title,text,action){
  return '<div class="menu-card"><div><h3>'+esc(title)+'</h3><p>'+esc(text)+'</p></div>'+menuButton("Open",action)+'</div>'
