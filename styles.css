@@ -415,3 +415,30 @@
     width:100%;
   }
 }
+
+
+/* REAL APP MOBILE MENU WORKSPACE — FULL DRAWER OVERLAY */
+@media(max-width:720px){
+  .sidebar #menuWorkspace{
+    position:fixed;
+    left:8px;
+    right:8px;
+    top:76px;
+    bottom:8px;
+    width:auto;
+    max-width:none;
+    max-height:none;
+    height:auto;
+    margin:0;
+    overflow-x:hidden;
+    overflow-y:auto;
+    z-index:1200;
+    box-shadow:0 22px 55px rgba(0,0,0,.78);
+  }
+  .sidebar #menuWorkspace .menu-workspace-head{
+    position:sticky;
+    top:0;
+    z-index:3;
+    background:#0d141e;
+  }
+}
