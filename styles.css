@@ -1886,3 +1886,71 @@
     font-size:25px;
   }
 }
+
+
+/* REAL APP SETTINGS — FINAL RESPONSIVE PANEL */
+.settings-section,
+#settings{
+  background:linear-gradient(150deg,#0d141e,#090f17) !important;
+  border:1px solid #2a3442 !important;
+  border-radius:14px !important;
+  box-shadow:0 15px 45px rgba(0,0,0,.16) !important;
+  overflow:hidden;
+}
+.settings-section .settings-group,
+#settings .settings-group{
+  background:#0b131d !important;
+  border:1px solid #293646 !important;
+  border-radius:11px !important;
+  padding:15px !important;
+  margin-bottom:12px;
+}
+.settings-section input,
+.settings-section select,
+.settings-section textarea,
+#settings input,
+#settings select,
+#settings textarea{
+  background:#0a111a !important;
+  border:1px solid #293646 !important;
+  color:#fff !important;
+  border-radius:9px !important;
+  min-height:42px;
+}
+.settings-section input:focus,
+.settings-section select:focus,
+.settings-section textarea:focus,
+#settings input:focus,
+#settings select:focus,
+#settings textarea:focus{
+  border-color:#c9a86a !important;
+  outline:none !important;
+  box-shadow:0 0 0 2px rgba(201,168,106,.12) !important;
+}
+.settings-section button,
+#settings button{
+  min-height:42px;
+  border-radius:9px;
+}
+@media(max-width:720px){
+  .settings-section,
+  #settings{
+    border-radius:12px !important;
+  }
+  .settings-section .settings-group,
+  #settings .settings-group{
+    padding:13px !important;
+  }
+  .settings-section input,
+  .settings-section select,
+  .settings-section textarea,
+  #settings input,
+  #settings select,
+  #settings textarea{
+    min-height:44px;
+  }
+  .settings-section button,
+  #settings button{
+    width:100%;
+  }
+}
