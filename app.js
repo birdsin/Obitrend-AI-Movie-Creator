@@ -314,3 +314,94 @@ document.addEventListener("DOMContentLoaded",()=>{
   $("quickVideoBtn")?.addEventListener("click",()=>{$("movieAssembly")?.scrollIntoView({behavior:"smooth",block:"start"});});
   $("openRecentMovieBtn")?.addEventListener("click",()=>{$("blueprintSection")?.scrollIntoView({behavior:"smooth",block:"start"});});
 });
+
+/* Android dashboard interaction layer */
+document.addEventListener("DOMContentLoaded",()=>{
+  const showCreate=()=>{
+    const p=$("createPanel");
+    if(!p)return;
+    p.classList.remove("hidden");
+    p.scrollIntoView({behavior:"smooth",block:"start"});
+    $("moviePrompt")?.focus();
+  };
+  const showAssembly=()=>{
+    const a=$("movieAssembly");
+    if(a){a.scrollIntoView({behavior:"smooth",block:"start");return;}
+    showCreate();
+  };
+  const notify=(msg)=>{
+    const p=$("createPanel");
+    if(!p)return;
+    p.classList.remove("hidden");
+    const s=$("status");
+    if(s)status("status",msg);
+    p.scrollIntoView({behavior:"smooth",block:"start"});
+  };
+
+  $("androidCreateMovieBtn")?.addEventListener("click",showCreate);
+  $("androidCreateNav")?.addEventListener("click",showCreate);
+  document.querySelectorAll('[data-android-action="movie"]').forEach(b=>b.addEventListener("click",showCreate));
+  document.querySelectorAll('[data-android-action="image"]').forEach(b=>b.addEventListener("click",()=>{
+    showCreate();
+    if($("moviePrompt"))$("moviePrompt").placeholder="Describe the movie image, poster or cinematic still you want...";
+    if($("visualStyle"))$("visualStyle").value="Cinematic realism";
+  }));
+  document.querySelectorAll('[data-android-action="video"]').forEach(b=>b.addEventListener("click",showAssembly));
+  document.querySelectorAll('[data-android-action="characters"]').forEach(b=>b.addEventListener("click",()=>{
+    if(state.blueprint?.scenes?.length){$("scenes")?.scrollIntoView({behavior:"smooth",block:"start"});return;}
+    notify("Build your movie blueprint first to create consistent AI characters.");
+  }));
+
+  $("androidSeeCreate")?.addEventListener("click",showCreate);
+  $("androidMoviesNav")?.addEventListener("click",()=>{
+    document.querySelector(".android-projects")?.scrollIntoView({behavior:"smooth",block:"start"});
+  });
+  $("androidSeeMovies")?.addEventListener("click",()=>{
+    document.querySelector(".android-projects")?.scrollIntoView({behavior:"smooth",block:"start"});
+  });
+
+  document.querySelectorAll(".android-projects button").forEach((b,i)=>b.addEventListener("click",()=>{
+    if(i===0 && state.blueprint){renderBlueprint(state.blueprint);$("blueprintSection")?.scrollIntoView({behavior:"smooth",block:"start"});}
+    else notify("This project is ready to be connected to your saved movie library.");
+  }));
+
+  const nav=document.querySelector(".android-bottom-nav");
+  nav?.querySelectorAll("button").forEach((b,i)=>b.addEventListener("click",()=>{
+    nav.querySelectorAll("button").forEach(x=>x.classList.remove("active"));b.classList.add("active");
+    if(i===0)window.scrollTo({top:0,behavior:"smooth"});
+    if(i===1)showCreate();
+    if(i===2)document.querySelector(".android-projects")?.scrollIntoView({behavior:"smooth",block:"start"});
+    if(i===3)notify("Movie Templates are ready to be connected to your template library.");
+    if(i===4)notify("Profile and account settings are ready to be connected.");
+  }));
+
+  const menuBtn=$("androidMenuBtn");
+  if(menuBtn){
+    let drawer=document.getElementById("androidDrawer");
+    if(!drawer){
+      drawer=document.createElement("div");
+      drawer.id="androidDrawer";
+      drawer.className="android-drawer";
+      drawer.innerHTML='<div class="android-drawer-head"><b>♛ OBITREND</b><button type="button" id="androidDrawerClose">×</button></div>'+
+        '<button data-drawer-action="home">⌂ <span>Home</span></button>'+
+        '<button data-drawer-action="create">＋ <span>Create Movie</span></button>'+
+        '<button data-drawer-action="movies">▣ <span>My Movies</span></button>'+
+        '<button data-drawer-action="templates">▦ <span>Templates</span></button>'+
+        '<button data-drawer-action="credits">◉ <span>My Credits</span></button>'+
+        '<button data-drawer-action="settings">⚙ <span>Settings</span></button>'+
+        '<button data-drawer-action="help">? <span>Help & Support</span></button>';
+      document.body.appendChild(drawer);
+      const close=()=>drawer.classList.remove("open");
+      $("androidDrawerClose")?.addEventListener("click",close);
+      drawer.addEventListener("click",e=>{
+        const b=e.target.closest("[data-drawer-action]");if(!b)return;
+        const a=b.dataset.drawerAction;
+        if(a==="home"){close();window.scrollTo({top:0,behavior:"smooth"});}
+        else if(a==="create"){close();showCreate();}
+        else if(a==="movies"){close();document.querySelector(".android-projects")?.scrollIntoView({behavior:"smooth"});}
+        else {close();notify(a==="credits"?"Your movie credits are shown at the top of the app.":a==="settings"?"Settings will be available here.":"Help & Support will be available here.");}
+      });
+    }
+    menuBtn.addEventListener("click",()=>drawer.classList.toggle("open"));
+  }
+});
