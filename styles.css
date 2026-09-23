@@ -528,3 +528,123 @@
     z-index:90 !important;
   }
 }
+
+
+/* REAL APP CREATE MOVIE SECTION — FINAL RESPONSIVE LAYOUT */
+.create-panel{
+  position:relative;
+  overflow:hidden;
+  padding:22px;
+}
+.create-panel .section-title{
+  padding-bottom:14px;
+  margin-bottom:4px;
+  border-bottom:1px solid #27313e;
+}
+.create-panel .section-title>span{
+  width:34px;
+  height:34px;
+  display:grid;
+  place-items:center;
+  border:1px solid #8f6f2c;
+  border-radius:9px;
+  background:#17140d;
+  color:var(--gold2);
+  font-size:18px;
+}
+.create-panel .section-title h2{
+  font-size:23px;
+}
+.create-panel label{
+  display:block;
+  color:#d7dce4;
+  font-size:13px;
+  font-weight:650;
+  margin:16px 0 7px;
+}
+.create-panel textarea,
+.create-panel select{
+  width:100%;
+  min-height:46px;
+  border:1px solid #334052;
+  border-radius:9px;
+  background:#080e16;
+  color:#f5f7fb;
+  padding:12px 13px;
+  outline:none;
+  transition:border-color .15s,box-shadow .15s;
+}
+.create-panel textarea{
+  min-height:132px;
+  resize:vertical;
+  line-height:1.5;
+}
+.create-panel textarea:focus,
+.create-panel select:focus{
+  border-color:#b18b35;
+  box-shadow:0 0 0 2px rgba(228,185,79,.12);
+}
+.create-panel .field-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+}
+.create-panel .gold-btn{
+  min-height:50px;
+  margin-top:18px;
+  font-size:14px;
+  border-radius:9px;
+  cursor:pointer;
+  box-shadow:0 10px 24px rgba(0,0,0,.2);
+}
+.create-panel .gold-btn:disabled{
+  opacity:.6;
+  cursor:wait;
+}
+.create-panel .status{
+  padding:10px 12px;
+  border-radius:8px;
+  background:#0a1119;
+  border:1px solid #26313f;
+}
+
+@media(max-width:720px){
+  .create-panel{
+    padding:15px;
+    border-radius:14px;
+  }
+  .create-panel .section-title{
+    align-items:center;
+  }
+  .create-panel .section-title h2{
+    font-size:20px;
+  }
+  .create-panel .section-title>span{
+    width:32px;
+    height:32px;
+    flex:0 0 32px;
+  }
+  .create-panel label{
+    font-size:12px;
+    margin-top:14px;
+  }
+  .create-panel textarea{
+    min-height:120px;
+    font-size:14px;
+  }
+  .create-panel select{
+    min-height:46px;
+    font-size:14px;
+  }
+  .create-panel .field-grid{
+    grid-template-columns:1fr;
+    gap:2px;
+  }
+  .create-panel .gold-btn{
+    position:sticky;
+    bottom:8px;
+    z-index:2;
+    min-height:50px;
+    margin-top:16px;
+  }
+}
