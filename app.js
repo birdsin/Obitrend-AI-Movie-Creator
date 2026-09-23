@@ -282,3 +282,25 @@ document.addEventListener("DOMContentLoaded",()=>{
     if(action.startsWith("help:")){openMenu("help");return}
   },true);
 })();
+
+/* Targeted mobile fix: Pro Plans must open from the row or chevron. */
+(function(){
+  const proGroup=document.querySelector('.nav-group a[href="#pro"]')?.closest('.nav-group');
+  if(!proGroup)return;
+  const proPanel=proGroup.querySelector('.nav-dropdown');
+  const proChevron=proGroup.querySelector('.nav-chevron');
+  const openPro=()=>{
+    document.querySelectorAll('.nav-dropdown.open').forEach(p=>{if(p!==proPanel)p.classList.remove('open')});
+    document.querySelectorAll('.nav-chevron.open').forEach(b=>{if(b!==proChevron)b.classList.remove('open')});
+    const opening=!proPanel.classList.contains('open');
+    proPanel.classList.toggle('open',opening);
+    proChevron?.classList.toggle('open',opening);
+  };
+  proGroup.querySelector('.nav-item')?.addEventListener('pointerup',e=>{
+    if(e.target.closest('.nav-chevron'))return;
+    e.preventDefault();e.stopPropagation();openPro();
+  },{passive:false});
+  proChevron?.addEventListener('pointerup',e=>{
+    e.preventDefault();e.stopPropagation();openPro();
+  },{passive:false});
+})();
