@@ -1690,3 +1690,81 @@
     min-height:42px;
   }
 }
+
+
+/* REAL APP OUTFIT COLORS — FINAL RESPONSIVE PALETTE */
+.outfit-colors-section,
+#outfitColors{
+  background:linear-gradient(150deg,#0d141e,#090f17) !important;
+  border:1px solid #2a3442 !important;
+  border-radius:14px !important;
+  box-shadow:0 15px 45px rgba(0,0,0,.16) !important;
+  overflow:hidden;
+}
+.outfit-colors-section .color-grid,
+#outfitColors .color-grid{
+  display:grid;
+  grid-template-columns:repeat(8,minmax(0,1fr));
+  gap:10px;
+}
+.outfit-colors-section .color-card,
+#outfitColors .color-card,
+.outfit-colors-section .color-option,
+#outfitColors .color-option{
+  min-width:0;
+  min-height:74px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid #293646 !important;
+  border-radius:10px !important;
+  background:#0b131d !important;
+  cursor:pointer;
+  transition:border-color .15s,transform .15s,box-shadow .15s;
+}
+.outfit-colors-section .color-card:hover,
+#outfitColors .color-card:hover,
+.outfit-colors-section .color-option:hover,
+#outfitColors .color-option:hover{
+  border-color:#80652a !important;
+  transform:translateY(-1px);
+}
+.outfit-colors-section .color-card.selected,
+#outfitColors .color-card.selected,
+.outfit-colors-section .color-option.selected,
+#outfitColors .color-option.selected{
+  border-color:#facc15 !important;
+  box-shadow:0 0 0 2px rgba(250,204,21,.16) !important;
+}
+.outfit-colors-section button,
+#outfitColors button{
+  min-height:40px;
+  border-radius:8px;
+}
+@media(max-width:950px){
+  .outfit-colors-section .color-grid,
+  #outfitColors .color-grid{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+  }
+}
+@media(max-width:720px){
+  .outfit-colors-section,
+  #outfitColors{
+    border-radius:12px !important;
+  }
+  .outfit-colors-section .color-grid,
+  #outfitColors .color-grid{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:8px;
+  }
+  .outfit-colors-section .color-card,
+  #outfitColors .color-card,
+  .outfit-colors-section .color-option,
+  #outfitColors .color-option{
+    min-height:64px;
+  }
+  .outfit-colors-section button,
+  #outfitColors button{
+    min-height:42px;
+  }
+}
