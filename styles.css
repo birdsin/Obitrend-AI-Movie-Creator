@@ -926,3 +926,134 @@
     min-height:46px;
   }
 }
+
+
+/* REAL APP SHOT STUDIO — RESPONSIVE WORKSPACE */
+.shot-studio{
+  position:relative;
+  padding:22px;
+  background:linear-gradient(150deg,#0d141e,#090f17);
+  border:1px solid #2a3442;
+  border-radius:14px;
+  box-shadow:0 15px 45px rgba(0,0,0,.18);
+}
+.shot-studio .card-head{
+  padding-bottom:15px;
+  border-bottom:1px solid #27313e;
+}
+.shot-studio .card-head h2{
+  font-size:22px;
+  margin:7px 0 4px;
+}
+.shot-studio .card-head p{
+  line-height:1.45;
+}
+.shot-grid{
+  display:grid;
+  grid-template-columns:minmax(220px,.75fr) minmax(0,1.55fr);
+  gap:14px;
+  margin-top:16px;
+}
+.shot-details{
+  background:#080e16;
+  border:1px solid #293646;
+  border-radius:10px;
+  padding:14px;
+}
+.detail{
+  padding:10px 0;
+  border-bottom:1px solid #26313d;
+}
+.detail:last-child{border-bottom:0}
+.detail b{
+  color:#e4b84d;
+  font-size:10px;
+  letter-spacing:.02em;
+  margin-bottom:5px;
+}
+.detail span{
+  color:#d7dce4;
+  font-size:12px;
+  line-height:1.4;
+}
+.video-card{
+  min-height:390px;
+  background:#03070b;
+  border:1px solid #293646;
+  border-radius:10px;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  position:relative;
+}
+.video-card video{
+  display:block;
+  width:100%;
+  height:100%;
+  max-height:520px;
+  object-fit:contain;
+}
+.video-placeholder{
+  text-align:center;
+  color:#7f8a99;
+  padding:30px;
+}
+.video-placeholder span{
+  display:block;
+  margin-bottom:10px;
+  font-size:46px;
+}
+.shot-studio>.gold-btn{
+  min-height:50px;
+  margin-top:15px;
+  cursor:pointer;
+}
+.shot-studio>.gold-btn:disabled{
+  opacity:.6;
+  cursor:wait;
+}
+@media(max-width:720px){
+  .shot-studio{
+    padding:15px;
+    border-radius:14px;
+  }
+  .shot-studio .card-head{
+    align-items:flex-start;
+  }
+  .shot-studio .card-head h2{
+    font-size:19px;
+  }
+  .shot-grid{
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+  .shot-details{
+    padding:12px;
+  }
+  .detail{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:15px;
+    padding:9px 0;
+  }
+  .detail b{
+    flex:0 0 72px;
+    margin:0;
+  }
+  .detail span{
+    flex:1;
+    text-align:right;
+    font-size:11px;
+  }
+  .video-card{
+    min-height:260px;
+    aspect-ratio:16/9;
+  }
+  .video-placeholder{
+    padding:20px;
+  }
+  .shot-studio>.gold-btn{
+    width:100%;
+  }
+}
