@@ -1313,3 +1313,65 @@
     min-height:44px;
   }
 }
+
+
+/* REAL APP CREATE VIDEO — FINAL RESPONSIVE LAYOUT */
+#createVideo,
+#createVideoSection,
+.video-creator-section{
+  background:linear-gradient(150deg,#0d141e,#090f17) !important;
+  border:1px solid #2a3442 !important;
+  border-radius:14px !important;
+  box-shadow:0 15px 45px rgba(0,0,0,.16) !important;
+}
+#createVideo input,
+#createVideo textarea,
+#createVideo select,
+#createVideoSection input,
+#createVideoSection textarea,
+#createVideoSection select,
+.video-creator-section input,
+.video-creator-section textarea,
+.video-creator-section select{
+  background:#0a111a !important;
+  border:1px solid #293646 !important;
+  color:#fff !important;
+  border-radius:9px !important;
+}
+#createVideo input:focus,
+#createVideo textarea:focus,
+#createVideo select:focus,
+#createVideoSection input:focus,
+#createVideoSection textarea:focus,
+#createVideoSection select:focus,
+.video-creator-section input:focus,
+.video-creator-section textarea:focus,
+.video-creator-section select:focus{
+  border-color:#c9a86a !important;
+  outline:none !important;
+  box-shadow:0 0 0 2px rgba(201,168,106,.12) !important;
+}
+#createVideo button,
+#createVideoSection button,
+.video-creator-section button{
+  min-height:42px;
+  border-radius:9px;
+}
+@media(max-width:720px){
+  #createVideo,
+  #createVideoSection,
+  .video-creator-section{
+    border-radius:12px !important;
+  }
+  #createVideo input,
+  #createVideo textarea,
+  #createVideo select,
+  #createVideoSection input,
+  #createVideoSection textarea,
+  #createVideoSection select,
+  .video-creator-section input,
+  .video-creator-section textarea,
+  .video-creator-section select{
+    min-height:44px;
+  }
+}
