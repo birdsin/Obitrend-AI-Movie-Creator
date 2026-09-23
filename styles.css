@@ -2009,3 +2009,34 @@
     width:100%;
   }
 }
+
+
+/* REAL APP UPGRADE PRO — FINAL RESPONSIVE CTA */
+.upgrade-card{
+  background:linear-gradient(145deg,#17130b,#0d141e) !important;
+  border:1px solid #80652a !important;
+  border-radius:12px !important;
+  padding:15px !important;
+  box-shadow:0 12px 30px rgba(0,0,0,.2) !important;
+}
+.upgrade-card h3{
+  color:#facc15 !important;
+  margin-bottom:6px;
+}
+.upgrade-card p{
+  color:#b7c0cc !important;
+  line-height:1.45;
+}
+.upgrade-card button,
+.upgrade-card .upgrade-btn{
+  width:100%;
+  min-height:44px;
+  border-radius:9px;
+}
+@media(max-width:720px){
+  .upgrade-card{
+    margin-top:12px;
+    padding:13px !important;
+    border-radius:11px !important;
+  }
+}
