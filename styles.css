@@ -2040,3 +2040,17 @@
     border-radius:11px !important;
   }
 }
+
+
+/* REAL APP GLOBAL POLISH — FINAL CONSISTENCY PASS */
+*{box-sizing:border-box}
+button,input,select,textarea{font:inherit}
+button{-webkit-tap-highlight-color:transparent}
+img{max-width:100%}
+.dashboard{min-width:0;overflow-x:hidden}
+.dashboard section,.dashboard .card,.dashboard .panel{max-width:100%}
+@media(max-width:720px){
+  body{overflow-x:hidden}
+  .dashboard{width:100%;max-width:100%}
+  .dashboard section{margin-left:0 !important;margin-right:0 !important}
+}
