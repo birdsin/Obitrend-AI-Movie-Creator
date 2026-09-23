@@ -2125,3 +2125,11 @@ img{max-width:100%}
 @media(min-width:800px){
   .dashboard{max-width:520px}
 }
+
+.android-drawer{position:fixed;inset:0 auto 0 0;width:min(86vw,360px);background:#0a1018;border-right:1px solid #394352;box-shadow:20px 0 60px rgba(0,0,0,.5);transform:translateX(-105%);transition:transform .22s ease;z-index:9999;padding:18px 14px;overflow:auto}
+.android-drawer.open{transform:translateX(0)}
+.android-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:10px 8px 20px;border-bottom:1px solid #2a3340;margin-bottom:10px;color:#f6ca55;font-size:20px}
+.android-drawer-head button{border:0;background:none;color:#fff;font-size:30px}
+.android-drawer>button{width:100%;height:54px;margin:3px 0;border:0;border-radius:10px;background:transparent;color:#e9edf3;text-align:left;padding:0 16px;font-size:15px}
+.android-drawer>button:hover{background:#191711;color:#ffd65d}
+.android-drawer>button:first-of-type{background:#302514;color:#ffd65d}
