@@ -1827,3 +1827,62 @@
     width:100%;
   }
 }
+
+
+/* REAL APP MY CREDITS — FINAL RESPONSIVE WALLET */
+.my-credits-section,
+#myCredits{
+  background:linear-gradient(150deg,#0d141e,#090f17) !important;
+  border:1px solid #2a3442 !important;
+  border-radius:14px !important;
+  box-shadow:0 15px 45px rgba(0,0,0,.16) !important;
+  overflow:hidden;
+}
+.my-credits-section .credits-grid,
+#myCredits .credits-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+.my-credits-section .credit-card,
+#myCredits .credit-card{
+  min-width:0;
+  background:#0b131d !important;
+  border:1px solid #293646 !important;
+  border-radius:11px !important;
+  padding:15px !important;
+}
+.my-credits-section .credit-value,
+#myCredits .credit-value{
+  color:#facc15 !important;
+  font-size:28px;
+  font-weight:700;
+}
+.my-credits-section .credit-label,
+#myCredits .credit-label{
+  color:#98a4b4 !important;
+}
+.my-credits-section button,
+#myCredits button{
+  min-height:42px;
+  border-radius:9px;
+}
+@media(max-width:720px){
+  .my-credits-section,
+  #myCredits{
+    border-radius:12px !important;
+  }
+  .my-credits-section .credits-grid,
+  #myCredits .credits-grid{
+    grid-template-columns:1fr !important;
+    gap:9px;
+  }
+  .my-credits-section .credit-card,
+  #myCredits .credit-card{
+    padding:13px !important;
+  }
+  .my-credits-section .credit-value,
+  #myCredits .credit-value{
+    font-size:25px;
+  }
+}
