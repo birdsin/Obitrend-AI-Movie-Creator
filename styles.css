@@ -514,15 +514,23 @@
     z-index:3 !important;
     background:#0d141e !important;
   }
+  /* Mobile: keep dropdowns in the normal menu flow so submenu taps
+     never cover or sit behind another navigation row. */
   .sidebar .nav-dropdown{
-    left:0 !important;
-    right:0 !important;
-    top:49px !important;
-    width:100% !important;
+    position:static !important;
+    left:auto !important;
+    right:auto !important;
+    top:auto !important;
+    width:calc(100% - 8px) !important;
+    margin:4px 4px 6px !important;
     z-index:150 !important;
   }
   .sidebar .nav-dropdown.open{
     display:grid !important;
+  }
+  .sidebar .nav-dropdown button{
+    touch-action:manipulation !important;
+    -webkit-tap-highlight-color:transparent;
   }
   .sidebar.open + .dashboard:before{
     z-index:90 !important;
