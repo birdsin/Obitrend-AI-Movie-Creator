@@ -1208,3 +1208,46 @@
   #blueprint .blueprint-body{padding:14px !important}
   #blueprint .blueprint-summary{grid-template-columns:1fr !important;gap:8px}
 }
+
+
+/* REAL APP HOME DASHBOARD — FINAL RESPONSIVE LAYOUT */
+.dashboard{
+  background:#070b11 !important;
+}
+.dashboard .hero,
+.dashboard .hero-card,
+.dashboard .welcome-card{
+  border-color:#293646 !important;
+}
+.dashboard .section-title{
+  margin-bottom:14px;
+}
+.dashboard .section-title h1,
+.dashboard .section-title h2{
+  color:#fff !important;
+}
+.dashboard .section-title small,
+.dashboard .muted{
+  color:#98a4b4 !important;
+}
+.dashboard button,
+.dashboard .primary-btn,
+.dashboard .action-btn{
+  min-height:42px;
+  border-radius:9px;
+}
+@media(max-width:720px){
+  .dashboard{
+    padding:12px !important;
+  }
+  .dashboard .hero,
+  .dashboard .hero-card,
+  .dashboard .welcome-card{
+    border-radius:12px !important;
+  }
+  .dashboard button,
+  .dashboard .primary-btn,
+  .dashboard .action-btn{
+    min-height:44px;
+  }
+}
