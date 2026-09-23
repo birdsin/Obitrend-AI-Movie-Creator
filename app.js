@@ -304,3 +304,13 @@ document.addEventListener("DOMContentLoaded",()=>{
     e.preventDefault();e.stopPropagation();openPro();
   },{passive:false});
 })();
+
+/* Real dashboard quick actions */
+document.addEventListener("DOMContentLoaded",()=>{
+  const create=()=>{$("createPanel")?.classList.remove("hidden");$("createPanel")?.scrollIntoView({behavior:"smooth",block:"start"});};
+  $("dashboardCreateBtn")?.addEventListener("click",create);
+  $("quickMovieBtn")?.addEventListener("click",create);
+  $("quickImageBtn")?.addEventListener("click",()=>{openMenu("Create Image","Create a cinematic image from your movie concept.","");});
+  $("quickVideoBtn")?.addEventListener("click",()=>{$("movieAssembly")?.scrollIntoView({behavior:"smooth",block:"start"});});
+  $("openRecentMovieBtn")?.addEventListener("click",()=>{$("blueprintSection")?.scrollIntoView({behavior:"smooth",block:"start"});});
+});
