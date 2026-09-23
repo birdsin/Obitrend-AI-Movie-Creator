@@ -2097,3 +2097,6 @@ img{max-width:100%}
   .movie-recent-strip .outline-btn{width:100%;margin-top:12px}
   .project-state{display:inline-block;margin-top:9px}
 }
+
+/* Legacy dashboard removed from the visible UI; workflow is retained for the new dashboard integration. */
+#legacyMovieDashboard{display:none!important;}
