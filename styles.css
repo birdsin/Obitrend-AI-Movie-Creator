@@ -1162,3 +1162,49 @@
     font-size:10px !important;
   }
 }
+
+
+/* REAL APP MOVIE BLUEPRINT — FINAL RESPONSIVE LAYOUT */
+#blueprint{
+  background:linear-gradient(150deg,#0d141e,#090f17) !important;
+  border:1px solid #2a3442 !important;
+  border-radius:14px !important;
+  box-shadow:0 15px 45px rgba(0,0,0,.16) !important;
+  overflow:hidden;
+}
+#blueprint .section-title{
+  padding:18px 20px 14px !important;
+  margin:0 !important;
+  border-bottom:1px solid #27313e;
+}
+#blueprint .section-title h2{
+  color:#fff !important;
+  font-size:23px !important;
+}
+#blueprint .section-title small{
+  color:#aeb7c4 !important;
+  font-size:13px !important;
+}
+#blueprint .blueprint-content,
+#blueprint .blueprint-body{
+  padding:18px 20px !important;
+}
+#blueprint .blueprint-summary{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  margin-bottom:16px;
+}
+#blueprint .blueprint-summary>*{
+  background:#0b131d;
+  border:1px solid #293646;
+  border-radius:10px;
+  padding:12px;
+}
+@media(max-width:720px){
+  #blueprint .section-title{padding:15px !important}
+  #blueprint .section-title h2{font-size:20px !important}
+  #blueprint .blueprint-content,
+  #blueprint .blueprint-body{padding:14px !important}
+  #blueprint .blueprint-summary{grid-template-columns:1fr !important;gap:8px}
+}
