@@ -1536,3 +1536,80 @@
     min-height:42px;
   }
 }
+
+
+/* REAL APP MODEL STYLES — FINAL RESPONSIVE GALLERY */
+.model-styles-section,
+#modelStyles{
+  background:linear-gradient(150deg,#0d141e,#090f17) !important;
+  border:1px solid #2a3442 !important;
+  border-radius:14px !important;
+  box-shadow:0 15px 45px rgba(0,0,0,.16) !important;
+  overflow:hidden;
+}
+.model-styles-section .model-style-grid,
+#modelStyles .model-style-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+}
+.model-styles-section .model-style-card,
+#modelStyles .model-style-card{
+  min-width:0;
+  overflow:hidden;
+  background:#0b131d !important;
+  border:1px solid #293646 !important;
+  border-radius:11px !important;
+  transition:border-color .15s,transform .15s,box-shadow .15s;
+}
+.model-styles-section .model-style-card:hover,
+#modelStyles .model-style-card:hover{
+  border-color:#80652a !important;
+  transform:translateY(-1px);
+}
+.model-styles-section .model-style-card.selected,
+#modelStyles .model-style-card.selected{
+  border-color:#facc15 !important;
+  box-shadow:0 0 0 2px rgba(250,204,21,.16) !important;
+}
+.model-styles-section img,
+#modelStyles img{
+  display:block;
+  width:100%;
+  aspect-ratio:4/3;
+  object-fit:cover;
+  background:#101923;
+}
+.model-styles-section .model-style-card-body,
+#modelStyles .model-style-card-body{
+  padding:11px;
+}
+.model-styles-section button,
+#modelStyles button{
+  min-height:40px;
+  border-radius:8px;
+}
+@media(max-width:950px){
+  .model-styles-section .model-style-grid,
+  #modelStyles .model-style-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media(max-width:720px){
+  .model-styles-section,
+  #modelStyles{
+    border-radius:12px !important;
+  }
+  .model-styles-section .model-style-grid,
+  #modelStyles .model-style-grid{
+    gap:9px;
+  }
+  .model-styles-section .model-style-card-body,
+  #modelStyles .model-style-card-body{
+    padding:9px;
+  }
+  .model-styles-section button,
+  #modelStyles button{
+    min-height:42px;
+  }
+}
