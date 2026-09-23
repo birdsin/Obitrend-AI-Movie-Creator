@@ -1251,3 +1251,65 @@
     min-height:44px;
   }
 }
+
+
+/* REAL APP CREATE IMAGE — FINAL RESPONSIVE LAYOUT */
+#createImage,
+#createImageSection,
+.image-creator-section{
+  background:linear-gradient(150deg,#0d141e,#090f17) !important;
+  border:1px solid #2a3442 !important;
+  border-radius:14px !important;
+  box-shadow:0 15px 45px rgba(0,0,0,.16) !important;
+}
+#createImage input,
+#createImage textarea,
+#createImage select,
+#createImageSection input,
+#createImageSection textarea,
+#createImageSection select,
+.image-creator-section input,
+.image-creator-section textarea,
+.image-creator-section select{
+  background:#0a111a !important;
+  border:1px solid #293646 !important;
+  color:#fff !important;
+  border-radius:9px !important;
+}
+#createImage input:focus,
+#createImage textarea:focus,
+#createImage select:focus,
+#createImageSection input:focus,
+#createImageSection textarea:focus,
+#createImageSection select:focus,
+.image-creator-section input:focus,
+.image-creator-section textarea:focus,
+.image-creator-section select:focus{
+  border-color:#c9a86a !important;
+  outline:none !important;
+  box-shadow:0 0 0 2px rgba(201,168,106,.12) !important;
+}
+#createImage button,
+#createImageSection button,
+.image-creator-section button{
+  min-height:42px;
+  border-radius:9px;
+}
+@media(max-width:720px){
+  #createImage,
+  #createImageSection,
+  .image-creator-section{
+    border-radius:12px !important;
+  }
+  #createImage input,
+  #createImage textarea,
+  #createImage select,
+  #createImageSection input,
+  #createImageSection textarea,
+  #createImageSection select,
+  .image-creator-section input,
+  .image-creator-section textarea,
+  .image-creator-section select{
+    min-height:44px;
+  }
+}
