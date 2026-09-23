@@ -648,3 +648,131 @@
     margin-top:16px;
   }
 }
+
+
+/* REAL APP SCENES & SHOTS SECTION — RESPONSIVE LAYOUT */
+.content-card:has(#scenes){
+  padding:22px;
+}
+.content-card:has(#scenes) .section-title{
+  padding-bottom:14px;
+  border-bottom:1px solid #27313e;
+}
+.content-card:has(#scenes) .section-title>span{
+  width:34px;height:34px;display:grid;place-items:center;
+  border:1px solid #8f6f2c;border-radius:9px;background:#17140d;
+}
+.scene-list{
+  display:grid;
+  gap:14px;
+}
+.scene{
+  background:linear-gradient(145deg,#0e1620,#0a1018);
+  border:1px solid #2b3746;
+  border-radius:12px;
+  padding:14px;
+  box-shadow:0 8px 24px rgba(0,0,0,.12);
+}
+.scene h3{
+  font-size:15px;
+  line-height:1.35;
+  margin:0;
+}
+.scene .scene-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px 12px;
+  color:#aeb7c4;
+  font-size:11px;
+  margin-top:7px;
+}
+.shots{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin-top:12px;
+}
+.shot{
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  background:#0b131d;
+  border:1px solid #293646;
+  border-radius:10px;
+  padding:12px;
+  min-height:105px;
+  transition:border-color .15s,transform .15s;
+}
+.shot:hover{
+  border-color:#80652a;
+  transform:translateY(-1px);
+}
+.shot-info strong{
+  font-size:12px;
+  line-height:1.4;
+}
+.shot-info span{
+  font-size:10px;
+  line-height:1.45;
+  margin-top:6px;
+}
+.shot button{
+  align-self:flex-start;
+  min-height:34px;
+  margin-top:10px;
+  padding:0 12px;
+  border:1px solid #8e6f2d;
+  border-radius:7px;
+  background:#11150f;
+  color:var(--gold2);
+  font-size:11px;
+  font-weight:750;
+  cursor:pointer;
+  touch-action:manipulation;
+}
+.shot button:active{
+  transform:scale(.98);
+}
+@media(max-width:720px){
+  .content-card:has(#scenes){
+    padding:15px;
+  }
+  .content-card:has(#scenes) .section-title{
+    margin-bottom:12px;
+  }
+  .content-card:has(#scenes) .section-title h2{
+    font-size:20px;
+  }
+  .content-card:has(#scenes) .section-title small{
+    font-size:12px;
+  }
+  .scene{
+    padding:12px;
+  }
+  .scene h3{
+    font-size:14px;
+  }
+  .scene .scene-meta{
+    font-size:10px;
+    line-height:1.5;
+  }
+  .shots{
+    grid-template-columns:1fr;
+    gap:9px;
+  }
+  .shot{
+    min-height:96px;
+    padding:11px;
+  }
+  .shot-info strong{
+    font-size:12px;
+  }
+  .shot-info span{
+    font-size:10px;
+  }
+  .shot button{
+    width:100%;
+    min-height:40px;
+    font-size:12px;
+  }
+}
