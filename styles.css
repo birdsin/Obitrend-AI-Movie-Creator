@@ -1768,3 +1768,62 @@
     min-height:42px;
   }
 }
+
+
+/* REAL APP PRO PLANS — FINAL RESPONSIVE PRICING */
+.pro-plans-section,
+#proPlans{
+  background:linear-gradient(150deg,#0d141e,#090f17) !important;
+  border:1px solid #2a3442 !important;
+  border-radius:14px !important;
+  box-shadow:0 15px 45px rgba(0,0,0,.16) !important;
+  overflow:hidden;
+}
+.pro-plans-section .plans-grid,
+#proPlans .plans-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+.pro-plans-section .plan-card,
+#proPlans .plan-card{
+  min-width:0;
+  background:#0b131d !important;
+  border:1px solid #293646 !important;
+  border-radius:12px !important;
+  padding:16px !important;
+  box-shadow:none !important;
+}
+.pro-plans-section .plan-card.featured,
+#proPlans .plan-card.featured{
+  border-color:#c9a86a !important;
+  box-shadow:0 0 0 2px rgba(201,168,106,.12) !important;
+}
+.pro-plans-section .plan-price,
+#proPlans .plan-price{
+  color:#facc15 !important;
+}
+.pro-plans-section button,
+#proPlans button{
+  min-height:44px;
+  border-radius:9px;
+}
+@media(max-width:720px){
+  .pro-plans-section,
+  #proPlans{
+    border-radius:12px !important;
+  }
+  .pro-plans-section .plans-grid,
+  #proPlans .plans-grid{
+    grid-template-columns:1fr !important;
+    gap:10px;
+  }
+  .pro-plans-section .plan-card,
+  #proPlans .plan-card{
+    padding:14px !important;
+  }
+  .pro-plans-section button,
+  #proPlans button{
+    width:100%;
+  }
+}
