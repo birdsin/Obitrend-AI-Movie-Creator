@@ -776,3 +776,153 @@
     font-size:12px;
   }
 }
+
+
+/* REAL APP MOVIE ASSEMBLY — RESPONSIVE TIMELINE */
+.movie-assembly{
+  position:relative;
+  padding:22px;
+  background:linear-gradient(150deg,#0d141e,#090f17);
+  border:1px solid #2a3442;
+  border-radius:14px;
+  box-shadow:0 15px 45px rgba(0,0,0,.16);
+}
+.movie-assembly .section-title{
+  padding-bottom:14px;
+  margin-bottom:14px;
+  border-bottom:1px solid #27313e;
+}
+.movie-assembly .section-title>span{
+  width:34px;height:34px;display:grid;place-items:center;
+  border:1px solid #8f6f2c;border-radius:9px;background:#17140d;
+}
+.assembly-subtitle{
+  color:#aeb7c4;
+  font-size:12px;
+  line-height:1.5;
+  margin:0 0 14px;
+}
+.assembly-progress{
+  height:9px;
+  background:#111923;
+  border:1px solid #2b3745;
+  border-radius:99px;
+  overflow:hidden;
+  margin:8px 0 7px;
+}
+.assembly-progress>div{
+  height:100%;
+  min-width:0;
+  background:linear-gradient(90deg,#a47a25,#f0c95a);
+}
+.assembly-progress-label{
+  display:flex;
+  justify-content:space-between;
+  color:#9da8b7;
+  font-size:10px;
+  margin-bottom:14px;
+}
+.assembly-queue{
+  display:grid;
+  gap:9px;
+  max-height:430px;
+  overflow-y:auto;
+  padding-right:2px;
+}
+.assembly-item{
+  display:grid;
+  grid-template-columns:42px minmax(0,1fr) auto;
+  align-items:center;
+  gap:11px;
+  background:#0b131d;
+  border:1px solid #293646;
+  border-radius:10px;
+  padding:11px;
+}
+.assembly-number{
+  width:34px;height:34px;border-radius:50%;
+  display:grid;place-items:center;
+  background:#18212c;
+  color:#e8bd4f;
+  font-weight:750;
+}
+.assembly-item h3{
+  margin:0 0 4px;
+  font-size:12px;
+  line-height:1.4;
+}
+.assembly-item p{
+  margin:0;
+  color:#8f9aaa;
+  font-size:10px;
+}
+.assembly-state{
+  white-space:nowrap;
+  font-size:10px;
+  color:#aeb7c3;
+}
+.assembly-item.ready{border-color:#476c4d}
+.assembly-item.generating{border-color:#8f6f2c}
+.assembly-item.failed{border-color:#704242}
+.assembly-item.ready .assembly-state{color:#6ee38b}
+.assembly-item.generating .assembly-state{color:#f0c95a}
+.assembly-item.failed .assembly-state{color:#ff8b8b}
+.assembly-item video{
+  grid-column:2 / -1;
+  width:100%;
+  max-height:190px;
+  object-fit:contain;
+  border-radius:8px;
+  background:#05080c;
+  border:1px solid #202a36;
+}
+.assembly-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:14px;
+}
+.assembly-actions button{
+  min-height:46px;
+}
+@media(max-width:720px){
+  .movie-assembly{
+    padding:15px;
+    border-radius:14px;
+  }
+  .movie-assembly .section-title h2{
+    font-size:20px;
+  }
+  .movie-assembly .section-title>span{
+    width:32px;height:32px;
+  }
+  .assembly-queue{
+    max-height:520px;
+  }
+  .assembly-item{
+    grid-template-columns:36px minmax(0,1fr);
+    gap:9px;
+    padding:10px;
+  }
+  .assembly-number{
+    width:32px;height:32px;
+  }
+  .assembly-state{
+    grid-column:2;
+    justify-self:start;
+    font-size:10px;
+    margin-top:-2px;
+  }
+  .assembly-item video{
+    grid-column:1 / -1;
+    max-height:220px;
+  }
+  .assembly-actions{
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+  .assembly-actions button{
+    width:100%;
+    min-height:46px;
+  }
+}
