@@ -2133,3 +2133,6 @@ img{max-width:100%}
 .android-drawer>button{width:100%;height:54px;margin:3px 0;border:0;border-radius:10px;background:transparent;color:#e9edf3;text-align:left;padding:0 16px;font-size:15px}
 .android-drawer>button:hover{background:#191711;color:#ffd65d}
 .android-drawer>button:first-of-type{background:#302514;color:#ffd65d}
+
+/* Show the generated movie blueprint after a successful build without changing the existing Create Movie UI. */
+#legacyMovieDashboard.movie-blueprint-visible{display:block!important;}
