@@ -2,6 +2,48 @@ const state={blueprint:null,sceneIndex:0,shotIndex:0};
 try{const saved=localStorage.getItem("obitrend_movie_blueprint");if(saved)state.blueprint=JSON.parse(saved)}catch(e){}
 const demoBlueprint={title:"The Rejected Boy",logline:"A young Nigerian boy with big dreams faces rejection from his family and community, but never gives up. Through hard work, faith and determination, he rises from being looked down on to becoming successful.",genre:"Drama",length:15,visualStyle:"Cinematic realism",visualBible:{},characters:[{name:"Chinedu",role:"Main Character",appearance:"Young, determined, kind",wardrobe:"Simple everyday clothing"},{name:"Mr. Okafor",role:"Father",appearance:"Strict, hardworking",wardrobe:"Simple work clothes"},{name:"Ngozi",role:"Mother",appearance:"Supportive, loving",wardrobe:"Traditional Nigerian clothing"},{name:"Emeka",role:"Rival",appearance:"Arrogant, jealous",wardrobe:"Modern casual clothing"}],scenes:[{heading:"The Rejection",location:"Village / Family House",duration:"2:00",shots:[{framing:"Close-up",angle:"Eye-level",camera:"Full-frame cinema camera",lens:"50mm",movement:"Slow push-in",focus:"Chinedu",lighting:"Natural daylight",sound:"Village ambience",continuity:"Chinedu leaves home"} ,{framing:"Medium shot",angle:"Slight high",camera:"Full-frame cinema camera",lens:"35mm",movement:"Static",focus:"Family",lighting:"Natural daylight",sound:"Family dialogue",continuity:"Family rejects Chinedu"}]},{heading:"The Dream",location:"City Street",duration:"2:00",shots:[{framing:"Medium shot",angle:"Tracking",camera:"Full-frame cinema camera",lens:"35mm",movement:"Tracking",focus:"Chinedu",lighting:"Warm city light",sound:"Traffic and footsteps",continuity:"Chinedu walks toward the city"},{framing:"Close-up",angle:"Eye-level",camera:"Full-frame cinema camera",lens:"50mm",movement:"Slow push-in",focus:"Chinedu",lighting:"Library practicals",sound:"Quiet study ambience",continuity:"Chinedu studies late"}]}]};
 if(!state.blueprint)state.blueprint=demoBlueprint;const $=id=>document.getElementById(id);
+
+function getMovieHistory(){
+  try{
+    const h=JSON.parse(localStorage.getItem("obitrend_movie_history")||"[]");
+    return Array.isArray(h)?h:[];
+  }catch(e){return []}
+}
+function getMovieCredits(){
+  const raw=localStorage.getItem("obitrend_movie_credits");
+  const n=Number(raw);
+  if(Number.isFinite(n)&&n>=0)return Math.floor(n);
+  localStorage.setItem("obitrend_movie_credits","47");
+  return 47;
+}
+function setMovieCredits(n){
+  const value=Math.max(0,Math.floor(Number(n)||0));
+  localStorage.setItem("obitrend_movie_credits",String(value));
+  updateAndroidStats();
+  return value;
+}
+function consumeMovieCredit(){
+  const current=getMovieCredits();
+  if(current<=0)return false;
+  setMovieCredits(current-1);
+  return true;
+}
+function getMoviePlan(){
+  return localStorage.getItem("obitrend_movie_plan")||"Pro";
+}
+function updateAndroidStats(){
+  const history=getMovieHistory();
+  const movies=history.length;
+  const scenes=history.reduce((total,item)=>{
+    const list=item&&item.blueprint&&Array.isArray(item.blueprint.scenes)?item.blueprint.scenes:[];
+    return total+list.length;
+  },0);
+  const moviesEl=$("androidMoviesCount"),scenesEl=$("androidScenesCount"),creditsEl=$("androidCreditsCount"),planEl=$("androidPlanStatus");
+  if(moviesEl)moviesEl.textContent=String(movies);
+  if(scenesEl)scenesEl.textContent=String(scenes);
+  if(creditsEl)creditsEl.textContent=String(getMovieCredits());
+  if(planEl)planEl.textContent=getMoviePlan();
+}
 function status(id,msg,error){const e=$(id);e.textContent=msg;e.className="status"+(error?" error":"")}
 $("buildBtn").onclick=async()=>{const prompt=$("moviePrompt").value.trim();if(!prompt){status("status","Enter your movie idea first.",true);return}const b=$("buildBtn");b.disabled=true;status("status","Building your cinematic blueprint…");try{const r=await fetch("/api/plan",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({prompt,length:Number($("length").value),genre:$("genre").value,visualStyle:$("visualStyle").value,ratio:$("ratio").value})});const text=await r.text();let d={};try{d=JSON.parse(text)}catch{}if(!r.ok)throw new Error(d.error||"Movie planning service is temporarily unavailable. Please try again.");state.blueprint=d.blueprint;try{localStorage.setItem("obitrend_movie_blueprint",JSON.stringify(d.blueprint))}catch(e){}renderBlueprint(d.blueprint);status("status","Blueprint ready.")}catch(e){status("status",e.message,true)}finally{b.disabled=false}};
 function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
@@ -35,11 +77,11 @@ function renderBlueprint(b){
 }
 function openShot(si,hi){state.sceneIndex=si;state.shotIndex=hi;const s=state.blueprint.scenes[si],sh=s.shots[hi];$("shotStudio").classList.remove("hidden");$("shotTitle").textContent="Scene "+(si+1)+" · Shot "+(hi+1);$("shotDescription").textContent=s.heading||"";$("shotDetails").innerHTML=[["Camera",sh.camera],["Lens",sh.lens],["Framing",sh.framing],["Angle",sh.angle],["Movement",sh.movement],["Focus",sh.focus],["Lighting",sh.lighting],["Sound",sh.sound],["Continuity",sh.continuity]].filter(x=>x[1]).map(x=>"<div class=\"detail\"><b>"+esc(x[0])+"</b><span>"+esc(x[1])+"</span></div>").join("");$("shotVideo").classList.add("hidden");$("shotVideo").removeAttribute("src");$("videoPlaceholder").classList.remove("hidden");status("shotStatus","");$("shotStudio").scrollIntoView({behavior:"smooth",block:"start"})}
 $("generateShotBtn").onclick=generateShot;$("closeStudio").onclick=()=>{$("shotStudio").classList.add("hidden")};const legacyMenuBtn=$("menuBtn");if(legacyMenuBtn){legacyMenuBtn.onclick=()=>{const sidebar=$("sidebar");if(!sidebar)return;const opening=!sidebar.classList.contains("open");if(opening){sidebar.classList.add("open");$("menuWorkspace")?.classList.add("hidden");document.querySelectorAll(".nav-dropdown.open").forEach(x=>x.classList.remove("open"));document.querySelectorAll(".nav-chevron.open").forEach(x=>x.classList.remove("open"));legacyMenuBtn.setAttribute("aria-expanded","true")}else{sidebar.classList.remove("open");$("menuWorkspace")?.classList.add("hidden");document.querySelectorAll(".nav-dropdown.open").forEach(x=>x.classList.remove("open"));document.querySelectorAll(".nav-chevron.open").forEach(x=>x.classList.remove("open"));legacyMenuBtn.setAttribute("aria-expanded","false")}}}
-async function generateShot(){if(!state.blueprint)return;const b=$("generateShotBtn");b.disabled=true;status("shotStatus","Sending shot to the video generator…");try{const r=await fetch("/api/generate-shot",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({blueprint:state.blueprint,sceneIndex:state.sceneIndex,shotIndex:state.shotIndex,ratio:$("ratio").value})});const d=await r.json();if(!r.ok)throw new Error(d.error||"Shot generation failed.");if(d.videoUrl){showVideo(d.videoUrl);status("shotStatus","Shot ready.")}else if(d.taskId){await pollTask(d.taskId)}else throw new Error("The video provider did not return a task.")}catch(e){status("shotStatus",e.message,true)}finally{b.disabled=false}}
-async function pollTask(id){for(let i=0;i<90;i++){status("shotStatus","Generating cinematic shot… "+Math.min(99,Math.round((i+1)/90*100))+"%");await new Promise(r=>setTimeout(r,5000));const r=await fetch("/api/generate-shot?taskId="+encodeURIComponent(id));const d=await r.json();if(!r.ok)throw new Error(d.error||"Video status check failed.");if(d.status==="SUCCEEDED"&&d.videoUrl){showVideo(d.videoUrl);status("shotStatus","Shot ready.");return}if(d.status==="FAILED"||d.status==="CANCELED")throw new Error("The shot could not be generated. Your project was not changed.")}throw new Error("Generation is taking longer than expected. Check the shot again shortly.")}
+async function generateShot(){if(!state.blueprint)return;if(getMovieCredits()<=0){status("shotStatus","No movie credits remaining. Please add credits before generating another shot.",true);return}const b=$("generateShotBtn");b.disabled=true;status("shotStatus","Sending shot to the video generator…");try{const r=await fetch("/api/generate-shot",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({blueprint:state.blueprint,sceneIndex:state.sceneIndex,shotIndex:state.shotIndex,ratio:$("ratio").value})});const d=await r.json();if(!r.ok)throw new Error(d.error||"Shot generation failed.");if(d.videoUrl){if(!consumeMovieCredit())throw new Error("No movie credit is available for this shot.");showVideo(d.videoUrl);status("shotStatus","Shot ready.")}else if(d.taskId){await pollTask(d.taskId)}else throw new Error("The video provider did not return a task.")}catch(e){status("shotStatus",e.message,true)}finally{b.disabled=false}}
+async function pollTask(id){for(let i=0;i<90;i++){status("shotStatus","Generating cinematic shot… "+Math.min(99,Math.round((i+1)/90*100))+"%");await new Promise(r=>setTimeout(r,5000));const r=await fetch("/api/generate-shot?taskId="+encodeURIComponent(id));const d=await r.json();if(!r.ok)throw new Error(d.error||"Video status check failed.");if(d.status==="SUCCEEDED"&&d.videoUrl){if(!consumeMovieCredit())throw new Error("No movie credit is available for this shot.");showVideo(d.videoUrl);status("shotStatus","Shot ready.");return}if(d.status==="FAILED"||d.status==="CANCELED")throw new Error("The shot could not be generated. Your project was not changed.")}throw new Error("Generation is taking longer than expected. Check the shot again shortly.")}
 function showVideo(url){$("videoPlaceholder").classList.add("hidden");$("shotVideo").src=url;$("shotVideo").classList.remove("hidden");$("shotVideo").load()}
 
-window.addEventListener("DOMContentLoaded",()=>{if(state.blueprint)renderBlueprint(state.blueprint)});
+window.addEventListener("DOMContentLoaded",()=>{updateAndroidStats();if(state.blueprint)renderBlueprint(state.blueprint)});
 
 const MENU_DATA={
  templates:[
@@ -109,12 +151,12 @@ document.addEventListener("click",e=>{
  if(action.startsWith("history:")){let h=[];try{h=JSON.parse(localStorage.getItem("obitrend_movie_history")||"[]")}catch(e){}const x=h[+action.split(":")[1]];if(x?.blueprint){state.blueprint=x.blueprint;renderBlueprint(x.blueprint);menuClose();window.scrollTo({top:0,behavior:"smooth"})}return}
  if(action.startsWith("pro:")){status("status","Selected "+(action.endsWith("weekly")?"Weekly":"Monthly")+" Pro plan. Payment setup can be connected here.");return}
  if(action==="credits-info"){const s=$("menuActionStatus");if(s)s.textContent="Movie credits are consumed by video-shot generation.";return}
- if(action==="clear-history"){localStorage.removeItem("obitrend_movie_history");const s=$("menuActionStatus");if(s)s.textContent="Saved movie history cleared.";return}
- if(action==="clear-project"){localStorage.removeItem("obitrend_movie_blueprint");state.blueprint=demoBlueprint;renderBlueprint(state.blueprint);const s=$("menuActionStatus");if(s)s.textContent="Current project reset.";return}
+ if(action==="clear-history"){localStorage.removeItem("obitrend_movie_history");updateAndroidStats();const s=$("menuActionStatus");if(s)s.textContent="Saved movie history cleared.";return}
+ if(action==="clear-project"){localStorage.removeItem("obitrend_movie_blueprint");state.blueprint=demoBlueprint;renderBlueprint(state.blueprint);updateAndroidStats();const s=$("menuActionStatus");if(s)s.textContent="Current project reset.";return}
  if(action.startsWith("help:")){const s=$("menuActionStatus");if(s)s.textContent=action.endsWith("create")?"Enter a movie idea, choose options, and tap Build Movie Blueprint.":action.endsWith("video")?"Open a shot and tap Generate This Shot. The status area shows progress.":"Your project blueprint remains saved while a shot is being generated."}
 });
 const originalBuildHandler=$("buildBtn")?.onclick;
-if(originalBuildHandler)$("buildBtn").onclick=async()=>{await originalBuildHandler();if(state.blueprint)saveHistory(state.blueprint)};
+if(originalBuildHandler)$("buildBtn").onclick=async()=>{await originalBuildHandler();if(state.blueprint)saveHistory(state.blueprint);updateAndroidStats()};
 
 /* Reliable touch controls for dashboard tabs and blueprint actions */
 function wireTouchAction(el,fn){
@@ -170,18 +212,19 @@ function renderAssembly(){
  }).join("");
 }
 async function generateAssemblyItem(item){
+ if(getMovieCredits()<=0)throw new Error("No movie credits remaining. Please add credits before generating another shot.");
  item.state="generating";renderAssembly();
  const r=await fetch("/api/generate-shot",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({blueprint:state.blueprint,sceneIndex:item.si,shotIndex:item.hi,ratio:$("ratio").value})});
  const d=await r.json();
  if(!r.ok)throw new Error(d.error||"Shot generation failed.");
- if(d.videoUrl)return d.videoUrl;
+ if(d.videoUrl){if(!consumeMovieCredit())throw new Error("No movie credit is available for this shot.");return d.videoUrl;}
  if(!d.taskId)throw new Error("The video provider did not return a task.");
  for(let i=0;i<90;i++){
   $("assemblyStatus").textContent="Generating Scene "+(item.si+1)+" Shot "+(item.hi+1)+"… "+Math.min(99,Math.round((i+1)/90*100))+"%";
   await new Promise(r=>setTimeout(r,5000));
   const s=await fetch("/api/generate-shot?taskId="+encodeURIComponent(d.taskId));const x=await s.json();
   if(!s.ok)throw new Error(x.error||"Video status check failed.");
-  if(x.status==="SUCCEEDED"&&x.videoUrl)return x.videoUrl;
+  if(x.status==="SUCCEEDED"&&x.videoUrl){if(!consumeMovieCredit())throw new Error("No movie credit is available for this shot.");return x.videoUrl;}
   if(x.status==="FAILED"||x.status==="CANCELED")throw new Error("The shot could not be generated.");
  }
  throw new Error("Generation is taking longer than expected.");
