@@ -14,12 +14,39 @@ function getMovieHistory(){
     return Array.isArray(h)?h:[];
   }catch(e){return []}
 }
+function getMovieEntitlement(){
+  let data=null;
+  try{data=JSON.parse(localStorage.getItem("obitrend_movie_entitlement")||"null")}catch(e){}
+  if(!data||typeof data!=="object"){
+    const legacyPlan=localStorage.getItem("obitrend_movie_plan");
+    data={plan:legacyPlan||"Free",active:!!legacyPlan&&legacyPlan!=="Free",expiresAt:null};
+    try{localStorage.setItem("obitrend_movie_entitlement",JSON.stringify(data))}catch(e){}
+  }
+  if(data.active&&data.expiresAt){
+    const expiry=new Date(data.expiresAt).getTime();
+    if(Number.isFinite(expiry)&&expiry<=Date.now()){
+      data={plan:"Free",active:false,expiresAt:null};
+      try{localStorage.setItem("obitrend_movie_entitlement",JSON.stringify(data));localStorage.setItem("obitrend_movie_plan","Free")}catch(e){}
+      localStorage.setItem("obitrend_movie_credits","0");
+    }
+  }
+  return data;
+}
+function setMoviePlan(plan,expiresAt=null){
+  const value=String(plan||"Free");
+  const data={plan:value,active:value!=="Free",expiresAt:expiresAt||null};
+  localStorage.setItem("obitrend_movie_entitlement",JSON.stringify(data));
+  localStorage.setItem("obitrend_movie_plan",value);
+  if(value==="Free")localStorage.setItem("obitrend_movie_credits","0");
+  updateAndroidStats();
+  return data;
+}
 function getMovieCredits(){
   const raw=localStorage.getItem("obitrend_movie_credits");
   const n=Number(raw);
   if(Number.isFinite(n)&&n>=0)return Math.floor(n);
-  localStorage.setItem("obitrend_movie_credits","47");
-  return 47;
+  localStorage.setItem("obitrend_movie_credits","0");
+  return 0;
 }
 function setMovieCredits(n){
   const value=Math.max(0,Math.floor(Number(n)||0));
@@ -33,8 +60,15 @@ function consumeMovieCredit(){
   setMovieCredits(current-1);
   return true;
 }
-function getMoviePlan(){
-  return localStorage.getItem("obitrend_movie_plan")||"Pro";
+function getMoviePlan(){return getMovieEntitlement().plan||"Free"}
+function getMoviePlanLabel(){
+  const e=getMovieEntitlement();
+  if(e.plan==="Free")return "Free";
+  if(e.expiresAt){
+    const d=new Date(e.expiresAt);
+    if(!Number.isNaN(d.getTime()))return e.plan+" · "+d.toLocaleDateString();
+  }
+  return e.plan;
 }
 function updateAndroidStats(){
   const history=getMovieHistory();
@@ -47,7 +81,7 @@ function updateAndroidStats(){
   if(moviesEl)moviesEl.textContent=String(movies);
   if(scenesEl)scenesEl.textContent=String(scenes);
   if(creditsEl)creditsEl.textContent=String(getMovieCredits());
-  if(planEl)planEl.textContent=getMoviePlan();
+  if(planEl)planEl.textContent=getMoviePlanLabel();
 }
 function status(id,msg,error){const e=$(id);e.textContent=msg;e.className="status"+(error?" error":"")}
 $("buildBtn").onclick=async()=>{const prompt=$("moviePrompt").value.trim();if(!prompt){status("status","Enter your movie idea first.",true);return}const b=$("buildBtn");b.disabled=true;status("status","Building your cinematic blueprint…");try{const r=await fetch("/api/plan",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({prompt,length:Number($("length").value),genre:$("genre").value,visualStyle:$("visualStyle").value,ratio:$("ratio").value})});const text=await r.text();let d={};try{d=JSON.parse(text)}catch{}if(!r.ok)throw new Error(d.error||"Movie planning service is temporarily unavailable. Please try again.");state.blueprint=d.blueprint;try{localStorage.setItem("obitrend_movie_blueprint",JSON.stringify(d.blueprint))}catch(e){}renderBlueprint(d.blueprint);status("status","Blueprint ready.")}catch(e){status("status",e.message,true)}finally{b.disabled=false}};
@@ -146,8 +180,20 @@ function openMenu(name){
   models:()=>menuOpen("Model Styles","Choose the visual direction for your next movie.",MENU_DATA.models.map((x,i)=>renderMenuCard(x,"Use this visual style for the next blueprint.","model:"+i)).join("")),
   backgrounds:()=>menuOpen("Backgrounds","Choose the world where your movie takes place.",MENU_DATA.backgrounds.map((x,i)=>renderMenuCard(x,"Use this setting in your next movie concept.","background:"+i)).join("")),
   colors:()=>menuOpen("Outfit Colors","Choose a wardrobe color direction for your movie.",MENU_DATA.colors.map((x,i)=>renderMenuCard(x,"Use this wardrobe color direction.","color:"+i)).join("")),
-  pro:()=>menuOpen("Pro Plans","Premium movie creation options.",renderMenuCard("Weekly Pro","20 movie credits · 7 days","pro:weekly")+renderMenuCard("Monthly Pro","80 movie credits · 30 days","pro:monthly")+'<div class="status">Payment can be connected to your existing billing flow when the movie subscription backend is enabled.</div>'),
-  credits:()=>menuOpen("My Credits","Your current movie studio credit balance.",'<div class="credit-box"><strong>47</strong><span>Credits available</span></div>'+renderMenuCard("How credits work","Credits are used when generating movie shots.","credits-info")),
+  pro:()=>{
+    const e=getMovieEntitlement();
+    const expiry=e.expiresAt?new Date(e.expiresAt).toLocaleDateString():"Not set";
+    menuOpen("Pro Plans","Premium movie creation options.",
+      '<div class="credit-box"><strong>'+esc(e.plan||"Free")+'</strong><span>Current plan</span></div>'+
+      '<div class="status">Movie credits: '+getMovieCredits()+' · Expiry: '+esc(expiry)+'</div>'+
+      renderMenuCard("Weekly Pro","20 movie credits · 7 days","pro:weekly")+
+      renderMenuCard("Monthly Pro","80 movie credits · 30 days","pro:monthly")+
+      '<div class="status">Plan activation must come from the payment/entitlement system. This screen does not create a paid subscription by itself.</div>');
+  },
+  credits:()=>menuOpen("My Credits","Your current movie studio credit balance.",
+    '<div class="credit-box"><strong>'+getMovieCredits()+'</strong><span>Credits available</span></div>'+
+    '<div class="status">Plan: '+esc(getMoviePlanLabel())+'</div>'+
+    renderMenuCard("How credits work","One movie credit is consumed only after a video shot is successfully generated.","credits-info")),
   settings:()=>menuOpen("Settings","Movie Creator settings are saved on this device.",'<div class="settings-list"><label class="setting-row"><span>Save movie history</span><input id="settingHistory" type="checkbox" checked></label><button class="outline-btn menu-action" data-menu-action="clear-history">Clear saved history</button><button class="outline-btn menu-action" data-menu-action="clear-project">Clear current project</button></div><div id="menuActionStatus" class="status"></div>'),
   help:()=>menuOpen("Help & Support","Quick help for the Movie Creator.",renderMenuCard("How do I create a movie?","Open Create Image, enter an idea, then build your cinematic blueprint.","help:create")+renderMenuCard("How do I generate video?","Open Create Video, choose a shot, then use Generate This Shot.","help:video")+renderMenuCard("Generation failed?","Your blueprint stays saved so you can try the shot again.","help:error"))
  };
@@ -163,7 +209,12 @@ document.addEventListener("click",e=>{
  if(action.startsWith("color:")){localStorage.setItem("obitrend_movie_color",MENU_DATA.colors[+action.split(":")[1]]);status("status","Outfit color selected: "+MENU_DATA.colors[+action.split(":")[1]]);return}
  if(action==="poster"||action==="still"){const p=$("menuImagePrompt")?.value.trim()||state.blueprint?.logline||"Create a cinematic movie frame";$("menuActionStatus").textContent=(action==="poster"?"Poster prompt ready: ":"Cinematic still prompt ready: ")+p;return}
  if(action.startsWith("history:")){let h=[];try{h=JSON.parse(localStorage.getItem("obitrend_movie_history")||"[]")}catch(e){}const x=h[+action.split(":")[1]];if(x?.blueprint){state.blueprint=x.blueprint;renderBlueprint(x.blueprint);menuClose();window.scrollTo({top:0,behavior:"smooth"})}return}
- if(action.startsWith("pro:")){status("status","Selected "+(action.endsWith("weekly")?"Weekly":"Monthly")+" Pro plan. Payment setup can be connected here.");return}
+ if(action.startsWith("pro:")){
+  const plan=action.endsWith("weekly")?"Weekly Pro":"Monthly Pro";
+  const s=$("menuActionStatus");
+  if(s)s.textContent=plan+" selected. Complete payment to activate the entitlement and credits.";
+  return;
+}
  if(action==="credits-info"){const s=$("menuActionStatus");if(s)s.textContent="Movie credits are consumed by video-shot generation.";return}
  if(action==="clear-history"){localStorage.removeItem("obitrend_movie_history");updateAndroidStats();const s=$("menuActionStatus");if(s)s.textContent="Saved movie history cleared.";return}
  if(action==="clear-project"){localStorage.removeItem("obitrend_movie_blueprint");state.blueprint=demoBlueprint;renderBlueprint(state.blueprint);updateAndroidStats();const s=$("menuActionStatus");if(s)s.textContent="Current project reset.";return}
