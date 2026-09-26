@@ -574,7 +574,8 @@ document.addEventListener("DOMContentLoaded",()=>{
         if(a==="home"){close();window.scrollTo({top:0,behavior:"smooth"});}
         else if(a==="create"){close();showCreate();}
         else if(a==="movies"){close();document.querySelector(".android-projects")?.scrollIntoView({behavior:"smooth"});}
-        else {close();notify(a==="credits"?"Your movie credits are shown at the top of the app.":a==="settings"?"Settings will be available here.":"Help & Support will be available here.");}
+        else if(a==="credits"){close();openMenu("credits");}
+        else {close();notify(a==="settings"?"Settings will be available here.":"Help & Support will be available here.");}
       });
     }
     menuBtn.addEventListener("click",()=>drawer.classList.toggle("open"));
