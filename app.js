@@ -471,10 +471,23 @@ document.addEventListener("DOMContentLoaded",()=>{
     document.querySelector(".android-projects")?.scrollIntoView({behavior:"smooth",block:"start"});
   });
 
-  document.querySelectorAll(".android-projects button").forEach((b,i)=>b.addEventListener("click",()=>{
-    if(i===0 && state.blueprint){renderBlueprint(state.blueprint);$("blueprintSection")?.scrollIntoView({behavior:"smooth",block:"start"});}
-    else notify("This project is ready to be connected to your saved movie library.");
-  }));
+  function openMovieProject(index){
+    if(index===0 && state.blueprint){
+      renderBlueprint(state.blueprint);
+      showGeneratedBlueprint();
+      const nav=document.querySelector(".android-bottom-nav");
+      nav?.querySelectorAll("button").forEach(x=>x.classList.remove("active"));
+      nav?.querySelectorAll("button")[2]?.classList.add("active");
+      return;
+    }
+    notify("This project is ready to be connected to your saved movie library.");
+  }
+  document.querySelectorAll(".android-projects button").forEach((b,i)=>{
+    b.type="button";
+    b.style.touchAction="manipulation";
+    b.addEventListener("pointerup",e=>{e.preventDefault();openMovieProject(i)},{passive:false});
+    b.addEventListener("click",e=>{e.preventDefault();openMovieProject(i)},{passive:false});
+  });
 
   const nav=document.querySelector(".android-bottom-nav");
   nav?.querySelectorAll("button").forEach((b,i)=>b.addEventListener("click",()=>{
