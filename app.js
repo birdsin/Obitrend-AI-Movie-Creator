@@ -158,6 +158,59 @@ document.addEventListener("click",e=>{
 const originalBuildHandler=$("buildBtn")?.onclick;
 if(originalBuildHandler)$("buildBtn").onclick=async()=>{await originalBuildHandler();if(state.blueprint)saveHistory(state.blueprint);updateAndroidStats()};
 
+/* Reliable mobile Create Movie button binding */
+document.addEventListener("DOMContentLoaded",()=>{
+  const build=$("buildBtn");
+  if(!build)return;
+  build.type="button";
+  build.style.touchAction="manipulation";
+  let running=false;
+  const runBuild=async(e)=>{
+    if(e&&e.cancelable)e.preventDefault();
+    if(running)return;
+    const prompt=$("moviePrompt")?.value.trim();
+    if(!prompt){
+      status("status","Enter your movie idea first.",true);
+      $("moviePrompt")?.focus();
+      return;
+    }
+    running=true;
+    build.disabled=true;
+    status("status","Building your cinematic blueprint…");
+    try{
+      const r=await fetch("/api/plan",{
+        method:"POST",
+        headers:{"content-type":"application/json"},
+        body:JSON.stringify({
+          prompt,
+          length:Number($("length")?.value||15),
+          genre:$("genre")?.value||"Drama",
+          visualStyle:$("visualStyle")?.value||"Cinematic realism",
+          ratio:$("ratio")?.value||"16:9"
+        })
+      });
+      const text=await r.text();
+      let d={};try{d=JSON.parse(text)}catch{}
+      if(!r.ok)throw new Error(d.error||"Movie planning service is temporarily unavailable. Please try again.");
+      if(!d.blueprint)throw new Error("The movie planner returned no blueprint. Please try again.");
+      state.blueprint=d.blueprint;
+      try{localStorage.setItem("obitrend_movie_blueprint",JSON.stringify(d.blueprint))}catch(e){}
+      renderBlueprint(d.blueprint);
+      saveHistory(d.blueprint);
+      updateAndroidStats();
+      status("status","Blueprint ready.");
+    }catch(e){
+      status("status",e?.message||"Movie planning failed. Please try again.",true);
+    }finally{
+      running=false;
+      build.disabled=false;
+    }
+  };
+  build.onclick=null;
+  build.addEventListener("pointerup",runBuild,{passive:false});
+  build.addEventListener("click",runBuild,{passive:false});
+});
+
 /* Reliable touch controls for dashboard tabs and blueprint actions */
 function wireTouchAction(el,fn){
  if(!el)return;
