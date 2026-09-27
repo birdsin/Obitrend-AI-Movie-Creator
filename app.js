@@ -186,8 +186,9 @@ function openMenu(name){
     menuOpen("Pro Plans","Premium movie creation options.",
       '<div class="credit-box"><strong>'+esc(e.plan||"Free")+'</strong><span>Current plan</span></div>'+
       '<div class="status">Movie credits: '+getMovieCredits()+' · Expiry: '+esc(expiry)+'</div>'+
-      renderMenuCard("Weekly Pro","20 movie credits · 7 days","pro:weekly")+
-      renderMenuCard("Monthly Pro","80 movie credits · 30 days","pro:monthly")+
+      renderMenuCard("Weekly Creator","₦9,000 · 7 days","pro:weekly")+
+      renderMenuCard("Monthly Creator","₦25,000 · 30 days","pro:monthly")+
+      renderMenuCard("Yearly Creator","₦250,000 · 365 days","pro:yearly")+
       '<div class="status">Plan activation must come from the payment/entitlement system. This screen does not create a paid subscription by itself.</div>');
   },
   credits:()=>menuOpen("My Credits","Your current movie studio credit balance.",
@@ -210,7 +211,7 @@ document.addEventListener("click",e=>{
  if(action==="poster"||action==="still"){const p=$("menuImagePrompt")?.value.trim()||state.blueprint?.logline||"Create a cinematic movie frame";$("menuActionStatus").textContent=(action==="poster"?"Poster prompt ready: ":"Cinematic still prompt ready: ")+p;return}
  if(action.startsWith("history:")){let h=[];try{h=JSON.parse(localStorage.getItem("obitrend_movie_history")||"[]")}catch(e){}const x=h[+action.split(":")[1]];if(x?.blueprint){state.blueprint=x.blueprint;renderBlueprint(x.blueprint);menuClose();window.scrollTo({top:0,behavior:"smooth"})}return}
  if(action.startsWith("pro:")){
-  const plan=action.endsWith("weekly")?"Weekly Pro":"Monthly Pro";
+  const plan=action.endsWith("weekly")?"Weekly Creator":action.endsWith("yearly")?"Yearly Creator":"Monthly Creator";
   const s=$("menuActionStatus");
   if(s)s.textContent=plan+" selected. Complete payment to activate the entitlement and credits.";
   return;
