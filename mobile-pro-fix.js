@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   profile.style.touchAction="manipulation";
 
   const openProPlans=()=>{
+    if(typeof openMenu==="function"){ openMenu("pro"); return; }
     if(typeof menuOpen!=="function")return;
     const card=(title,text,action)=>{
       if(typeof renderMenuCard==="function")return renderMenuCard(title,text,action);
