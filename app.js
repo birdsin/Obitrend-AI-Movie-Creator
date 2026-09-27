@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   if(state.blueprint && localStorage.getItem("obitrend_movie_blueprint")){
     renderBlueprint(state.blueprint);
   }
+  verifyMoviePaymentReturn();
 });
 const state={blueprint:null,sceneIndex:0,shotIndex:0};
 try{const saved=localStorage.getItem("obitrend_movie_blueprint");if(saved)state.blueprint=JSON.parse(saved)}catch(e){}
@@ -45,6 +46,51 @@ function setMoviePlan(plan,expiresAt=null){
   if(value==="Free")localStorage.setItem("obitrend_movie_credits","0");
   updateAndroidStats();
   return data;
+}
+async function startMoviePayment(planKey){
+  const plan=MOVIE_PLANS[planKey];
+  if(!plan){status("status","Invalid movie plan.",true);return}
+  let email=localStorage.getItem("obitrend_movie_email")||"";
+  email=window.prompt("Enter the email you use for Paystack payment:",email)||"";
+  email=email.trim().toLowerCase();
+  if(!email)return;
+  localStorage.setItem("obitrend_movie_email",email);
+  status("status","Opening secure Paystack checkout…");
+  try{
+    const r=await fetch("/api/movie-payment",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"initialize",plan:planKey,email})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(d.error||"Could not start payment.");
+    localStorage.setItem("obitrend_movie_pending_reference",d.reference);
+    localStorage.setItem("obitrend_movie_pending_plan",planKey);
+    window.location.href=d.authorization_url;
+  }catch(e){status("status",e.message,true)}
+}
+async function verifyMoviePaymentReturn(){
+  const q=new URLSearchParams(window.location.search);
+  if(q.get("movie_payment")!=="success")return;
+  const reference=q.get("reference")||localStorage.getItem("obitrend_movie_pending_reference")||"";
+  if(!reference)return;
+  const already=localStorage.getItem("obitrend_movie_verified_reference");
+  if(already===reference){
+    history.replaceState({},document.title,window.location.pathname);
+    return;
+  }
+  status("status","Verifying your movie payment…");
+  try{
+    const r=await fetch("/api/movie-payment",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"verify",reference})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok||!d.success)throw new Error(d.error||"Payment verification failed.");
+    const expiry=new Date(Date.now()+Number(d.durationDays||0)*86400000).toISOString();
+    setMoviePlan(d.planName,expiry);
+    setMovieCredits(d.credits);
+    localStorage.setItem("obitrend_movie_verified_reference",reference);
+    localStorage.removeItem("obitrend_movie_pending_reference");
+    localStorage.removeItem("obitrend_movie_pending_plan");
+    if(d.email)localStorage.setItem("obitrend_movie_email",d.email);
+    history.replaceState({},document.title,window.location.pathname);
+    updateAndroidStats();
+    status("status",d.planName+" activated. "+d.credits+" movie credits added.");
+  }catch(e){status("status",e.message,true)}
 }
 function getMovieCredits(){
   const raw=localStorage.getItem("obitrend_movie_credits");
@@ -215,12 +261,7 @@ document.addEventListener("click",e=>{
  if(action.startsWith("color:")){localStorage.setItem("obitrend_movie_color",MENU_DATA.colors[+action.split(":")[1]]);status("status","Outfit color selected: "+MENU_DATA.colors[+action.split(":")[1]]);return}
  if(action==="poster"||action==="still"){const p=$("menuImagePrompt")?.value.trim()||state.blueprint?.logline||"Create a cinematic movie frame";$("menuActionStatus").textContent=(action==="poster"?"Poster prompt ready: ":"Cinematic still prompt ready: ")+p;return}
  if(action.startsWith("history:")){let h=[];try{h=JSON.parse(localStorage.getItem("obitrend_movie_history")||"[]")}catch(e){}const x=h[+action.split(":")[1]];if(x?.blueprint){state.blueprint=x.blueprint;renderBlueprint(x.blueprint);menuClose();window.scrollTo({top:0,behavior:"smooth"})}return}
- if(action.startsWith("pro:")){
-  const plan=action.endsWith("weekly")?"Weekly Creator":action.endsWith("yearly")?"Yearly Creator":"Monthly Creator";
-  const s=$("menuActionStatus");
-  if(s)s.textContent=plan+" selected. Complete payment to activate the entitlement and credits.";
-  return;
-}
+ if(action.startsWith("pro:")){startMoviePayment(action.endsWith("weekly")?"weekly":action.endsWith("yearly")?"yearly":"monthly");return}
  if(action==="credits-info"){const s=$("menuActionStatus");if(s)s.textContent="Movie credits are consumed by video-shot generation.";return}
  if(action==="clear-history"){localStorage.removeItem("obitrend_movie_history");updateAndroidStats();const s=$("menuActionStatus");if(s)s.textContent="Saved movie history cleared.";return}
  if(action==="clear-project"){localStorage.removeItem("obitrend_movie_blueprint");state.blueprint=demoBlueprint;renderBlueprint(state.blueprint);updateAndroidStats();const s=$("menuActionStatus");if(s)s.textContent="Current project reset.";return}
@@ -442,7 +483,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     if(action.startsWith("model:")){const i=+action.split(":")[1];localStorage.setItem("obitrend_movie_model_style",MENU_DATA.models[i]);$("visualStyle").value=MENU_DATA.models[i];status("status","Model style selected: "+MENU_DATA.models[i]);return}
     if(action.startsWith("background:")){const i=+action.split(":")[1];localStorage.setItem("obitrend_movie_background",MENU_DATA.backgrounds[i]);status("status","Background selected: "+MENU_DATA.backgrounds[i]);return}
     if(action.startsWith("color:")){const i=+action.split(":")[1];localStorage.setItem("obitrend_movie_color",MENU_DATA.colors[i]);status("status","Outfit color selected: "+MENU_DATA.colors[i]);return}
-    if(action.startsWith("pro:")){status("status","Selected "+(action.endsWith("weekly")?"Weekly":"Monthly")+" Pro plan. Payment setup can be connected here.");return}
+    if(action.startsWith("pro:")){startMoviePayment(action.endsWith("weekly")?"weekly":action.endsWith("yearly")?"yearly":"monthly");return}
     if(action==="credits:balance"){openMenu("credits");return}
     if(action==="credits:usage"){openMenu("credits");status("status","Credits usage is shown in My Credits.");return}
     if(action==="credits:info"){openMenu("credits");return}
