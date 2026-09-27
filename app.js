@@ -16,9 +16,9 @@ function getMovieHistory(){
   }catch(e){return []}
 }
 const MOVIE_PLANS={
-  weekly:{name:"Weekly Creator",priceNaira:9000,credits:20,durationDays:7},
-  monthly:{name:"Monthly Creator",priceNaira:25000,credits:100,durationDays:30},
-  yearly:{name:"Yearly Creator",priceNaira:250000,credits:1200,durationDays:365}
+  threeDays:{name:"3 Day Creator",priceNaira:13000,credits:10,durationDays:3},
+  weekly:{name:"Weekly Creator",priceNaira:26000,credits:22,durationDays:7},
+  monthly:{name:"Monthly Creator",priceNaira:90000,credits:70,durationDays:30}
 };
 function getMovieEntitlement(){
   let data=null;
@@ -237,9 +237,9 @@ function openMenu(name){
     menuOpen("Pro Plans","Premium movie creation options.",
       '<div class="credit-box"><strong>'+esc(e.plan||"Free")+'</strong><span>Current plan</span></div>'+
       '<div class="status">Movie credits: '+getMovieCredits()+' · Expiry: '+esc(expiry)+'</div>'+
-      renderMenuCard("Weekly Creator","₦9,000 · 20 credits · 7 days","pro:weekly")+
-      renderMenuCard("Monthly Creator","₦25,000 · 100 credits · 30 days","pro:monthly")+
-      renderMenuCard("Yearly Creator","₦250,000 · 1,200 credits · 365 days","pro:yearly")+
+      renderMenuCard("3 Day Creator","₦13,000 · 10 credits · 3 days","pro:threeDays")+
+      renderMenuCard("Weekly Creator","₦26,000 · 22 credits · 7 days","pro:weekly")+
+      renderMenuCard("Monthly Creator","₦90,000 · 70 credits · 30 days","pro:monthly")+
       '<div class="status">Plan activation must come from the payment/entitlement system. This screen does not create a paid subscription by itself.</div>');
   },
   credits:()=>menuOpen("My Credits","Your current movie studio credit balance.",
@@ -261,7 +261,7 @@ document.addEventListener("click",e=>{
  if(action.startsWith("color:")){localStorage.setItem("obitrend_movie_color",MENU_DATA.colors[+action.split(":")[1]]);status("status","Outfit color selected: "+MENU_DATA.colors[+action.split(":")[1]]);return}
  if(action==="poster"||action==="still"){const p=$("menuImagePrompt")?.value.trim()||state.blueprint?.logline||"Create a cinematic movie frame";$("menuActionStatus").textContent=(action==="poster"?"Poster prompt ready: ":"Cinematic still prompt ready: ")+p;return}
  if(action.startsWith("history:")){let h=[];try{h=JSON.parse(localStorage.getItem("obitrend_movie_history")||"[]")}catch(e){}const x=h[+action.split(":")[1]];if(x?.blueprint){state.blueprint=x.blueprint;renderBlueprint(x.blueprint);menuClose();window.scrollTo({top:0,behavior:"smooth"})}return}
- if(action.startsWith("pro:")){startMoviePayment(action.endsWith("weekly")?"weekly":action.endsWith("yearly")?"yearly":"monthly");return}
+ if(action.startsWith("pro:")){const key=action.slice(4);startMoviePayment(key);return}
  if(action==="credits-info"){const s=$("menuActionStatus");if(s)s.textContent="Movie credits are consumed by video-shot generation.";return}
  if(action==="clear-history"){localStorage.removeItem("obitrend_movie_history");updateAndroidStats();const s=$("menuActionStatus");if(s)s.textContent="Saved movie history cleared.";return}
  if(action==="clear-project"){localStorage.removeItem("obitrend_movie_blueprint");state.blueprint=demoBlueprint;renderBlueprint(state.blueprint);updateAndroidStats();const s=$("menuActionStatus");if(s)s.textContent="Current project reset.";return}
@@ -483,7 +483,7 @@ document.addEventListener("DOMContentLoaded",()=>{
     if(action.startsWith("model:")){const i=+action.split(":")[1];localStorage.setItem("obitrend_movie_model_style",MENU_DATA.models[i]);$("visualStyle").value=MENU_DATA.models[i];status("status","Model style selected: "+MENU_DATA.models[i]);return}
     if(action.startsWith("background:")){const i=+action.split(":")[1];localStorage.setItem("obitrend_movie_background",MENU_DATA.backgrounds[i]);status("status","Background selected: "+MENU_DATA.backgrounds[i]);return}
     if(action.startsWith("color:")){const i=+action.split(":")[1];localStorage.setItem("obitrend_movie_color",MENU_DATA.colors[i]);status("status","Outfit color selected: "+MENU_DATA.colors[i]);return}
-    if(action.startsWith("pro:")){startMoviePayment(action.endsWith("weekly")?"weekly":action.endsWith("yearly")?"yearly":"monthly");return}
+    if(action.startsWith("pro:")){const key=action.slice(4);startMoviePayment(key);return}
     if(action==="credits:balance"){openMenu("credits");return}
     if(action==="credits:usage"){openMenu("credits");status("status","Credits usage is shown in My Credits.");return}
     if(action==="credits:info"){openMenu("credits");return}
