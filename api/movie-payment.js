@@ -1,7 +1,7 @@
 const PLANS={
-  weekly:{name:"Weekly Creator",amount:900000,credits:20,durationDays:7,planCode:process.env.PAYSTACK_MOVIE_WEEKLY_PLAN_CODE||""},
-  monthly:{name:"Monthly Creator",amount:2500000,credits:100,durationDays:30,planCode:process.env.PAYSTACK_MOVIE_MONTHLY_PLAN_CODE||""},
-  yearly:{name:"Yearly Creator",amount:25000000,credits:1200,durationDays:365,planCode:process.env.PAYSTACK_MOVIE_YEARLY_PLAN_CODE||""}
+  threeDays:{name:"3 Day Creator",amount:1300000,credits:10,durationDays:3,planCode:process.env.PAYSTACK_MOVIE_3DAY_PLAN_CODE||""},
+  weekly:{name:"Weekly Creator",amount:2600000,credits:22,durationDays:7,planCode:process.env.PAYSTACK_MOVIE_WEEKLY_PLAN_CODE||""},
+  monthly:{name:"Monthly Creator",amount:9000000,credits:70,durationDays:30,planCode:process.env.PAYSTACK_MOVIE_MONTHLY_PLAN_CODE||""}
 };
 function json(res,status,body){res.status(status).setHeader("content-type","application/json");res.end(JSON.stringify(body))}
 async function paystack(path,options={}){
