@@ -88,7 +88,7 @@ module.exports=async(req,res)=>{
 
     // Runway's current documented text-only video flow uses imageToVideo with no prompt image.
     // Gen-4.5 accepts 16:9 and 9:16 outputs; unsupported UI ratios safely fall back to landscape.
-    const model=process.env.RUNWAY_MODEL||"gen4_turbo";
+    const model=process.env.RUNWAY_MODEL||"gen4.5";
     const body={
       model,
       promptText:prompt,
