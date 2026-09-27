@@ -14,6 +14,11 @@ function getMovieHistory(){
     return Array.isArray(h)?h:[];
   }catch(e){return []}
 }
+const MOVIE_PLANS={
+  weekly:{name:"Weekly Creator",priceNaira:9000,credits:20,durationDays:7},
+  monthly:{name:"Monthly Creator",priceNaira:25000,credits:100,durationDays:30},
+  yearly:{name:"Yearly Creator",priceNaira:250000,credits:1200,durationDays:365}
+};
 function getMovieEntitlement(){
   let data=null;
   try{data=JSON.parse(localStorage.getItem("obitrend_movie_entitlement")||"null")}catch(e){}
@@ -186,9 +191,9 @@ function openMenu(name){
     menuOpen("Pro Plans","Premium movie creation options.",
       '<div class="credit-box"><strong>'+esc(e.plan||"Free")+'</strong><span>Current plan</span></div>'+
       '<div class="status">Movie credits: '+getMovieCredits()+' · Expiry: '+esc(expiry)+'</div>'+
-      renderMenuCard("Weekly Creator","₦9,000 · 7 days","pro:weekly")+
-      renderMenuCard("Monthly Creator","₦25,000 · 30 days","pro:monthly")+
-      renderMenuCard("Yearly Creator","₦250,000 · 365 days","pro:yearly")+
+      renderMenuCard("Weekly Creator","₦9,000 · 20 credits · 7 days","pro:weekly")+
+      renderMenuCard("Monthly Creator","₦25,000 · 100 credits · 30 days","pro:monthly")+
+      renderMenuCard("Yearly Creator","₦250,000 · 1,200 credits · 365 days","pro:yearly")+
       '<div class="status">Plan activation must come from the payment/entitlement system. This screen does not create a paid subscription by itself.</div>');
   },
   credits:()=>menuOpen("My Credits","Your current movie studio credit balance.",
