@@ -35,7 +35,7 @@ module.exports=async function handler(req,res){
       if(!plan)return json(res,400,{error:"This payment is not a recognized OBITREND Movie Creator plan."});
       if(tx.status!=="success")return json(res,402,{error:"Payment was not completed successfully."});
       if(String(tx.currency||"").toUpperCase()!=="NGN")return json(res,400,{error:"Payment currency mismatch."});
-      if(Number(tx.amount)!==plan.amount)return json(res,400,{error:"Payment amount does not match the selected movie plan."});
+      const requestedAmount=Number(tx.requested_amount??tx.amount);\n      if(requestedAmount!==plan.amount)return json(res,400,{error:"Payment amount does not match the selected movie plan."});
       return json(res,200,{success:true,reference,plan:planKey,planName:plan.name,credits:plan.credits,durationDays:plan.durationDays,email:tx.customer?.email||""});
     }
     return json(res,400,{error:"Unknown payment action."});
