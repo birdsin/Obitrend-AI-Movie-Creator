@@ -194,8 +194,8 @@ const MENU_DATA={
  colors:["Black","White","Red","Navy Blue","Oxblood","Brown","Gold","Cream","Emerald","Sky Blue"]
 };
 function menuOpen(title,subtitle,html){
- const w=$("menuWorkspace"); const sidebar=$("sidebar"); if(!w||!sidebar)return;
- if(!sidebar.contains(w))sidebar.appendChild(w);
+ const w=$("menuWorkspace"); const sidebar=$("sidebar"); if(!w)return;
+ if(sidebar && !sidebar.contains(w))sidebar.appendChild(w);
  $("menuWorkspaceTitle").textContent=title;$("menuWorkspaceSubtitle").textContent=subtitle||"";$("menuWorkspaceBody").innerHTML=html;
  w.classList.remove("hidden");
 }
