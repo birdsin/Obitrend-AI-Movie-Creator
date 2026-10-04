@@ -62,3 +62,34 @@ document.addEventListener("DOMContentLoaded",()=>{
     }
   });
 });
+
+/* FIX: mobile drawer Settings must open the real Settings workspace */
+document.addEventListener("click",(e)=>{
+  const item=e.target.closest('[data-drawer-action="settings"]');
+  if(!item)return;
+  e.preventDefault();
+  e.stopPropagation();
+  const drawer=document.getElementById("androidDrawer");
+  drawer?.classList.remove("open");
+  const sidebar=document.getElementById("sidebar");
+  sidebar?.classList.add("open");
+  if(typeof openMenu==="function") openMenu("settings");
+  const w=document.getElementById("menuWorkspace");
+  if(w){
+    w.classList.remove("hidden");
+    w.style.position="fixed";
+    w.style.left="12px";
+    w.style.right="12px";
+    w.style.top="80px";
+    w.style.bottom="20px";
+    w.style.zIndex="99999";
+    w.style.margin="0";
+    w.style.maxHeight="none";
+    w.style.overflowY="auto";
+    w.style.background="#0d141e";
+    w.style.border="1px solid #2a3442";
+    w.style.boxShadow="0 20px 60px rgba(0,0,0,.85)";
+    w.scrollTop=0;
+  }
+},true);
+
