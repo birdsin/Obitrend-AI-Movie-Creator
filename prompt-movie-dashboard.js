@@ -73,6 +73,50 @@
     return applyCreditDuration(credits);
   }
 
+  function showGenerationCard(stage="Planning",progress=8,message="Preparing your movie…"){
+    let card=q("#pmGenerationCard");
+    if(!card){
+      card=document.createElement("div");
+      card.id="pmGenerationCard";
+      card.className="pm-generation-card";
+      card.innerHTML=`
+        <div class="pm-generation-head">
+          <div class="pm-generation-icon"><i data-lucide="clapperboard"></i></div>
+          <div><strong>Generating Your Movie</strong><span id="pmGenerationMessage">Preparing your movie…</span></div>
+          <b id="pmGenerationPercent">8%</b>
+        </div>
+        <div class="pm-generation-track"><i id="pmGenerationBar"></i></div>
+        <div class="pm-generation-stage-text" id="pmGenerationStageText">Planning your story and scenes…</div>
+        <div class="pm-generation-steps">
+          <div data-stage="planning"><i data-lucide="clapperboard"></i><span>Planning</span></div>
+          <div data-stage="generating"><i data-lucide="video"></i><span>Generating</span></div>
+          <div data-stage="enhancing"><i data-lucide="sparkles"></i><span>Enhancing</span></div>
+          <div data-stage="finalizing"><i data-lucide="check"></i><span>Finalizing</span></div>
+        </div>
+      `;
+      const statusEl=q("#pmStatus");
+      statusEl?.parentNode?.insertBefore(card,statusEl);
+      iconRefresh();
+    }
+    const order={Planning:0,Generating:1,Enhancing:2,Finalizing:3};
+    const key=String(stage||"Planning");
+    const idx=order[key]??0;
+    card.querySelector("#pmGenerationPercent").textContent=Math.max(1,Math.min(99,Math.round(Number(progress)||0)))+"%";
+    card.querySelector("#pmGenerationBar").style.width=Math.max(1,Math.min(99,Number(progress)||0))+"%";
+    card.querySelector("#pmGenerationMessage").textContent=message||"Creating your movie…";
+    card.querySelector("#pmGenerationStageText").textContent=message||"Creating your movie…";
+    card.querySelectorAll("[data-stage]").forEach(el=>{
+      const n=order[el.dataset.stage];
+      el.classList.toggle("active",n===idx);
+      el.classList.toggle("done",n<idx);
+    });
+    card.classList.add("visible");
+  }
+  function hideGenerationCard(){
+    const card=q("#pmGenerationCard");
+    if(card)card.classList.remove("visible");
+  }
+
   function showEmptyPromptError(){
     status.textContent="Describe your movie first";
     status.className="pm-status error";
@@ -105,11 +149,17 @@
       status.textContent=error?.message||"Could not load your movie credits.";
       return;
     }
-    status.className="pm-status";status.textContent="AI is turning your prompt into a complete cinematic blueprint…";
+    status.className="pm-status";
+    status.textContent="AI is turning your prompt into a complete cinematic blueprint…";
+    showGenerationCard("Planning",12,"Planning your story, characters and scenes…");
     engineBuild?.click();
-    const started=Date.now();
     const timer=setInterval(()=>{
       const source=document.getElementById("status")?.textContent||"";
+      if(/Producing your|Generating|generating/i.test(source)){
+        showGenerationCard("Generating",45,source||"Generating your first movie segment…");
+      }else if(/Blueprint ready\./i.test(source)){
+        showGenerationCard("Generating",38,"Blueprint ready. Starting cinematic movie generation…");
+      }
       if(/Blueprint ready\./i.test(source)){
         clearInterval(timer);
         status.textContent="Movie blueprint ready. AI selected the story structure, characters, scenes, camera, lighting and sound automatically.";
@@ -121,7 +171,10 @@
         q("#pmResultTitle")&&(q("#pmResultTitle").textContent=document.getElementById("movieTitle")?.textContent||"Your movie");
         return;
       }
-      if(Date.now()-started>90000){clearInterval(timer);generate.disabled=false;composer?.classList.remove("pm-loading");status.textContent=source||"Movie generation is taking longer than expected.";status.className="pm-status error"}
+      if(/failed|error|could not|unavailable/i.test(source) && !/Blueprint ready\./i.test(source)){
+        clearInterval(timer);
+        hideGenerationCard();
+      }
       mirrorStatus();
     },500);
   });
@@ -200,6 +253,8 @@
         }
 
         status.className="pm-status";
+        const segmentProgress=Math.max(40,Math.min(92,Math.round((i/Math.max(1,targetCount))*52)+40));
+        showGenerationCard("Generating",segmentProgress,"Generating movie segment "+(i+1)+" of "+targetCount+"…");
         const totalSeconds=targetCount*30;
         const durationLabel=totalSeconds<60?totalSeconds+"-second":(totalSeconds/60)+"-minute";
         status.textContent="Producing your "+durationLabel+" movie — 30-second segment "+(i+1)+" of "+targetCount+"…";
@@ -224,6 +279,7 @@
           results.push({scene:item.si,shot:item.hi,url});
           generatedNow++;
           savedUrls[i]=url;
+          showGenerationCard("Enhancing",Math.max(55,Math.min(96,Math.round(((i+1)/Math.max(1,targetCount))*88))),"Enhancing segment "+(i+1)+" and preserving cinematic continuity…");
           try{localStorage.setItem("obitrend_auto_movie_videos",JSON.stringify(results))}catch(_){}
 
           await refreshMovieEntitlement();
@@ -243,6 +299,7 @@
         }
       }
 
+      showGenerationCard("Finalizing",98,"Finalizing your movie and saving the completed production…");
       await setMovieProductionStatus(productionId,"completed").catch(()=>{});
       await refreshMovieEntitlement();
 
@@ -261,9 +318,11 @@
       const completedSeconds=targetCount*30;
       const completedLabel=completedSeconds<60?completedSeconds+" seconds":(completedSeconds/60)+" minute"+(completedSeconds/60===1?"":"s");
       status.textContent="Your "+completedLabel+" movie is complete. "+targetCount+" x 30-second segments were generated using exactly "+targetCount+" movie credit"+(targetCount===1?"":"s")+".";
+      hideGenerationCard();
       loadRecent();
     }catch(error){
       status.className="pm-status error";
+      hideGenerationCard();
       status.textContent=error?.message||"Movie generation stopped. Your completed scenes are saved.";
     }finally{
       composer?.classList.remove("pm-loading");
