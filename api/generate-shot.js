@@ -124,9 +124,9 @@ module.exports=async(req,res)=>{
       ratio:ratio==="9:16"?"720:1280":"1280:720"
     };
 
-    // Gen-4.5 prompt-only generation uses Runway's text-to-video endpoint.
-    // image_to_video requires promptImage and therefore rejects prompt-only requests.
-    const r=await runwayRequest("/text_to_video",{
+    // Gen-4.5 supports text-to-video through the image_to_video operation.
+    // promptImage is intentionally omitted for prompt-only generation.
+    const r=await runwayRequest("/image_to_video",{
       method:"POST",
       body:JSON.stringify(body)
     });
