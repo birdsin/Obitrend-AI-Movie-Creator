@@ -18,9 +18,12 @@ document.addEventListener("DOMContentLoaded",()=>{
         "Pro Plans",
         "Choose a Movie Creator plan and continue securely with Paystack.",
         '<div class="menu-grid">'+
-        '<div class="menu-card"><div><h3>3 Day Creator</h3><p>₦13,000 · 10 credits · 3 days</p></div><button class="outline-btn menu-action" data-menu-action="pro:threeDays">Open</button></div>'+
-        '<div class="menu-card"><div><h3>Weekly Creator</h3><p>₦26,000 · 22 credits · 7 days</p></div><button class="outline-btn menu-action" data-menu-action="pro:weekly">Open</button></div>'+
-        '<div class="menu-card"><div><h3>Monthly Creator</h3><p>₦90,000 · 70 credits · 30 days</p></div><button class="outline-btn menu-action" data-menu-action="pro:monthly">Open</button></div>'+
+        '<div class="menu-card"><div><h3>1 Day Pro</h3><p>₦5,000 · 1 video credit · 1 day</p></div><button class="outline-btn menu-action" data-menu-action="pro:oneDay">Open</button></div>'+
+        '<div class="menu-card"><div><h3>2 Day Pro</h3><p>₦10,000 · 2 video credits · 2 days</p></div><button class="outline-btn menu-action" data-menu-action="pro:twoDays">Open</button></div>'+
+        '<div class="menu-card"><div><h3>6 Day Pro</h3><p>₦20,000 · 4 video credits · 6 days</p></div><button class="outline-btn menu-action" data-menu-action="pro:sixDays">Open</button></div>'+
+        '<div class="menu-card"><div><h3>7 Day Pro</h3><p>₦40,000 · 8 video credits · 7 days</p></div><button class="outline-btn menu-action" data-menu-action="pro:weekly">Open</button></div>'+
+        '<div class="menu-card"><div><h3>14 Day Pro</h3><p>₦50,000 · 10 video credits · 14 days</p></div><button class="outline-btn menu-action" data-menu-action="pro:fourteenDays">Open</button></div>'+
+        '<div class="menu-card"><div><h3>1 Month Pro</h3><p>₦100,000 · 20 video credits · 1 month</p></div><button class="outline-btn menu-action" data-menu-action="pro:monthly">Open</button></div>'+
         '</div>'
       );
     }else{
