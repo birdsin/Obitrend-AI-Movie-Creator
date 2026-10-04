@@ -171,6 +171,17 @@ module.exports=async(req,res)=>{
     return json(res,200,{taskId,videoUrl:Array.isArray(d.output)?d.output[0]:null});
   }catch(e){
     console.error("Shot generation error:",e);
-    return json(res,500,{error:"Shot generation failed. Please try again."});
+    try{
+      await fetch(supabaseUrl+"/functions/v1/movie-credit",{
+        method:"POST",
+        headers:{
+          "content-type":"application/json",
+          "apikey":publishable,
+          "Authorization":auth
+        },
+        body:JSON.stringify({action:"release",token:String(reservation)})
+      });
+    }catch(_){}
+    return json(res,500,{error:"Shot generation failed. Your OBITREND movie credit was restored. Please try again.",reservationReleased:true});
   }
 };
