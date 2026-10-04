@@ -223,3 +223,53 @@ document.addEventListener("click",(e)=>{
   }
 },true);
 
+/* FIX ONLY: switching from one mobile menu item to another must open that workspace, not the dashboard */
+document.addEventListener("click",(e)=>{
+  const item=e.target.closest("#androidDrawer [data-drawer-action]");
+  if(!item)return;
+  e.preventDefault();
+  e.stopPropagation();
+  e.stopImmediatePropagation();
+
+  const action=item.dataset.drawerAction;
+  const drawer=document.getElementById("androidDrawer");
+  drawer?.classList.remove("open");
+
+  if(action==="home"){
+    window.scrollTo({top:0,behavior:"smooth"});
+    return;
+  }
+  if(action==="create"){
+    const panel=document.getElementById("createPanel");
+    if(panel){
+      panel.classList.remove("hidden");
+      panel.scrollIntoView({behavior:"smooth",block:"start"});
+    }
+    return;
+  }
+
+  const menuMap={movies:"creations",templates:"templates",credits:"credits",settings:"settings",help:"help"};
+  const target=menuMap[action];
+  if(!target || typeof openMenu!=="function")return;
+
+  openMenu(target);
+
+  const workspace=document.getElementById("menuWorkspace");
+  if(workspace){
+    workspace.classList.remove("hidden");
+    workspace.style.position="fixed";
+    workspace.style.left="12px";
+    workspace.style.right="12px";
+    workspace.style.top="80px";
+    workspace.style.bottom="20px";
+    workspace.style.zIndex="99999";
+    workspace.style.margin="0";
+    workspace.style.maxHeight="none";
+    workspace.style.overflowY="auto";
+    workspace.style.background="#0d141e";
+    workspace.style.border="1px solid #2a3442";
+    workspace.style.boxShadow="0 20px 60px rgba(0,0,0,.85)";
+    workspace.scrollTop=0;
+  }
+},true);
+
