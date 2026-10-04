@@ -80,7 +80,8 @@ async function verifyMoviePaymentReturn(){
     if(d.email)localStorage.setItem("obitrend_movie_email",d.email);
     history.replaceState({},document.title,window.location.pathname);
     await refreshMovieEntitlement();
-    status("status",d.planName+" activated. "+d.credits+" movie credits added. User ID: "+(d.user_id||window.movieUserId));
+    status("status",d.planName+" activated. "+d.credits+" movie credits added.");
+    setTimeout(()=>{resumeSavedMovieAfterPayment();},350);
   }catch(e){status("status",e.message||"Payment verification failed.",true)}
 }
 let movieServerEntitlement=null;
@@ -107,6 +108,68 @@ async function reserveMovieCredit(){
   updateAndroidStats();
   return d.reservation_token;
 }
+async function movieProductionRequest(action,payload={}){
+  await window.movieAuthReady;
+  const token=await window.getMovieAccessToken();
+  const r=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-credit",{
+    method:"POST",
+    headers:{"content-type":"application/json","Authorization":"Bearer "+token},
+    body:JSON.stringify({action,...payload})
+  });
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(d.error||"Movie production service is temporarily unavailable.");
+  return d;
+}
+async function createMovieProduction(blueprint,totalSegments){
+  const d=await movieProductionRequest("production_create",{
+    title:blueprint?.title||"Untitled Movie",
+    blueprint,
+    length_minutes:Number(blueprint?.length||1),
+    total_segments:Number(totalSegments||0)
+  });
+  if(!d.production_id)throw new Error("Could not save the movie production.");
+  localStorage.setItem("obitrend_movie_active_production_id",String(d.production_id));
+  return String(d.production_id);
+}
+async function getMovieProduction(productionId){
+  if(!productionId)return null;
+  const d=await movieProductionRequest("production_status",{production_id:productionId});
+  return d&&d.id?d:null;
+}
+async function saveMovieProductionSegment(productionId,segmentIndex,videoUrl){
+  return movieProductionRequest("production_segment",{
+    production_id:productionId,
+    segment_index:Number(segmentIndex),
+    video_url:String(videoUrl||"")
+  });
+}
+async function setMovieProductionStatus(productionId,productionStatus){
+  if(!productionId)return null;
+  return movieProductionRequest("production_status_update",{
+    production_id:productionId,
+    status:productionStatus
+  });
+}
+async function resumeSavedMovieAfterPayment(){
+  const id=localStorage.getItem("obitrend_movie_active_production_id")||"";
+  if(!id||typeof window.resumeMovieProduction!=="function")return false;
+  try{
+    await refreshMovieEntitlement();
+    const production=await getMovieProduction(id);
+    if(!production||production.status==="completed"||Number(production.completed_segments)>=Number(production.total_segments)){
+      localStorage.removeItem("obitrend_movie_active_production_id");
+      return false;
+    }
+    status("status","Credits added. Continuing your unfinished movie automatically…");
+    await window.resumeMovieProduction(id,production);
+    return true;
+  }catch(e){
+    console.error("Movie resume after payment:",e);
+    status("status","Credits added. Your unfinished movie is saved and ready to continue.",false);
+    return false;
+  }
+}
+
 async function finishMovieCredit(action,token){
   const access=await window.getMovieAccessToken();
   const r=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-credit",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+access},body:JSON.stringify({action,token})});
