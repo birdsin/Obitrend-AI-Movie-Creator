@@ -96,42 +96,88 @@
       return;
     }
 
-    // ONE successful movie short = ONE movie credit.
-    // The blueprint may contain many story shots for planning, but the user
-    // must never be charged/generated for all of them in one request.
-    const firstSceneIndex=0;
-    const firstShotIndex=0;
-    const firstScene=blueprint.scenes[firstSceneIndex];
-    if(!firstScene?.shots?.length){
+    const shots=blueprint.scenes.flatMap((scene,si)=>
+      (scene.shots||[]).map((shot,hi)=>({si,hi,shot}))
+    );
+    if(!shots.length){
       status.className="pm-status error";
-      status.textContent="The movie blueprint contains no playable shot.";
+      status.textContent="The movie blueprint contains no playable shots.";
       generate.disabled=false;
       return;
     }
 
-    status.className="pm-status";
-    status.textContent="Generating 1 movie short automatically…";
+    // One generated short costs exactly one movie credit.
+    // If the user explicitly asks for only one short, generate one.
+    // Otherwise generate as many planned shots as the user's credits allow,
+    // sequentially, never more than one active Runway job at a time.
+    const promptText=String(prompt?.value||"").toLowerCase();
+    const wantsOne=/\bonly\s+(?:1|one)\s+(?:short\s+)?(?:movie\s+)?video\b|\b(?:1|one)\s+(?:short\s+)?movie\s+short\b/.test(promptText);
 
     try{
-      if(typeof window.openShot!=="function"||typeof window.generateShot!=="function"){
-        throw new Error("The cinematic generation engine is unavailable.");
+      await refreshMovieEntitlement();
+      const availableCredits=getMovieCredits();
+
+      if(availableCredits<=0){
+        status.className="pm-status error";
+        status.textContent="You have no movie credits left. Please purchase Pro credits to generate more movie shorts.";
+        generate.disabled=false;
+        return;
       }
 
-      window.openShot(firstSceneIndex,firstShotIndex);
-      await window.generateShot();
+      const targetCount=Math.min(
+        shots.length,
+        wantsOne?1:availableCredits
+      );
 
-      const shotStatus=(document.getElementById("shotStatus")?.textContent||"").trim();
-      const video=document.getElementById("shotVideo");
-      if(!video?.src||/failed|unavailable|could not|no movie credits|taking longer/i.test(shotStatus)){
-        throw new Error(shotStatus||"This movie short could not be generated.");
+      const results=[];
+      for(let i=0;i<targetCount;i++){
+        const item=shots[i];
+        status.className="pm-status";
+        status.textContent="Generating movie short "+(i+1)+" of "+targetCount+"…";
+
+        try{
+          if(typeof window.openShot!=="function"||typeof window.generateShot!=="function"){
+            throw new Error("The cinematic generation engine is unavailable.");
+          }
+
+          window.openShot(item.si,item.hi);
+          await window.generateShot();
+
+          const shotStatus=(document.getElementById("shotStatus")?.textContent||"").trim();
+          const video=document.getElementById("shotVideo");
+          if(!video?.src||/failed|unavailable|could not|no movie credits|taking longer/i.test(shotStatus)){
+            throw new Error(shotStatus||"This movie short could not be generated.");
+          }
+
+          results.push({scene:item.si,shot:item.hi,url:video.src});
+          try{localStorage.setItem("obitrend_auto_movie_videos",JSON.stringify(results))}catch{}
+
+          // Get the authoritative remaining credit count before starting the
+          // next short. Reservation/commit is handled by the generation engine.
+          await refreshMovieEntitlement();
+
+          if(i<targetCount-1 && getMovieCredits()<=0) break;
+        }catch(error){
+          status.className="pm-status error";
+          status.textContent=error?.message||"Movie short generation stopped.";
+          return;
+        }
       }
 
-      // Store only the successfully generated short.
-      const results=[{scene:firstSceneIndex,shot:firstShotIndex,url:video.src}];
-      try{localStorage.setItem("obitrend_auto_movie_videos",JSON.stringify(results))}catch{}
+      await refreshMovieEntitlement();
+      const remaining=getMovieCredits();
+      const generated=results.length;
 
-      status.className="pm-status";
-      status.textContent="Movie short ready to watch. 1 credit was used for this successful movie.";
+      if(remaining<=0 && generated<shots.length){
+        status.className="pm-status";
+        status.textContent="You have generated "+generated+" movie short"+(generated===1?"":"s")+". Your movie credits are finished. Please purchase Pro credits to generate more.";
+      }else if(generated<shots.length){
+        status.className="pm-status";
+        status.textContent="Generated "+generated+" movie short"+(generated===1?"":"s")+" successfully. "+remaining+" movie credit"+(remaining===1?" remains":"s remain")+". Generate again to continue.";
+      }else{
+        status.className="pm-status";
+        status.textContent="All movie shorts are ready to watch. "+remaining+" movie credit"+(remaining===1?" remains":"s remain")+".";
+      }
     }catch(error){
       status.className="pm-status error";
       status.textContent=error?.message||"Movie short generation stopped.";
@@ -140,7 +186,6 @@
       generate.disabled=false;
     }
   }
-
   window.showGeneratedBlueprint=window.showGeneratedBlueprint||function(){};
   try{showGeneratedBlueprint=function(){};}catch{}
 
