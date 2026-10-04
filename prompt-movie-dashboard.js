@@ -5,8 +5,11 @@
   window.setTimeout(()=>startup?.classList.add("hide"),1700);
 
   const prompt=q("#pmPrompt"), enginePrompt=q("#moviePrompt"), generate=q("#pmGenerate"), engineBuild=q("#buildBtn"), status=q("#pmStatus");
+  const iconRefresh=()=>window.lucide?.createIcons?.();
+  iconRefresh();
   const examples=[...document.querySelectorAll(".pm-example")];
-  examples.forEach(b=>b.addEventListener("click",()=>{prompt.value=b.dataset.prompt||"";prompt.focus()}));
+  examples.forEach(b=>b.addEventListener("click",()=>{prompt.value=b.dataset.prompt||"";if(enginePrompt)enginePrompt.value=prompt.value;prompt.dispatchEvent(new Event("input",{bubbles:true}));prompt.focus()}));
+  prompt?.addEventListener("input",()=>{if(enginePrompt)enginePrompt.value=prompt.value;});
 
   function mirrorStatus(){
     const a=q("#status"), b=q("#assemblyStatus"), c=q("#shotStatus");
@@ -40,6 +43,8 @@
         status.textContent="Movie blueprint ready. AI selected the story structure, characters, scenes, camera, lighting and sound automatically.";
         generate.disabled=false;
         q("#pmResult")?.classList.add("ready");
+        try{if(typeof saveHistory==="function"&&state?.blueprint)saveHistory(state.blueprint)}catch(_){}
+        loadRecent();
         autoGenerateMovie();
         q("#pmResultTitle")&&(q("#pmResultTitle").textContent=document.getElementById("movieTitle")?.textContent||"Your movie");
         return;
@@ -87,13 +92,73 @@
   window.showGeneratedBlueprint=window.showGeneratedBlueprint||function(){};
   try{showGeneratedBlueprint=function(){};}catch{}
   const recent=q("#pmProjects");
+  const posterImages=[
+    "https://images.unsplash.com/photo-1723221890385-6949a72be9da?auto=format&fit=crop&fm=jpg&q=85&w=900",
+    "https://images.unsplash.com/photo-1542995719-06bfa52c0e11?auto=format&fit=crop&fm=jpg&q=85&w=900",
+    "https://images.unsplash.com/photo-1750768132075-1e0a93963ac9?auto=format&fit=crop&fm=jpg&q=85&w=900"
+  ];
   function loadRecent(){
     let history=[];try{history=JSON.parse(localStorage.getItem("obitrend_movie_history")||"[]")}catch{}
-    if(!Array.isArray(history)||!history.length)return;
+    if(!Array.isArray(history)||!history.length){
+      recent.innerHTML='<div class="pm-empty">No movies yet</div>';
+      return;
+    }
     recent.innerHTML=history.slice(0,3).map((x,i)=>{
-      const b=x?.blueprint||{};return '<button class="pm-project" type="button"><div class="pm-project-art">MOVIE '+(i+1)+'</div><b>'+String(b.title||"Untitled Movie").replace(/[&<>]/g,"")+'</b><span>'+String(b.genre||"Cinematic")+' · '+String(b.length||15)+' min</span></button>'
+      const b=x?.blueprint||{};
+      const title=String(b.title||x.title||"Untitled Movie").replace(/[&<>]/g,"");
+      const genre=String(b.genre||x.genre||"Cinematic").replace(/[&<>]/g,"");
+      const length=String(b.length||x.length||15).replace(/[&<>]/g,"");
+      const image=posterImages[i%posterImages.length];
+      return '<button class="pm-project" type="button" data-movie-index="'+i+'"><div class="pm-project-art" style="background-image:url('+image+')"><span class="pm-genre">'+genre+'</span><span class="pm-badge">'+length+' min</span><span class="pm-play"><i data-lucide="play"></i></span><span class="pm-poster-title">'+title+'</span></div><b>'+title+'</b><span>'+genre+' · '+length+' min</span></button>';
     }).join("");
+    recent.querySelectorAll(".pm-project").forEach((card,i)=>card.addEventListener("click",()=>{
+      const item=history[i];
+      if(item?.blueprint){
+        try{localStorage.setItem("obitrend_movie_blueprint",JSON.stringify(item.blueprint));state.blueprint=item.blueprint}catch(_){}
+        prompt.value=item.prompt||item.blueprint.logline||item.blueprint.title||"";
+        if(enginePrompt)enginePrompt.value=prompt.value;
+        status.className="pm-status";
+        status.textContent="Movie loaded from your recent creations.";
+      }
+    }));
+    iconRefresh();
   }
-  loadRecent();
+  let menuOpenState=false;
+  let drawer=q("#pmDrawer");
+  function closeDrawer(){
+    menuOpenState=false;
+    drawer?.classList.remove("open");
+    drawer?.setAttribute("aria-hidden","true");
+  }
+  function openDrawer(){
+    if(!drawer){
+      drawer=document.createElement("aside");
+      drawer.id="pmDrawer";
+      drawer.className="pm-drawer";
+      drawer.setAttribute("aria-hidden","true");
+      drawer.innerHTML='<div class="pm-drawer-head"><strong>OBITREND</strong><button type="button" id="pmDrawerClose" aria-label="Close menu">×</button></div>'+
+        '<button type="button" data-pm-nav="home"><i data-lucide="home"></i> Home</button>'+
+        '<button type="button" data-pm-nav="create"><i data-lucide="film"></i> Create Movie</button>'+
+        '<button type="button" data-pm-nav="creations"><i data-lucide="clapperboard"></i> My Movies</button>'+
+        '<button type="button" data-pm-nav="pro"><i data-lucide="crown"></i> Pro Plans</button>'+
+        '<button type="button" data-pm-nav="settings"><i data-lucide="settings"></i> Settings</button>';
+      document.body.appendChild(drawer);
+      drawer.querySelector("#pmDrawerClose")?.addEventListener("click",closeDrawer);
+      drawer.querySelectorAll("[data-pm-nav]").forEach(btn=>btn.addEventListener("click",()=>{
+        const action=btn.dataset.pmNav;
+        closeDrawer();
+        if(action==="home")window.scrollTo({top:0,behavior:"smooth"});
+        else if(action==="create"){prompt?.focus();q(".pm-composer")?.scrollIntoView({behavior:"smooth",block:"center"});}
+        else if(action==="creations"||action==="pro"||action==="settings"){if(typeof openMenu==="function")openMenu(action==="creations"?"creations":action);}
+      }));
+      iconRefresh();
+    }
+    menuOpenState=!menuOpenState;
+    drawer.classList.toggle("open",menuOpenState);
+    drawer.setAttribute("aria-hidden",String(!menuOpenState));
+  }
+  q("#pmMenuBtn")?.addEventListener("click",openDrawer);
+  q("#pmCreatorBtn")?.addEventListener("click",()=>{if(typeof openMenu==="function")openMenu("pro")});
+  q("#pmProfileBtn")?.addEventListener("click",()=>{if(typeof openMenu==="function")openMenu("settings")});
   window.addEventListener("beforeunload",()=>observers.forEach(o=>o?.disconnect()));
 })();
