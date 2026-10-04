@@ -186,6 +186,7 @@
     try{blueprint=JSON.parse(localStorage.getItem("obitrend_movie_blueprint")||"null")}catch{}
     if(!blueprint?.scenes?.length){
       status.textContent="Movie blueprint is ready.";
+      hideGenerationCard();
       generate.disabled=false;
       return;
     }
@@ -196,6 +197,7 @@
     if(!shots.length){
       status.className="pm-status error";
       status.textContent="The movie blueprint contains no playable shots.";
+      hideGenerationCard();
       generate.disabled=false;
       return;
     }
@@ -294,6 +296,7 @@
         }catch(error){
           await setMovieProductionStatus(productionId,"paused").catch(()=>{});
           status.className="pm-status error";
+          hideGenerationCard();
           status.textContent=error?.message||"Movie generation stopped. Your completed scenes are saved.";
           return;
         }
