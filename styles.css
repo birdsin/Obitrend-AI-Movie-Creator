@@ -2153,3 +2153,97 @@ img{max-width:100%}
 .menu-back-btn{width:42px;height:42px;flex:0 0 42px;border:1px solid #a78330;border-radius:9px;background:#111720;color:var(--gold2);font-size:24px;line-height:1;cursor:pointer;display:grid;place-items:center}
 .menu-back-btn:active{transform:scale(.97)}
 
+
+/* FINAL MENU NAVIGATION FIX — stable 41ae317 */
+.drawer-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.64);
+  opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .22s ease,visibility .22s ease;
+  z-index:9998;
+}
+.drawer-overlay.open{opacity:1;visibility:visible;pointer-events:auto}
+#androidDrawer.android-drawer{
+  position:fixed;left:0;top:0;bottom:0;
+  width:min(360px,calc(100vw - 32px));
+  max-width:calc(100vw - 32px);
+  height:100dvh;
+  padding:18px 14px;
+  margin:0;
+  background:#090e16;
+  border-right:1px solid #2f3947;
+  box-shadow:20px 0 60px rgba(0,0,0,.62);
+  transform:translateX(-105%);
+  transition:transform .28s cubic-bezier(.22,.61,.36,1);
+  z-index:9999;
+  overflow-y:auto;
+  overflow-x:hidden;
+  box-sizing:border-box;
+}
+#androidDrawer.android-drawer.open{transform:translateX(0)}
+.android-drawer-head{
+  min-height:74px;
+  display:flex!important;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 8px 18px!important;
+  margin:0 0 16px!important;
+  border-bottom:1px solid #252e3a!important;
+  color:#f6ca55;
+}
+.android-drawer-head b{font-size:19px;letter-spacing:.25em}
+.android-drawer-head button{
+  width:42px;height:42px;border:1px solid #303a49!important;border-radius:12px;
+  background:#111823!important;color:#fff!important;font-size:28px!important;
+  display:grid;place-items:center;line-height:1;
+}
+.android-drawer-nav{display:grid;gap:8px}
+#androidDrawer .nav-item{
+  width:100%;height:58px;margin:0!important;
+  display:flex;align-items:center;gap:16px;
+  border:1px solid transparent;border-radius:11px;
+  background:transparent!important;color:#e7ebf1!important;
+  padding:0 14px!important;text-align:left;
+  cursor:pointer;font-size:16px;font-weight:600;
+  touch-action:manipulation;
+}
+#androidDrawer .nav-item:hover,
+#androidDrawer .nav-item:focus-visible{background:rgba(255,255,255,.06)!important;outline:none}
+#androidDrawer .nav-item:active{background:rgba(255,255,255,.10)!important;transform:translateX(1px)}
+#androidDrawer .nav-item.active{
+  background:rgba(212,175,55,.15)!important;
+  border-left:3px solid #D4AF37!important;
+  color:#D4AF37!important;
+}
+.drawer-icon{
+  width:30px;min-width:30px;display:grid;place-items:center;
+  color:#D4AF37;font-size:23px;line-height:1;
+}
+.nav-workspace{
+  position:fixed!important;inset:0!important;z-index:10001!important;
+  width:100%!important;max-width:none!important;
+  height:100dvh!important;max-height:none!important;
+  margin:0!important;padding:18px!important;
+  overflow:auto!important;border:0!important;border-radius:0!important;
+  background:#070b12!important;
+  box-shadow:none!important;
+}
+.nav-workspace .menu-workspace-head{
+  position:sticky;top:0;z-index:2;
+  padding:8px 0 14px;background:#070b12;
+}
+.menu-workspace-actions{display:flex;gap:8px}
+.menu-workspace-actions button{
+  width:42px;height:42px;border:1px solid #303a49;border-radius:11px;
+  background:#111823;color:#fff;font-size:25px;display:grid;place-items:center;
+}
+.menu-workspace-actions button:first-child{font-size:30px;color:#D4AF37}
+.settings-live-grid{display:grid;gap:10px}
+.logout-btn{
+  width:100%;height:46px;border:1px solid #8e3535;border-radius:9px;
+  background:#211012;color:#ffb0b0;font-weight:800;cursor:pointer;
+}
+.logout-btn:disabled{opacity:.6}
+body.menu-workspace-open{overflow:hidden}
+@media(max-width:420px){
+  #androidDrawer.android-drawer{width:calc(100vw - 24px);max-width:calc(100vw - 24px)}
+}

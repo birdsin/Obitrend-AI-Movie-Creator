@@ -17,8 +17,6 @@ function getMovieHistory(){
   }catch(e){return []}
 }
 const MOVIE_PLANS={
-  twoDays:{name:"2 Day Creator",priceNaira:3000,credits:2,durationDays:2},
-  oneDay:{name:"1 Day Creator",priceNaira:6500,credits:4,durationDays:1},
   threeDays:{name:"3 Day Creator",priceNaira:13000,credits:10,durationDays:3},
   weekly:{name:"Weekly Creator",priceNaira:26000,credits:22,durationDays:7},
   monthly:{name:"Monthly Creator",priceNaira:90000,credits:70,durationDays:30}
@@ -221,16 +219,19 @@ const MENU_DATA={
  colors:["Black","White","Red","Navy Blue","Oxblood","Brown","Gold","Cream","Emerald","Sky Blue"]
 };
 function menuOpen(title,subtitle,html){
- const w=$("menuWorkspace"); const sidebar=$("sidebar"); if(!w)return;
- if(sidebar && !sidebar.contains(w))sidebar.appendChild(w);
- $("menuWorkspaceTitle").textContent=title;$("menuWorkspaceSubtitle").textContent=subtitle||"";$("menuWorkspaceBody").innerHTML=html;
+ const w=$("menuWorkspace"); if(!w)return;
+ $("menuWorkspaceTitle").textContent=title||"OBITREND";
+ $("menuWorkspaceSubtitle").textContent=subtitle||"";
+ $("menuWorkspaceBody").innerHTML=html||"";
  w.classList.remove("hidden");
+ w.setAttribute("aria-hidden","false");
+ document.body.classList.add("menu-workspace-open");
 }
 function menuClose(){
  const w=$("menuWorkspace"); if(!w)return;
  w.classList.add("hidden");
- const anchor=$("blueprintSection");
- if(anchor&&w.parentElement!==anchor.parentElement)anchor.parentElement.insertBefore(w,anchor);
+ w.setAttribute("aria-hidden","true");
+ document.body.classList.remove("menu-workspace-open");
 }
 function menuButton(label,action,cls="outline-btn"){return '<button class="'+cls+' menu-action" data-menu-action="'+esc(action)+'">'+esc(label)+'</button>'}
 function renderMenuCard(title,text,action){
@@ -266,8 +267,6 @@ function openMenu(name){
         '<div class="credit-box"><strong>'+esc(e.plan||"Free")+'</strong><span>Current plan</span></div>'+
         '<div class="status">User ID: '+esc(e.userId||window.moviePublicUserId||"Creating…")+'</div>'+
         '<div class="status">Movie credits: '+getMovieCredits()+' · Expiry: '+esc(expiry)+'</div>'+
-        renderMenuCard("2 Day Creator","₦3,000 · 2 credits · 2 days","pro:twoDays")+
-        renderMenuCard("1 Day Creator","₦6,500 · 4 credits · 1 day","pro:oneDay")+
         renderMenuCard("3 Day Creator","₦13,000 · 10 credits · 3 days","pro:threeDays")+
         renderMenuCard("Weekly Creator","₦26,000 · 22 credits · 7 days","pro:weekly")+
         renderMenuCard("Monthly Creator","₦90,000 · 70 credits · 30 days","pro:monthly")+
@@ -285,7 +284,29 @@ function openMenu(name){
     '<div class="status">Plan: '+esc(getMoviePlanLabel())+'</div>'+
     renderMenuCard("How credits work","One movie credit is consumed only after a video shot is successfully generated.","credits-info")+
     '<div id="menuActionStatus" class="status"></div>'),
-  settings:()=>menuOpen("Settings","Movie Creator settings are saved on this device.",'<div class="settings-list"><label class="setting-row"><span>Save movie history</span><input id="settingHistory" type="checkbox" checked></label><button class="outline-btn menu-action" data-menu-action="clear-history">Clear saved history</button><button class="outline-btn menu-action" data-menu-action="clear-project">Clear current project</button></div><div id="menuActionStatus" class="status"></div>'),
+  settings:()=>{
+   const renderSettings=()=>{
+     const e=getMovieEntitlement();
+     menuOpen("Settings","Live account balance and Movie Creator settings.",
+       '<div class="settings-live-grid">'+
+       '<div class="credit-box"><strong>'+getMovieCredits()+'</strong><span>Live movie credits</span></div>'+
+       '<div class="status">Plan: <b>'+esc(e.plan||"Free")+'</b><br>User ID: '+esc(e.userId||window.moviePublicUserId||"Creating…")+'<br>Expiry: '+esc(e.expiresAt?new Date(e.expiresAt).toLocaleDateString():"—")+'</div>'+
+       '</div>'+
+       '<div class="settings-list">'+
+       '<label class="setting-row"><span>Save movie history</span><input id="settingHistory" type="checkbox" checked></label>'+
+       '<button class="outline-btn menu-action" data-menu-action="clear-history">Clear saved history</button>'+
+       '<button class="outline-btn menu-action" data-menu-action="clear-project">Clear current project</button>'+
+       '<button class="logout-btn" id="movieLogoutBtn" type="button">Logout</button>'+
+       '</div><div id="menuActionStatus" class="status"></div>');
+     document.getElementById("movieLogoutBtn")?.addEventListener("click",async()=>{
+       const b=document.getElementById("movieLogoutBtn"); if(b)b.disabled=true;
+       try{await window.movieAuthReady; await window.movieSupabase?.auth?.signOut(); window.location.reload();}
+       catch(e){if(b)b.disabled=false; const s=$("menuActionStatus");if(s)s.textContent=e?.message||"Logout failed."; }
+     });
+   };
+   renderSettings();
+   Promise.resolve(window.movieAuthReady).then(()=>refreshMovieEntitlement()).then(renderSettings).catch(()=>renderSettings());
+ },
   help:()=>menuOpen("Help & Support","Quick help for the Movie Creator.",renderMenuCard("How do I create a movie?","Open Create Image, enter an idea, then build your cinematic blueprint.","help:create")+renderMenuCard("How do I generate video?","Open Create Video, choose a shot, then use Generate This Shot.","help:video")+renderMenuCard("Generation failed?","Your blueprint stays saved so you can try the shot again.","help:error"))
  };
  (actions[name]||actions.home)();
@@ -686,3 +707,100 @@ document.addEventListener("DOMContentLoaded",()=>{
     menuBtn.addEventListener("click",()=>drawer.classList.toggle("open"));
   }
 });
+
+/* FINAL MOBILE DRAWER NAVIGATION FIX — stable 41ae317, no router */
+(function(){
+  const byId=id=>document.getElementById(id);
+  const drawer=byId("androidDrawer");
+  const overlay=byId("drawerOverlay");
+  if(!drawer)return;
+  window.lucide?.createIcons?.();
+
+  function closeDrawer(){
+    drawer.classList.remove("open");
+    drawer.setAttribute("aria-hidden","true");
+    overlay?.classList.remove("open");
+    overlay?.setAttribute("aria-hidden","true");
+    document.body.style.overflow="";
+  }
+  function openDrawer(){
+    closeWorkspace();
+    drawer.classList.add("open");
+    drawer.setAttribute("aria-hidden","false");
+    overlay?.classList.add("open");
+    overlay?.setAttribute("aria-hidden","false");
+    document.body.style.overflow="hidden";
+  }
+  function closeWorkspace(){
+    const w=byId("menuWorkspace");
+    if(w){w.classList.add("hidden");w.setAttribute("aria-hidden","true");}
+    document.body.classList.remove("menu-workspace-open");
+  }
+  function setActive(page){
+    drawer.querySelectorAll("[data-nav]").forEach(b=>b.classList.toggle("active",b.dataset.nav===page));
+  }
+  function safeScroll(el){
+    if(!el)return false;
+    try{el.scrollIntoView({behavior:"smooth",block:"start"});return true}catch(_){el.scrollIntoView();return true}
+  }
+  function showCreate(){
+    const p=byId("createPanel");
+    if(!p)return;
+    p.classList.remove("hidden");
+    safeScroll(p);
+    setTimeout(()=>byId("moviePrompt")?.focus(),250);
+  }
+  function navigateTo(page){
+    try{
+      closeDrawer();
+      setActive(page);
+      if(page==="home"){
+        closeWorkspace();
+        window.scrollTo({top:0,behavior:"smooth"});
+        return;
+      }
+      if(page==="create"){
+        closeWorkspace();
+        showCreate();
+        return;
+      }
+      if(page==="my-movies"){
+        openMenu("creations");
+        return;
+      }
+      if(page==="pro"){
+        openMenu("pro");
+        return;
+      }
+      if(page==="settings"){
+        openMenu("settings");
+        return;
+      }
+      navigateTo("home");
+    }catch(e){
+      console.error("OBITREND navigation error:",e);
+      closeDrawer();closeWorkspace();setActive("home");
+      window.scrollTo({top:0,behavior:"smooth"});
+    }
+  }
+  window.navigateTo=navigateTo;
+  window.openDrawer=openDrawer;
+  window.closeDrawer=closeDrawer;
+
+  const menuButtons=[byId("pmMenuBtn"),byId("androidMenuBtn")].filter(Boolean);
+  menuButtons.forEach(btn=>{
+    btn.type="button";
+    btn.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();openDrawer();},{passive:false});
+  });
+  byId("androidDrawerClose")?.addEventListener("click",e=>{e.preventDefault();closeDrawer();});
+  overlay?.addEventListener("click",closeDrawer);
+  drawer.addEventListener("click",e=>{
+    const btn=e.target.closest("[data-nav]");
+    if(!btn)return;
+    e.preventDefault();e.stopPropagation();
+    navigateTo(btn.dataset.nav);
+  },{passive:false});
+  byId("menuWorkspaceClose")?.addEventListener("click",closeWorkspace);
+  byId("menuWorkspaceBack")?.addEventListener("click",()=>{closeWorkspace();openDrawer();});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeDrawer();closeWorkspace();}});
+})();
