@@ -333,14 +333,38 @@ $("menuWorkspaceClose")?.addEventListener("click",e=>{
  e.stopPropagation();
  closeWorkspaceButton();
 },{passive:false});
-$("menuWorkspaceBack")?.addEventListener("click",()=>{
- $("sidebar")?.classList.remove("open");
+$("menuWorkspaceBack")?.addEventListener("pointerup",e=>{
+ e.preventDefault();
+ e.stopPropagation();
  menuClose();
  const drawer=$("androidDrawer");
- if(drawer){drawer.classList.add("open");return;}
- const menuBtn=$("androidMenuBtn");
- menuBtn?.click();
-});
+ const overlay=$("drawerOverlay");
+ if(drawer)drawer.classList.remove("open");
+ if(overlay)overlay.classList.remove("open");
+ document.body.classList.remove("menu-workspace-open");
+ const dashboard=$("promptDashboard");
+ if(dashboard){
+   dashboard.classList.remove("hidden");
+   dashboard.setAttribute("data-page","home");
+   dashboard.scrollIntoView({behavior:"smooth",block:"start"});
+ }
+},{passive:false});
+$("menuWorkspaceBack")?.addEventListener("click",e=>{
+ e.preventDefault();
+ e.stopPropagation();
+ menuClose();
+ const drawer=$("androidDrawer");
+ const overlay=$("drawerOverlay");
+ if(drawer)drawer.classList.remove("open");
+ if(overlay)overlay.classList.remove("open");
+ document.body.classList.remove("menu-workspace-open");
+ const dashboard=$("promptDashboard");
+ if(dashboard){
+   dashboard.classList.remove("hidden");
+   dashboard.setAttribute("data-page","home");
+   dashboard.scrollIntoView({behavior:"smooth",block:"start"});
+ }
+},{passive:false});
 document.addEventListener("click",e=>{
  const b=e.target.closest("[data-menu-action]");if(!b)return;const action=b.dataset.menuAction;
  if(action.startsWith("template:")){const x=MENU_DATA.templates[+action.split(":")[1]];$("moviePrompt").value=x[1];$("createPanel").classList.remove("hidden");menuClose();$("createPanel").scrollIntoView({behavior:"smooth"});return}
