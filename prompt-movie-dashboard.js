@@ -40,6 +40,7 @@
         status.textContent="Movie blueprint ready. AI selected the story structure, characters, scenes, camera, lighting and sound automatically.";
         generate.disabled=false;
         q("#pmResult")?.classList.add("ready");
+        autoGenerateMovie();
         q("#pmResultTitle")&&(q("#pmResultTitle").textContent=document.getElementById("movieTitle")?.textContent||"Your movie");
         return;
       }
@@ -49,6 +50,38 @@
   });
 
   prompt?.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();generate?.click()}});
+
+  async function autoGenerateMovie(){
+    let blueprint=null;
+    try{blueprint=JSON.parse(localStorage.getItem("obitrend_movie_blueprint")||"null")}catch{}
+    if(!blueprint?.scenes?.length){status.textContent="Movie blueprint is ready.";return}
+    const shots=blueprint.scenes.flatMap((scene,si)=>(scene.shots||[]).map((shot,hi)=>({si,hi,shot})));
+    if(!shots.length){status.textContent="Movie blueprint is ready, but it contains no shots.";return}
+    const results=[];
+    for(let i=0;i<shots.length;i++){
+      const item=shots[i];
+      status.className="pm-status";
+      status.textContent="Generating movie shot "+(i+1)+" of "+shots.length+" automatically…";
+      try{
+        if(typeof window.openShot!=="function"||typeof window.generateShot!=="function")throw new Error("The cinematic generation engine is unavailable.");
+        window.openShot(item.si,item.hi);
+        await window.generateShot();
+        const shotStatus=(document.getElementById("shotStatus")?.textContent||"").trim();
+        const video=document.getElementById("shotVideo");
+        if(!video?.src||/failed|unavailable|could not|no movie credits|taking longer/i.test(shotStatus)){
+          throw new Error(shotStatus||"This shot could not be generated.");
+        }
+        results.push({scene:item.si,shot:item.hi,url:video.src});
+        try{localStorage.setItem("obitrend_auto_movie_videos",JSON.stringify(results))}catch{}
+      }catch(error){
+        status.className="pm-status error";
+        status.textContent=error?.message||"Movie generation stopped.";
+        return;
+      }
+    }
+    status.className="pm-status";
+    status.textContent="Your movie shots are ready. OBITREND generated the cinematic sequence automatically from your prompt.";
+  }
 
   // The new dashboard is the visible home. Keep the existing movie engine hidden and intact.
   window.showGeneratedBlueprint=window.showGeneratedBlueprint||function(){};
