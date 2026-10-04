@@ -21,6 +21,18 @@
     <div class="pm-loader"><i></i></div>
   </div>
 </div>
+<script>
+(function(){
+  var splash=document.getElementById("obitrendStartup");
+  function hide(){
+    if(!splash)return;
+    splash.classList.add("hide");
+    splash.setAttribute("aria-hidden","true");
+    splash.style.pointerEvents="none";
+  }
+  window.setTimeout(hide,1500);
+})();
+</script>
 
 <section id="obitrendAuth" class="obi-auth" aria-label="OBITREND account access" hidden>
   <div class="obi-auth-card">
