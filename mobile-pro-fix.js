@@ -205,3 +205,21 @@ document.addEventListener("click",(e)=>{
   }
 },true);
 
+/* VERIFY/FIX ONLY: ensure Home and Create Movie drawer items respond to mobile taps */
+document.addEventListener("click",(e)=>{
+  const item=e.target.closest('[data-drawer-action="home"],[data-drawer-action="create"]');
+  if(!item)return;
+  e.preventDefault();
+  e.stopPropagation();
+  const drawer=document.getElementById("androidDrawer");
+  drawer?.classList.remove("open");
+  if(item.dataset.drawerAction==="home"){
+    window.scrollTo({top:0,behavior:"smooth"});
+    return;
+  }
+  if(typeof showCreate==="function"){
+    showCreate();
+    document.getElementById("createPanel")?.scrollIntoView({behavior:"smooth",block:"start"});
+  }
+},true);
+
