@@ -247,7 +247,7 @@
         closeDrawer();
         if(action==="home")window.scrollTo({top:0,behavior:"smooth"});
         else if(action==="create"){prompt?.focus();q(".pm-composer")?.scrollIntoView({behavior:"smooth",block:"center"});}
-        else if(action==="creations"||action==="pro"||action==="settings"){if(typeof openMenu==="function")openMenu(action==="creations"?"creations":action);}
+        else if(action==="settings"){window.location.assign("/settings/");}else if(action==="creations"||action==="pro"){if(typeof openMenu==="function")openMenu(action);}
       }));
       iconRefresh();
     }
