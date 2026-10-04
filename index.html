@@ -21,6 +21,34 @@
   </div>
 </div>
 
+<div id="drawerOverlay" class="drawer-overlay" aria-hidden="true"></div>
+<aside id="androidDrawer" class="android-drawer" aria-label="OBITREND navigation" aria-hidden="true">
+  <div class="android-drawer-head">
+    <b>OBITREND</b>
+    <button type="button" id="androidDrawerClose" aria-label="Close menu">×</button>
+  </div>
+  <nav class="android-drawer-nav">
+    <button class="nav-item" type="button" data-nav="home"><span class="drawer-icon">⌂</span><span>Home</span></button>
+    <button class="nav-item" type="button" data-nav="create"><span class="drawer-icon">▣</span><span>Create Movie</span></button>
+    <button class="nav-item" type="button" data-nav="my-movies"><span class="drawer-icon">▤</span><span>My Movies</span></button>
+    <button class="nav-item" type="button" data-nav="pro"><span class="drawer-icon">♕</span><span>Pro Plans</span></button>
+    <button class="nav-item" type="button" data-nav="settings"><span class="drawer-icon">⚙</span><span>Settings</span></button>
+  </nav>
+</aside>
+<section id="menuWorkspace" class="menu-workspace nav-workspace hidden" aria-hidden="true" data-page="workspace">
+  <div class="menu-workspace-head">
+    <div>
+      <h2 id="menuWorkspaceTitle">OBITREND</h2>
+      <p id="menuWorkspaceSubtitle"></p>
+    </div>
+    <div class="menu-workspace-actions">
+      <button id="menuWorkspaceBack" type="button" aria-label="Back to menu">‹</button>
+      <button id="menuWorkspaceClose" type="button" aria-label="Close">×</button>
+    </div>
+  </div>
+  <div id="menuWorkspaceBody" class="menu-workspace-body"></div>
+</section>
+
 <main class="pm-dashboard" id="promptDashboard" data-page="home">
   <header class="pm-topbar">
     <button class="pm-menu" id="pmMenuBtn" type="button" aria-label="Open menu"><i data-lucide="menu"></i></button>
