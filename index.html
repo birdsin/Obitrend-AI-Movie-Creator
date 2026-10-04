@@ -8,6 +8,7 @@
 <title>OBITREND AI Movie Creator</title>
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="stylesheet" href="/styles.css?v=20261004-3">
+<link rel="stylesheet" href="/app.css?v=20261004-1">
 <link rel="stylesheet" href="/dashboard-enhancements.css">
 <link rel="stylesheet" href="/prompt-movie-dashboard.css?v=20261004-3">
 </head>
@@ -21,7 +22,42 @@
   </div>
 </div>
 
-<main class="pm-dashboard" id="promptDashboard">
+<section id="obitrendAuth" class="obi-auth" aria-label="OBITREND account access" hidden>
+  <div class="obi-auth-card">
+    <div class="obi-auth-logo">♛ <span>OBITREND</span></div>
+
+    <div id="authSignIn" class="obi-auth-state">
+      <div class="obi-auth-heading"><h1>Welcome back to OBITREND</h1><p>Sign in to continue creating.</p></div>
+      <form id="signInForm" novalidate>
+        <label class="obi-field"><span>📧</span><input id="authEmail" type="email" autocomplete="email" placeholder="you@fashion.com" required></label>
+        <label class="obi-field"><span>🔒</span><input id="authPassword" type="password" autocomplete="current-password" placeholder="••••••••" required><button id="togglePassword" type="button" aria-label="Show password">👁️</button></label>
+        <button class="obi-gold-btn" type="submit">Sign In →</button>
+      </form>
+      <div class="obi-divider"><span>or</span></div>
+      <button id="biometricBtn" class="obi-biometric" type="button">🔓 Sign in with Biometric</button>
+      <button id="forgotPassword" class="obi-link-btn" type="button">Forgot password?</button>
+      <p class="obi-switch">First time? <button id="showCreate" type="button">Create account</button></p>
+    </div>
+
+    <div id="authCreate" class="obi-auth-state" hidden>
+      <div class="obi-auth-heading"><h1>Create your fashion empire</h1><p>Start your OBITREND account.</p></div>
+      <form id="createAccountForm" novalidate>
+        <label class="obi-field"><span>👤</span><input id="authFullName" type="text" autocomplete="name" placeholder="Full name" required></label>
+        <label class="obi-field"><span>📧</span><input id="createEmail" type="email" autocomplete="email" placeholder="you@fashion.com" required></label>
+        <label class="obi-field"><span>🔒</span><input id="createPassword" type="password" autocomplete="new-password" placeholder="••••••••" required><button id="toggleCreatePassword" type="button" aria-label="Show password">👁️</button></label>
+        <div id="passwordStrength" class="obi-strength">Password strength: <b>Weak</b></div>
+        <label class="obi-field"><span>🔒</span><input id="confirmPassword" type="password" autocomplete="new-password" placeholder="Confirm password" required></label>
+        <label class="obi-check"><input id="termsCheck" type="checkbox" required><span>I agree to Terms</span></label>
+        <button class="obi-gold-btn" type="submit">Create Account &amp; Get 5 Free Credits</button>
+      </form>
+      <p class="obi-switch">Already have account? <button id="showSignIn" type="button">Sign In</button></p>
+    </div>
+
+    <div id="authToast" class="obi-toast" role="status" aria-live="polite"></div>
+  </div>
+</section>
+
+<main class="pm-dashboard auth-locked" id="promptDashboard">
   <header class="pm-topbar">
     <button class="pm-menu" id="pmMenuBtn" type="button" aria-label="Open menu"><i data-lucide="menu"></i></button>
     <div class="pm-brand"><span class="pm-crown">♛</span><div><b>OBITREND</b><span>AI MOVIE CREATOR</span></div></div>
@@ -106,7 +142,7 @@
 
 <script src="https://unpkg.com/lucide@latest"></script>
 <script type="module" src="/movie-auth.js?v=20261004-4"></script>
-<script src="/app.js?v=20261004-5"></script>
+<script src="/app.js?v=20261004-6"></script>
 <script src="/mobile-pro-fix.js?v=20260927-1"></script>
 <script src="/dashboard-enhancements.js"></script>
 <script src="/prompt-movie-dashboard.js?v=20261004-3"></script>
