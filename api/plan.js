@@ -183,8 +183,8 @@ module.exports = async function handler(req, res) {
 
     const parsedLength = Number(x.length);
     const length = Number.isFinite(parsedLength)
-      ? Math.min(120, Math.max(1, parsedLength))
-      : 15;
+      ? Math.min(10, Math.max(0.5, parsedLength))
+      : 1;
 
     const genre = typeof x.genre === "string" && x.genre.trim()
       ? x.genre.trim().slice(0, 120)
@@ -202,7 +202,7 @@ module.exports = async function handler(req, res) {
       return send(res, 400, { error: "Movie idea is required." });
     }
 
-    const count = length === 1 ? 2 : length <= 5 ? 4 : length <= 15 ? 8 : 12;
+    const count = Math.min(20, Math.max(1, Math.ceil(length * 2)));
     const requestedModel = getMovieModel();
 
     let response = await callOpenAI({
