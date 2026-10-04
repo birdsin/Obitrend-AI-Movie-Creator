@@ -74,7 +74,7 @@
         status.textContent="Movie blueprint ready. AI selected the story structure, characters, scenes, camera, lighting and sound automatically.";
         composer?.classList.remove("pm-loading");
         q("#pmResult")?.classList.add("ready");
-        try{if(typeof saveHistory==="function"&&state?.blueprint)saveHistory(state.blueprint)}catch(_){}
+        
         loadRecent();
         autoGenerateMovie();
         q("#pmResultTitle")&&(q("#pmResultTitle").textContent=document.getElementById("movieTitle")?.textContent||"Your movie");
@@ -151,6 +151,7 @@
 
           results.push({scene:item.si,shot:item.hi,url:video.src});
           try{localStorage.setItem("obitrend_auto_movie_videos",JSON.stringify(results))}catch{}
+          try{if(typeof saveHistory==="function"&&state?.blueprint)saveHistory(state.blueprint,video.src)}catch(_){}
 
           // Get the authoritative remaining credit count before starting the
           // next short. Reservation/commit is handled by the generation engine.
@@ -215,23 +216,8 @@
 
   function renderDemos(){
     if(!recent)return;
-    recent.innerHTML='<div class="pm-empty pm-demo-empty">No movies yet<br><button class="pm-player-cta" type="button" id="pmFirstMovieCta">Generate your first movie →</button></div><div class="pm-demo-grid">'+demoMovies.map((m,i)=>
-      '<button class="pm-project pm-demo" type="button" data-demo-index="'+i+'">'+
-        '<div class="pm-project-art pm-demo-art" style="background-image:url('+m.image+')">'+
-          '<span class="pm-genre">'+m.genre+'</span><span class="pm-badge">'+m.length+' min</span>'+
-          '<span class="pm-play"><i data-lucide="play"></i></span><span class="pm-demo-label">DEMO MOVIE</span>'+
-          '<span class="pm-poster-title">'+m.title+'</span>'+
-        '</div><div class="pm-demo-copy"><b>'+m.title+'</b><span>'+m.genre+' · Tap to use this story</span></div>'+
-      '</button>'
-    ).join("")+'</div>';
+    recent.innerHTML='<div class="pm-empty pm-demo-empty">No movies yet<br><button class="pm-player-cta" type="button" id="pmFirstMovieCta">Generate your first movie →</button></div>';
     recent.querySelector("#pmFirstMovieCta")?.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
-    recent.querySelectorAll("[data-demo-index]").forEach(card=>card.addEventListener("click",()=>fillPrompt(demoMovies[Number(card.dataset.demoIndex)]?.prompt)));
-    recent.querySelectorAll(".pm-demo .pm-play").forEach(play=>play.addEventListener("click",e=>{
-      e.preventDefault();e.stopPropagation();
-      const card=play.closest(".pm-demo"), demo=demoMovies[Number(card?.dataset.demoIndex)];
-      openPlayerModal(demo,demo?.image,demo?.title);
-    }));
-    iconRefresh();
   }
 
   function closePlayerModal(){
@@ -260,7 +246,8 @@
 
   function loadRecent(){
     let history=[];try{history=JSON.parse(localStorage.getItem("obitrend_movie_history")||"[]")}catch{}
-    if(!Array.isArray(history)||!history.length){renderDemos();return}
+    history=Array.isArray(history)?history.filter(x=>x&&x.generated===true&&x.videoUrl):[];
+    if(!history.length){renderDemos();return}
     recent.innerHTML=history.slice(0,3).map((x,i)=>{
       const b=x?.blueprint||{};
       const title=String(b.title||x.title||"Untitled Movie").replace(/[&<>]/g,"");
