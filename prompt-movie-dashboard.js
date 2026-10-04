@@ -271,7 +271,7 @@
   }
   q("#pmMenuBtn")?.addEventListener("click",openDrawer);
   q("#pmCreatorBtn")?.addEventListener("click",()=>{if(typeof openMenu==="function")openMenu("pro")});
-  q("#pmProfileBtn")?.addEventListener("click",()=>{if(typeof openMenu==="function")openMenu("settings")});
+  q("#pmProfileBtn")?.addEventListener("click",()=>{window.location.assign("/settings/")});
 
   loadRecent();
   window.addEventListener("beforeunload",()=>observers.forEach(o=>o?.disconnect()));
