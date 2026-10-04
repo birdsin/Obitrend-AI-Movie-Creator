@@ -118,8 +118,9 @@ module.exports=async(req,res)=>{
 
     const safePrompt=prompt.length>1000?prompt.slice(0,997)+"...":prompt;
     const body={
-      model:"gen4.5",
+      model:"wan3",
       promptText:safePrompt,
+      audio:true,
       duration:5,
       ratio:ratio==="9:16"?"720:1280":"1280:720"
     };
