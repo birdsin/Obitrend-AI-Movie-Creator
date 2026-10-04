@@ -1,3 +1,231 @@
+let authChecked=false;
+setTimeout(()=>{
+  if(!authChecked){
+    const overlay=document.getElementById("authOverlay");
+    if(overlay)overlay.style.display="none";
+    document.body.style.overflow="auto";
+  }
+},3000);
+
+(function(){
+  const accountsKey="obitrend_accounts";
+
+  function authMessage(message,error=false){
+    const el=document.getElementById("authMessage");
+    if(el){
+      el.textContent=message||"";
+      el.className=error?"error":"success";
+    }
+  }
+
+  function saveAccount(email){
+    try{
+      let list=JSON.parse(localStorage.getItem(accountsKey)||"[]");
+      if(!Array.isArray(list))list=[];
+      list=list.filter(x=>String(x).toLowerCase()!==email.toLowerCase());
+      list.unshift(email.toLowerCase());
+      localStorage.setItem(accountsKey,JSON.stringify(list.slice(0,10)));
+      localStorage.setItem("obitrend_movie_email",email.toLowerCase());
+    }catch(e){}
+  }
+
+  function renderSavedAccounts(){
+    const box=document.getElementById("savedAccounts");
+    if(!box)return;
+    let list=[];
+    try{list=JSON.parse(localStorage.getItem(accountsKey)||"[]")}catch(e){}
+    if(!Array.isArray(list)||!list.length){
+      box.innerHTML="";
+      return;
+    }
+    box.innerHTML='<div class="obi-saved-title">Saved accounts</div>'+list.map(email=>{
+      const safe=String(email).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+      return '<button type="button" class="obi-account" data-email="'+safe+'">'+safe+"</button>";
+    }).join("");
+    box.querySelectorAll(".obi-account").forEach(btn=>{
+      btn.onclick=()=>{
+        const email=btn.getAttribute("data-email")||"";
+        const input=document.getElementById("authEmail");
+        if(input)input.value=email;
+        showAuth(false);
+      };
+    });
+  }
+
+  function showAuth(create=false){
+    const overlay=document.getElementById("authOverlay");
+    const signIn=document.getElementById("authSignIn");
+    const createBox=document.getElementById("authCreate");
+    if(!overlay)return;
+    overlay.style.display="flex";
+    overlay.setAttribute("aria-hidden","false");
+    document.body.style.overflow="hidden";
+    if(signIn)signIn.hidden=create;
+    if(createBox)createBox.hidden=!create;
+    authMessage("");
+    renderSavedAccounts();
+  }
+
+  function hideAuth(){
+    const overlay=document.getElementById("authOverlay");
+    if(overlay){
+      overlay.style.display="none";
+      overlay.setAttribute("aria-hidden","true");
+    }
+    document.body.style.overflow="auto";
+  }
+
+  function setIdentity(session){
+    const user=session?.user;
+    if(!user?.id)return;
+    window.movieUserId=user.id;
+    window.moviePublicUserId="OBI-"+user.id.replaceAll("-","").slice(0,8).toUpperCase();
+    window.movieAuthReady=Promise.resolve(session);
+  }
+
+  async function getClient(){
+    const start=Date.now();
+    while(!window.movieSupabase&&Date.now()-start<2000){
+      await new Promise(resolve=>setTimeout(resolve,50));
+    }
+    return window.movieSupabase||null;
+  }
+
+  async function checkAuth(){
+    try{
+      const supabase=await getClient();
+      if(!supabase)return;
+      const result=await Promise.race([
+        supabase.auth.getSession(),
+        new Promise((_,reject)=>setTimeout(()=>reject(new Error("AUTH_TIMEOUT")),2000))
+      ]);
+      const session=result?.data?.session||null;
+      if(!session||session.user?.is_anonymous)showAuth(false);
+      else{
+        setIdentity(session);
+        hideAuth();
+      }
+    }catch(e){
+      // Auth must never prevent the dashboard from rendering.
+    }finally{
+      authChecked=true;
+    }
+  }
+
+  function bindAuth(){
+    const signIn=document.getElementById("signInForm");
+    const create=document.getElementById("createAccountForm");
+    const supabase=window.movieSupabase;
+    if(!supabase)return;
+
+    document.getElementById("togglePassword")?.addEventListener("click",()=>{
+      const p=document.getElementById("authPassword");
+      if(p)p.type=p.type==="password"?"text":"password";
+    });
+    document.getElementById("toggleCreatePassword")?.addEventListener("click",()=>{
+      const p=document.getElementById("createPassword");
+      if(p)p.type=p.type==="password"?"text":"password";
+    });
+    document.getElementById("showCreate")?.addEventListener("click",()=>showAuth(true));
+    document.getElementById("showSignIn")?.addEventListener("click",()=>showAuth(false));
+
+    document.getElementById("createPassword")?.addEventListener("input",e=>{
+      const v=e.target.value||"";
+      const score=(v.length>=8?1:0)+(/[A-Z]/.test(v)&&/[a-z]/.test(v)?1:0)+(/\d/.test(v)&&/[^A-Za-z0-9]/.test(v)?1:0);
+      const el=document.getElementById("passwordStrength");
+      if(el)el.textContent="Password strength: "+(score>=3?"Strong":score===2?"Medium":"Weak");
+    });
+
+    signIn?.addEventListener("submit",async e=>{
+      e.preventDefault();
+      const email=(document.getElementById("authEmail")?.value||"").trim().toLowerCase();
+      const password=document.getElementById("authPassword")?.value||"";
+      if(!email||!password){authMessage("Enter your email and password.",true);return;}
+      try{
+        authMessage("Signing in…");
+        const {data,error}=await supabase.auth.signInWithPassword({email,password});
+        if(error)throw error;
+        setIdentity(data.session);
+        saveAccount(email);
+        hideAuth();
+        authMessage("");
+        if(typeof refreshMovieEntitlement==="function")refreshMovieEntitlement().catch(()=>{});
+      }catch(error){
+        authMessage(error?.message||"Sign in failed. Please check your details.",true);
+      }
+    });
+
+    create?.addEventListener("submit",async e=>{
+      e.preventDefault();
+      const name=(document.getElementById("authFullName")?.value||"").trim();
+      const email=(document.getElementById("createEmail")?.value||"").trim().toLowerCase();
+      const password=document.getElementById("createPassword")?.value||"";
+      const confirm=document.getElementById("confirmPassword")?.value||"";
+      const terms=document.getElementById("termsCheck")?.checked;
+      if(!name||!email||!password){authMessage("Complete all required fields.",true);return;}
+      if(password!==confirm){authMessage("Passwords do not match.",true);return;}
+      if(password.length<8){authMessage("Password must be at least 8 characters.",true);return;}
+      if(!terms){authMessage("Please agree to the terms.",true);return;}
+      try{
+        authMessage("Creating your account…");
+        const current=await supabase.auth.getSession().catch(()=>({data:{session:null}}));
+        if(current?.data?.session?.user?.is_anonymous)await supabase.auth.signOut({scope:"local"});
+        const {data,error}=await supabase.auth.signUp({
+          email,
+          password,
+          options:{data:{full_name:name}}
+        });
+        if(error)throw error;
+        if(!data.session){
+          authMessage("Account created. Check your email to confirm, then sign in.");
+          return;
+        }
+        setIdentity(data.session);
+        saveAccount(email);
+        hideAuth();
+        if(typeof refreshMovieEntitlement==="function")refreshMovieEntitlement().catch(()=>{});
+      }catch(error){
+        authMessage(error?.message||"Account creation failed.",true);
+      }
+    });
+
+    document.getElementById("bioBtn")?.addEventListener("click",async()=>{
+      if(!navigator.credentials){
+        authMessage("Not supported on this device.",true);
+        return;
+      }
+      try{
+        await navigator.credentials.get({
+          publicKey:{
+            challenge:crypto.getRandomValues(new Uint8Array(32)),
+            timeout:60000,
+            userVerification:"required",
+            allowCredentials:[]
+          }
+        });
+        authMessage("Biometric verification successful.");
+      }catch(e){
+        authMessage("Biometric verification was cancelled or unavailable.",true);
+      }
+    });
+
+    window.obiLogout=async()=>{
+      try{await supabase.auth.signOut()}catch(e){}
+      location.reload();
+    };
+  }
+
+  function start(){
+    const run=async()=>{
+      await checkAuth();
+      bindAuth();
+    };
+    run();
+  }
+
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});
+  else start();
+})();
 document.addEventListener("DOMContentLoaded",()=>{
   if(state.blueprint && localStorage.getItem("obitrend_movie_blueprint")){
     renderBlueprint(state.blueprint);
