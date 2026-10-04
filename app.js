@@ -287,7 +287,13 @@ function openMenu(name){
 }
 document.querySelectorAll(".nav-item").forEach(a=>a.addEventListener("click",e=>{if(a.closest(".nav-group")?.querySelector(".nav-dropdown"))return;const href=a.getAttribute("href")||"#home";if(href.startsWith("#")){e.preventDefault();openMenu(href.slice(1));document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("selected"));a.classList.add("selected")}}));
 $("menuWorkspaceClose")?.addEventListener("click",menuClose);
-$("menuWorkspaceBack")?.addEventListener("click",()=>{menuClose();window.scrollTo({top:0,behavior:"smooth"});});
+$("menuWorkspaceBack")?.addEventListener("click",()=>{
+ menuClose();
+ const drawer=$("androidDrawer");
+ if(drawer){drawer.classList.add("open");return;}
+ const menuBtn=$("androidMenuBtn");
+ menuBtn?.click();
+});
 document.addEventListener("click",e=>{
  const b=e.target.closest("[data-menu-action]");if(!b)return;const action=b.dataset.menuAction;
  if(action.startsWith("template:")){const x=MENU_DATA.templates[+action.split(":")[1]];$("moviePrompt").value=x[1];$("createPanel").classList.remove("hidden");menuClose();$("createPanel").scrollIntoView({behavior:"smooth"});return}
