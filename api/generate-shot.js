@@ -121,7 +121,7 @@ module.exports=async(req,res)=>{
       model:"wan3",
       promptText:safePrompt,
       audio:true,
-      duration:10,
+      duration:30,
       ratio:ratio==="9:16"?"720:1280":"1280:720"
     };
 
