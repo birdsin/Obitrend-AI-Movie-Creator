@@ -625,11 +625,11 @@ document.addEventListener("DOMContentLoaded",()=>{
   const nav=document.querySelector(".android-bottom-nav");
   nav?.querySelectorAll("button").forEach((b,i)=>b.addEventListener("click",()=>{
     nav.querySelectorAll("button").forEach(x=>x.classList.remove("active"));b.classList.add("active");
-    if(i===0)window.scrollTo({top:0,behavior:"smooth"});
-    if(i===1)showCreate();
-    if(i===2)document.querySelector(".android-projects")?.scrollIntoView({behavior:"smooth",block:"start"});
-    if(i===3)notify("Movie Templates are ready to be connected to your template library.");
-    if(i===4)notify("Profile and account settings are ready to be connected.");
+    if(i===0){menuClose();window.scrollTo({top:0,behavior:"smooth"});}
+    if(i===1){menuClose();showCreate();}
+    if(i===2){openMenu("creations");}
+    if(i===3){openMenu("templates");}
+    if(i===4){openMenu("pro");}
   }));
 
   const menuBtn=$("androidMenuBtn");
