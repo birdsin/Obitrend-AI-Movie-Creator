@@ -256,16 +256,23 @@ function openMenu(name){
   backgrounds:()=>menuOpen("Backgrounds","Choose the world where your movie takes place.",MENU_DATA.backgrounds.map((x,i)=>renderMenuCard(x,"Use this setting in your next movie concept.","background:"+i)).join("")),
   colors:()=>menuOpen("Outfit Colors","Choose a wardrobe color direction for your movie.",MENU_DATA.colors.map((x,i)=>renderMenuCard(x,"Use this wardrobe color direction.","color:"+i)).join("")),
   pro:()=>{
-    const e=getMovieEntitlement();
-    const expiry=e.expiresAt?new Date(e.expiresAt).toLocaleDateString():"Not set";
-    menuOpen("Pro Plans","Premium movie creation options.",
-      '<div class="credit-box"><strong>'+esc(e.plan||"Free")+'</strong><span>Current plan</span></div>'+
-      '<div class="status">User ID: '+esc(e.userId||"Creating…")+'</div>'+
-      '<div class="status">Movie credits: '+getMovieCredits()+' · Expiry: '+esc(expiry)+'</div>'+
-      renderMenuCard("3 Day Creator","₦13,000 · 10 credits · 3 days","pro:threeDays")+
-      renderMenuCard("Weekly Creator","₦26,000 · 22 credits · 7 days","pro:weekly")+
-      renderMenuCard("Monthly Creator","₦90,000 · 70 credits · 30 days","pro:monthly")+
-      '<div class="status">Plan activation must come from the payment/entitlement system. This screen does not create a paid subscription by itself.</div>');
+    const renderPro=()=>{
+      const e=getMovieEntitlement();
+      const expiry=e.expiresAt?new Date(e.expiresAt).toLocaleDateString():"Not set";
+      menuOpen("Pro Plans","Premium movie creation options.",
+        '<div class="credit-box"><strong>'+esc(e.plan||"Free")+'</strong><span>Current plan</span></div>'+
+        '<div class="status">User ID: '+esc(e.userId||window.movieUserId||"Creating…")+'</div>'+
+        '<div class="status">Movie credits: '+getMovieCredits()+' · Expiry: '+esc(expiry)+'</div>'+
+        renderMenuCard("3 Day Creator","₦13,000 · 10 credits · 3 days","pro:threeDays")+
+        renderMenuCard("Weekly Creator","₦26,000 · 22 credits · 7 days","pro:weekly")+
+        renderMenuCard("Monthly Creator","₦90,000 · 70 credits · 30 days","pro:monthly")+
+        '<div class="status">Plan activation must come from the payment/entitlement system. This screen does not create a paid subscription by itself.</div>');
+    };
+    renderPro();
+    Promise.resolve(window.movieAuthReady)
+      .then(()=>refreshMovieEntitlement())
+      .then(()=>renderPro())
+      .catch(()=>renderPro());
   },
   credits:()=>menuOpen("My Credits","Your current movie studio credit balance.",
     '<div class="credit-box"><strong>'+getMovieCredits()+'</strong><span>Credits available</span></div>'+
