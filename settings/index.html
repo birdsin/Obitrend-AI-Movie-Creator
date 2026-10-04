@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080b10"><title>OBITREND · Profile</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#080b10;color:#f5f5f5;font-family:Inter,system-ui,sans-serif}
+.wrap{width:min(720px,92vw);margin:auto;padding:28px 0}.top{display:flex;justify-content:space-between;align-items:center}
+.brand{color:#d4af37;font-weight:900;letter-spacing:.18em}.back,.action{background:#121722;color:#fff;border:1px solid #333b49;border-radius:11px;padding:10px 15px;font-weight:800}
+.panel{margin-top:40px;border:1px solid #2b3441;border-radius:18px;background:#0d121a;padding:8px 20px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:20px 0;border-bottom:1px solid #242c37}.row:last-child{border:0}
+.row span{display:block;color:#9aa3b1;font-size:13px;margin-top:5px}.value{color:#f5f5f5;font-weight:700;text-align:right;overflow-wrap:anywhere}
+.action{cursor:pointer}.danger{border-color:#694040;color:#ffbaba}.gold{border-color:#806523;color:#f0c95c}
+.status{padding:14px 0;color:#9aa3b1;font-size:13px}.error{color:#ff9c9c}
+@media(max-width:560px){.row{align-items:flex-start;flex-direction:column}.value{text-align:left}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header class="top"><div class="brand">♛ OBITREND</div><button class="back" type="button" onclick="location.href='/'">← Back</button></header>
+<section class="panel">
+<div class="row"><div><strong>OBITREND User ID</strong><span>Your unique movie creator account ID.</span></div><div class="value" id="userId">Loading…</div></div>
+<div class="row"><div><strong>Current plan</strong><span>Your active movie plan.</span></div><div class="value" id="plan">Loading…</div></div>
+<div class="row"><div><strong>Movie credits</strong><span>Credits currently available for movie generation.</span></div><div class="value" id="credits">Loading…</div></div>
+<div class="row"><div><strong>Plan expiry date/time</strong><span>Exact server expiry time for your current plan.</span></div><div class="value" id="expiry">Loading…</div></div>
+<div class="row"><div><strong>Account settings</strong><span>Manage your current movie creator session.</span></div><button class="action" type="button" id="clear">Clear Cache</button></div>
+<div class="row"><div><strong>Upgrade/Pro options</strong><span>View available movie creator plans.</span></div><button class="action gold" type="button" id="upgrade">Upgrade</button></div>
+<div class="row"><div><strong>Logout</strong><span>Sign out of the current movie creator session.</span></div><button class="action danger" type="button" id="logout">Logout</button></div>
+<div id="status" class="status">Loading account…</div>
+</section>
+</main>
+<script type="module">
+import{createClient}from"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/+esm";
+const c=createClient("https://vjlitqujcujwsislprfg.supabase.co","sb_publishable_vxKAcrlrdZ3wfNH_n7EuZg_joZKejD6",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+const $=id=>document.getElementById(id);
+function exactTime(v){if(!v)return"—";const d=new Date(v);return Number.isNaN(d.getTime())?"—":d.toLocaleString(undefined,{dateStyle:"medium",timeStyle:"medium"});}
+async function loadProfile(){
+  try{
+    let{data:{session}}=await c.auth.getSession();
+    if(!session){const x=await c.auth.signInAnonymously();if(x.error)throw x.error;session=x.data.session;}
+    if(!session?.user?.id)throw new Error("User identity unavailable.");
+    const publicId="OBI-"+session.user.id.replaceAll("-","").slice(0,8).toUpperCase();
+    $("userId").textContent=publicId;
+    const token=session.access_token;
+    const r=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-credit",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({action:"status"})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(d.error||"Could not load account balance.");
+    $("plan").textContent=d.plan_name||"Free";
+    $("credits").textContent=String(Number(d.credits||0));
+    $("expiry").textContent=d.expires_at?exactTime(d.expires_at):"No expiry — Free plan";
+    $("status").textContent="Live account balance loaded.";
+  }catch(e){$("status").textContent=e.message||"Could not load account."; $("status").className="status error";}
+}
+$("clear").onclick=()=>{["obitrend_movie_history","obitrend_movie_blueprint","obitrend_auto_movie_videos"].forEach(k=>localStorage.removeItem(k));alert("Saved movie data cleared.");};
+$("upgrade").onclick=()=>location.href="/pricing/";
+$("logout").onclick=async()=>{await c.auth.signOut();location.href="/";};
+loadProfile();
+</script>
+</body></html>
