@@ -49,6 +49,24 @@ module.exports=async(req,res)=>{
       if(!r.ok)return json(res,502,{error:"Video status is temporarily unavailable. Please try again."});
       const output=d.output;
       const videoUrl=Array.isArray(output)?output[0]:output&&typeof output==="object"?(output.video_url||output.url):output||d.videoUrl||null;
+
+      // A terminal Runway failure must release the reserved OBITREND
+      // credit server-side. Do not depend on the browser reaching the
+      // release call after a failed task.
+      if(d.status==="FAILED"||d.status==="CANCELED"){
+        try{
+          await fetch(supabaseUrl+"/functions/v1/movie-credit",{
+            method:"POST",
+            headers:{
+              "content-type":"application/json",
+              "apikey":publishable,
+              "Authorization":auth
+            },
+            body:JSON.stringify({action:"release",token:String(reservation)})
+          });
+        }catch(_){}
+      }
+
       return json(res,200,{status:d.status,videoUrl});
     }catch(e){
       return json(res,500,{error:"Could not check video status. Please try again."});
@@ -101,21 +119,17 @@ module.exports=async(req,res)=>{
       "Aspect ratio "+ratio+"."
     ].join(" ");
 
-    // Runway's current Gen-4.5 image_to_video validator can require
-    // promptImage even when documentation describes prompt-only generation.
-    // Use the official multi-shot recipe for prompt-only 5-second generation;
-    // it accepts text directly and returns a normal Runway task id.
-    const safePrompt=prompt.length>2500?prompt.slice(0,2497)+"...":prompt;
+    // Runway Gen-4.5 supports prompt-only text-to-video on this
+    // endpoint when promptImage is omitted.
+    const safePrompt=prompt.length>1000?prompt.slice(0,997)+"...":prompt;
     const body={
-      version:"2026-06",
-      mode:"auto",
-      prompt:safePrompt,
+      model:"gen4.5",
+      promptText:safePrompt,
       duration:5,
-      ratio:ratio==="9:16"?"720:1280":"1280:720",
-      audio:false
+      ratio:ratio==="9:16"?"720:1280":"1280:720"
     };
 
-    const r=await runwayRequest("/recipes/multi_shot_video",{
+    const r=await runwayRequest("/image_to_video",{
       method:"POST",
       body:JSON.stringify(body)
     });
