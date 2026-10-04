@@ -2147,3 +2147,9 @@ img{max-width:100%}
 @media(max-width:400px){
   .android-drawer{width:calc(100vw - 32px) !important;max-width:calc(100vw - 32px) !important;}
 }
+
+/* FIX: menu workspace back navigation */
+.menu-workspace-heading{display:flex;align-items:flex-start;gap:12px;min-width:0}
+.menu-back-btn{width:42px;height:42px;flex:0 0 42px;border:1px solid #a78330;border-radius:9px;background:#111720;color:var(--gold2);font-size:24px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.menu-back-btn:active{transform:scale(.97)}
+
