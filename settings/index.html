@@ -27,7 +27,7 @@
 <div class="row"><div><strong>Upgrade/Pro options</strong><span>View available movie creator plans.</span></div><button class="action gold" type="button" id="upgrade">Upgrade</button></div>
 <div class="row"><div><strong>Logout</strong><span>Sign out of the current movie creator session.</span></div><button class="action danger" type="button" id="logout">Logout</button></div>
 <div id="status" class="status">Loading account…</div>
-</section>
+</section><div id="accountModal" class="modal" hidden><div class="modal-card"><button id="closeModal" class="modal-close" type="button">×</button><h2>Switch Account</h2><div id="accountList"></div><button id="addAccount" class="action gold" type="button">＋ Add another account</button></div></div>
 </main>
 <script type="module">
 import{createClient}from"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/+esm";
@@ -36,24 +36,28 @@ const $=id=>document.getElementById(id);
 function exactTime(v){if(!v)return"—";const d=new Date(v);return Number.isNaN(d.getTime())?"—":d.toLocaleString(undefined,{dateStyle:"medium",timeStyle:"medium"});}
 async function loadProfile(){
   try{
-    let{data:{session}}=await c.auth.getSession();
-    if(!session){const x=await c.auth.signInAnonymously();if(x.error)throw x.error;session=x.data.session;}
-    if(!session?.user?.id)throw new Error("User identity unavailable.");
-    const publicId="OBI-"+session.user.id.replaceAll("-","").slice(0,8).toUpperCase();
-    $("userId").textContent=publicId;
-    const token=session.access_token;
-    const r=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-credit",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({action:"status"})});
+    const{data:{session}}=await c.auth.getSession();
+    if(!session?.user?.id){location.href="/?auth=signin";return;}
+    $("userId").textContent="OBI-"+session.user.id.replaceAll("-","").slice(0,8).toUpperCase();
+    const r=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-credit",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+session.access_token},body:JSON.stringify({action:"status"})});
     const d=await r.json().catch(()=>({}));
     if(!r.ok)throw new Error(d.error||"Could not load account balance.");
-    $("plan").textContent=d.plan_name||"Free";
-    $("credits").textContent=String(Number(d.credits||0));
-    $("expiry").textContent=d.expires_at?exactTime(d.expires_at):"No expiry — Free plan";
-    $("status").textContent="Live account balance loaded.";
-  }catch(e){$("status").textContent=e.message||"Could not load account."; $("status").className="status error";}
+    $("plan").textContent=d.plan_name||"Free";$("credits").textContent=String(Number(d.credits||0));$("expiry").textContent=d.expires_at?exactTime(d.expires_at):"No expiry — Free plan";$("status").textContent="Live account balance loaded.";
+  }catch(e){$("status").textContent=e.message||"Could not load account.";$("status").className="status error";}
 }
-\n$("switchAccount").onclick=()=>{const m=$("accountModal");const list=$("accountList");let accounts=[];try{accounts=JSON.parse(localStorage.getItem("obitrend_accounts")||"[]")}catch(_){};if(!Array.isArray(accounts))accounts=[];const current=localStorage.getItem("obitrend_movie_email")||"";list.innerHTML=accounts.map(email=>'<button class="account-item" data-email="'+email.replace(/"/g,"&quot;")+'" type="button"><span class="account-avatar">'+email.charAt(0).toUpperCase()+'</span><span class="account-email">'+email+'</span>'+(email===current?'<span class="active-badge">Active</span>':'')+'</button>').join("")||'<div class="status">No saved accounts yet.</div>';list.querySelectorAll("[data-email]").forEach(b=>b.onclick=()=>location.href="/?auth=signin&email="+encodeURIComponent(b.dataset.email));m.hidden=false;};\n$("closeModal").onclick=()=>$("accountModal").hidden=true;\n$("accountModal").onclick=e=>{if(e.target.id==="accountModal")$("accountModal").hidden=true};\n$("addAccount").onclick=()=>location.href="/?auth=create";\n$("clear").onclick=()=>{["obitrend_movie_history","obitrend_movie_blueprint","obitrend_auto_movie_videos"].forEach(k=>localStorage.removeItem(k));alert("Saved movie data cleared.");};
+$("switchAccount").onclick=()=>{
+  const m=$("accountModal"),list=$("accountList");let accounts=[];try{accounts=JSON.parse(localStorage.getItem("obitrend_accounts")||"[]")}catch(_){}
+  if(!Array.isArray(accounts))accounts=[];
+  const current=localStorage.getItem("obitrend_movie_email")||"";
+  list.innerHTML=accounts.map(email=>'<button class="account-item" data-email="'+email.replace(/"/g,"&quot;")+'" type="button"><span class="account-avatar">'+email.charAt(0).toUpperCase()+'</span><span class="account-email">'+email+'</span>'+(email===current?'<span class="active-badge">Active</span>':'')+'</button>').join("")||'<div class="status">No saved accounts yet.</div>';
+  list.querySelectorAll("[data-email]").forEach(b=>b.onclick=()=>location.href="/?auth=signin&email="+encodeURIComponent(b.dataset.email));m.hidden=false;
+};
+$("closeModal").onclick=()=>$("accountModal").hidden=true;
+$("accountModal").onclick=e=>{if(e.target.id==="accountModal")$("accountModal").hidden=true};
+$("addAccount").onclick=()=>location.href="/?auth=create";
+$("clear").onclick=()=>{["obitrend_movie_history","obitrend_movie_blueprint","obitrend_auto_movie_videos"].forEach(k=>localStorage.removeItem(k));alert("Saved movie data cleared.");};
 $("upgrade").onclick=()=>location.href="/pricing/";
-$("logout").onclick=async()=>{await c.auth.signOut();location.href="/";};
+$("logout").onclick=async()=>{await c.auth.signOut();location.href="/?auth=signin";};
 loadProfile();
 </script>
 </body></html>
