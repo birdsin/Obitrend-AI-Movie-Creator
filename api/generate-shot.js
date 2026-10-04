@@ -50,9 +50,6 @@ module.exports=async(req,res)=>{
       const output=d.output;
       const videoUrl=Array.isArray(output)?output[0]:output&&typeof output==="object"?(output.video_url||output.url):output||d.videoUrl||null;
 
-      // A terminal Runway failure must release the reserved OBITREND
-      // credit server-side. Do not depend on the browser reaching the
-      // release call after a failed task.
       if(d.status==="FAILED"||d.status==="CANCELED"){
         try{
           await fetch(supabaseUrl+"/functions/v1/movie-credit",{
@@ -119,8 +116,6 @@ module.exports=async(req,res)=>{
       "Aspect ratio "+ratio+"."
     ].join(" ");
 
-    // Runway Gen-4.5 supports prompt-only text-to-video on this
-    // endpoint when promptImage is omitted.
     const safePrompt=prompt.length>1000?prompt.slice(0,997)+"...":prompt;
     const body={
       model:"gen4.5",
@@ -129,14 +124,15 @@ module.exports=async(req,res)=>{
       ratio:ratio==="9:16"?"720:1280":"1280:720"
     };
 
-    const r=await runwayRequest("/image_to_video",{
+    // Gen-4.5 prompt-only generation uses Runway's text-to-video endpoint.
+    // image_to_video requires promptImage and therefore rejects prompt-only requests.
+    const r=await runwayRequest("/text_to_video",{
       method:"POST",
       body:JSON.stringify(body)
     });
     const d=await r.json().catch(()=>({}));
 
     if(!r.ok){
-      const providerMessage=d&&d.error?String(d.error):d&&d.message?String(d.message):"";
       console.error("Runway start failed:",r.status,JSON.stringify(d));
       try{
         await fetch(supabaseUrl+"/functions/v1/movie-credit",{
