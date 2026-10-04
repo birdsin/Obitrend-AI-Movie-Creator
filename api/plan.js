@@ -1,5 +1,4 @@
-// Ensure the latest Vercel environment variables are included in this deployment.\nconst OPENAI_URL="https://api.openai.com/v1/chat/completions";
-const schema={type:"object",additionalProperties:false,properties:{
+// Ensure the latest Vercel environment variables are included in this deployment.\nconst schema={type:"object",additionalProperties:false,properties:{
  title:{type:"string"},logline:{type:"string"},genre:{type:"string"},
  visualBible:{type:"object",additionalProperties:false,properties:{world:{type:"string"},colorGrade:{type:"string"},lighting:{type:"string"},realism:{type:"string"},continuity:{type:"string"}},required:["world","colorGrade","lighting","realism","continuity"]},
  characters:{type:"array",items:{type:"object",additionalProperties:false,properties:{name:{type:"string"},role:{type:"string"},appearance:{type:"string"},wardrobe:{type:"string"},personality:{type:"string"}},required:["name","role","appearance","wardrobe","personality"]}},
@@ -23,7 +22,7 @@ module.exports=async function(req,res){
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),45000);
   let r;
   try{
-   r=await fetch(OPENAI_URL,{method:"POST",headers:{"content-type":"application/json","authorization":"Bearer "+key},body:JSON.stringify(body),signal:controller.signal});
+   r=await fetch("https://api.openai.com/v1/chat/completions",{method:"POST",headers:{"content-type":"application/json","authorization":"Bearer "+key},body:JSON.stringify(body),signal:controller.signal});
   }finally{clearTimeout(timer)}
   const rawText=await r.text();
   let data={};try{data=JSON.parse(rawText)}catch{}
