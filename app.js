@@ -17,6 +17,8 @@ function getMovieHistory(){
   }catch(e){return []}
 }
 const MOVIE_PLANS={
+  twoDays:{name:"2 Day Creator",priceNaira:3000,credits:2,durationDays:2},
+  oneDay:{name:"1 Day Creator",priceNaira:6500,credits:4,durationDays:1},
   threeDays:{name:"3 Day Creator",priceNaira:13000,credits:10,durationDays:3},
   weekly:{name:"Weekly Creator",priceNaira:26000,credits:22,durationDays:7},
   monthly:{name:"Monthly Creator",priceNaira:90000,credits:70,durationDays:30}
@@ -264,6 +266,8 @@ function openMenu(name){
         '<div class="credit-box"><strong>'+esc(e.plan||"Free")+'</strong><span>Current plan</span></div>'+
         '<div class="status">User ID: '+esc(e.userId||window.moviePublicUserId||"Creating…")+'</div>'+
         '<div class="status">Movie credits: '+getMovieCredits()+' · Expiry: '+esc(expiry)+'</div>'+
+        renderMenuCard("2 Day Creator","₦3,000 · 2 credits · 2 days","pro:twoDays")+
+        renderMenuCard("1 Day Creator","₦6,500 · 4 credits · 1 day","pro:oneDay")+
         renderMenuCard("3 Day Creator","₦13,000 · 10 credits · 3 days","pro:threeDays")+
         renderMenuCard("Weekly Creator","₦26,000 · 22 credits · 7 days","pro:weekly")+
         renderMenuCard("Monthly Creator","₦90,000 · 70 credits · 30 days","pro:monthly")+
