@@ -801,6 +801,15 @@ document.addEventListener("DOMContentLoaded",()=>{
     navigateTo(btn.dataset.nav);
   },{passive:false});
   byId("menuWorkspaceClose")?.addEventListener("click",closeWorkspace);
-  byId("menuWorkspaceBack")?.addEventListener("click",()=>{closeWorkspace();openDrawer();});
+  const workspaceBack=byId("menuWorkspaceBack");
+  if(workspaceBack){
+    const goBackToMenu=(e)=>{
+      e.preventDefault();
+      e.stopPropagation();
+      closeWorkspace();
+      openDrawer();
+    };
+    workspaceBack.addEventListener("pointerup",goBackToMenu,{passive:false});
+  }
   document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeDrawer();closeWorkspace();}});
 })();
