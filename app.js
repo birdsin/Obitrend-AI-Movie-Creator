@@ -682,3 +682,54 @@ document.addEventListener("DOMContentLoaded",()=>{
     menuBtn.addEventListener("click",()=>drawer.classList.toggle("open"));
   }
 });
+
+/* OBITREND MAGNIFYING INSPECTION — visual-only, no API/credit/payment changes */
+(function(){
+  function installMagnify(){
+    var prompt=document.getElementById("pmPrompt")||document.getElementById("creativePrompt")||document.getElementById("moviePrompt");
+    if(prompt&&!prompt.parentElement.querySelector(".obitrend-magnify-badge")){
+      var badge=document.createElement("div");
+      badge.className="obitrend-magnify-badge";
+      badge.innerHTML='<span class="magnify-dot"></span><span>🔍 AI Magnifier Active · Inspect your creative details</span>';
+      prompt.parentElement.appendChild(badge);
+    }
+    var host=document.getElementById("dashboardGarmentPreview");
+    if(host&&!host.dataset.magnifyReady){
+      host.dataset.magnifyReady="1";
+      var loupe=document.createElement("div");
+      loupe.className="obitrend-loupe";
+      host.style.position=host.style.position||"relative";
+      host.appendChild(loupe);
+      var image=host.querySelector("img");
+      function move(e){
+        if(!image)return;
+        var r=host.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+        if(x<0||y<0||x>r.width||y>r.height){loupe.style.opacity="0";return}
+        var px=Math.max(0,Math.min(100,x/r.width*100)),py=Math.max(0,Math.min(100,y/r.height*100));
+        loupe.style.opacity="1";loupe.style.left=x+"px";loupe.style.top=y+"px";
+        loupe.style.backgroundImage='url("'+(image.currentSrc||image.src)+'")';
+        loupe.style.backgroundSize=(r.width*2)+"px "+(r.height*2)+"px";
+        loupe.style.backgroundPosition=px+"% "+py+"%";
+      }
+      host.addEventListener("mousemove",move,{passive:true});
+      host.addEventListener("mouseleave",function(){loupe.style.opacity="0"},{passive:true});
+      host.addEventListener("touchmove",function(e){if(e.touches[0])move(e.touches[0])},{passive:true});
+      host.addEventListener("touchend",function(){loupe.style.opacity="0"},{passive:true});
+    }
+    var how=document.querySelector(".magnify-how-it-works");
+    var anchor=document.getElementById("movies")||document.getElementById("create");
+    if(!how&&anchor){
+      how=document.createElement("section");
+      how.className="magnify-how-it-works";
+      how.setAttribute("aria-label","OBITREND magnifying workflow");
+      how.innerHTML='<article class="magnify-step"><div class="magnify-step-icon">⌕</div><h3>Scan Your Details</h3><p>Inspect fine details with the OBITREND loupe.</p></article><article class="magnify-step"><div class="magnify-step-icon">⌕</div><h3>Magnify Your Vision</h3><p>Focus the prompt and refine exactly what you want the AI to understand.</p></article><article class="magnify-step"><div class="magnify-step-icon">⌕</div><h3>Reveal Campaign</h3><p>Turn the refined direction into a polished cinematic result.</p></article>';
+      anchor.parentNode.insertBefore(how,anchor);
+    }
+    document.querySelectorAll("#androidCreditsCount,.android-credit-value,.pm-credit").forEach(function(el){
+      if(el.dataset.magnifyPulse)return;el.dataset.magnifyPulse="1";
+      var observer=new MutationObserver(function(){el.animate([{transform:"scale(1)"},{transform:"scale(1.08)"},{transform:"scale(1)"}],{duration:420,easing:"ease-out"})});
+      observer.observe(el,{childList:true,characterData:true,subtree:true});
+    });
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",installMagnify,{once:true});else installMagnify();
+})();
