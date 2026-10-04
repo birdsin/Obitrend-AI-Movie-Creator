@@ -590,7 +590,6 @@ document.addEventListener("DOMContentLoaded",()=>{
   };
 
   $("androidCreateMovieBtn")?.addEventListener("click",showCreate);
-  $("androidCreateNav")?.addEventListener("click",showCreate);
   document.querySelectorAll('[data-android-action="movie"]').forEach(b=>b.addEventListener("click",showCreate));
   document.querySelectorAll('[data-android-action="image"]').forEach(b=>b.addEventListener("click",()=>{
     showCreate();
@@ -604,9 +603,6 @@ document.addEventListener("DOMContentLoaded",()=>{
   }));
 
   $("androidSeeCreate")?.addEventListener("click",showCreate);
-  $("androidMoviesNav")?.addEventListener("click",()=>{
-    document.querySelector(".android-projects")?.scrollIntoView({behavior:"smooth",block:"start"});
-  });
   $("androidSeeMovies")?.addEventListener("click",()=>{
     document.querySelector(".android-projects")?.scrollIntoView({behavior:"smooth",block:"start"});
   });
