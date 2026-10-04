@@ -1,5 +1,5 @@
-const CACHE="obitrend-movie-shell-v2";
-const CORE=["/","/index.html","/styles.css","/app.js","/movie-auth.js"];
+const CACHE="obitrend-movie-shell-v3";
+const CORE=["/","/index.html","/styles.css","/app.js","/movie-auth.js","/prompt-movie-dashboard.css","/prompt-movie-dashboard.js"];
 self.addEventListener("install",event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE).catch(()=>{})).then(()=>self.skipWaiting()));
 });
