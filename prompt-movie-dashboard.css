@@ -188,3 +188,9 @@ body.pm-mode{background:radial-gradient(circle at 75% 0%,rgba(194,142,39,.12),tr
 @media(prefers-reduced-motion:reduce){.pm-composer.pm-loading:after{animation:none}}
 
 .pm-demo-empty{grid-column:1/-1;min-height:92px;margin-bottom:2px;border:1px dashed rgba(212,175,55,.22);color:#8f9aaa}.pm-demo-empty .pm-player-cta{display:inline-block;margin-top:10px}
+
+
+/* Cinematic Engine controls stay visually identical while being tappable */
+.pm-engine-action{appearance:none;-webkit-appearance:none;border:0;padding:0;margin:0;font:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+.pm-engine-action:focus-visible{outline:2px solid #e6b95e;outline-offset:4px;}
+.pm-engine-action:active{transform:scale(.97);}
