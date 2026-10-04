@@ -204,6 +204,7 @@ async function pollTask(id,reservation){for(let i=0;i<90;i++){status("shotStatus
 function showVideo(url){$("videoPlaceholder").classList.add("hidden");$("shotVideo").src=url;$("shotVideo").classList.remove("hidden");$("shotVideo").load()}
 
 window.addEventListener("DOMContentLoaded",()=>{updateAndroidStats();if(state.blueprint)renderBlueprint(state.blueprint)});
+window.addEventListener("DOMContentLoaded",async()=>{try{await refreshMovieEntitlement();}catch(e){status("status",e.message||"Secure Movie Creator account setup is unavailable.",true)}});
 
 const MENU_DATA={
  templates:[
