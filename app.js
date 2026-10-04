@@ -21,22 +21,16 @@ const MOVIE_PLANS={
   monthly:{name:"Monthly Creator",priceNaira:90000,credits:70,durationDays:30}
 };
 function getMovieEntitlement(){
-  let data=null;
-  try{data=JSON.parse(localStorage.getItem("obitrend_movie_entitlement")||"null")}catch(e){}
-  if(!data||typeof data!=="object"){
-    const legacyPlan=localStorage.getItem("obitrend_movie_plan");
-    data={plan:legacyPlan||"Free",active:!!legacyPlan&&legacyPlan!=="Free",expiresAt:null};
-    try{localStorage.setItem("obitrend_movie_entitlement",JSON.stringify(data))}catch(e){}
+  if(movieServerEntitlement){
+    return {
+      plan:movieServerEntitlement.plan_name||"Free",
+      active:Boolean(movieServerEntitlement.active),
+      expiresAt:movieServerEntitlement.expires_at||null,
+      credits:Number(movieServerEntitlement.credits||0),
+      userId:movieServerEntitlement.public_user_id||window.movieUserId||null
+    };
   }
-  if(data.active&&data.expiresAt){
-    const expiry=new Date(data.expiresAt).getTime();
-    if(Number.isFinite(expiry)&&expiry<=Date.now()){
-      data={plan:"Free",active:false,expiresAt:null};
-      try{localStorage.setItem("obitrend_movie_entitlement",JSON.stringify(data));localStorage.setItem("obitrend_movie_plan","Free")}catch(e){}
-      localStorage.setItem("obitrend_movie_credits","0");
-    }
-  }
-  return data;
+  return {plan:"Free",active:false,expiresAt:null,credits:0,userId:window.movieUserId||null};
 }
 function setMoviePlan(plan,expiresAt=null){
   const value=String(plan||"Free");
