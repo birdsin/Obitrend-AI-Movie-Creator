@@ -87,7 +87,7 @@
 
   prompt?.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();generate?.click()}});
 
-  async function autoGenerateMovie(){
+  async function autoGenerateMovie(resumeProductionId=null,resumeProduction=null){
     let blueprint=null;
     try{blueprint=JSON.parse(localStorage.getItem("obitrend_movie_blueprint")||"null")}catch{}
     if(!blueprint?.scenes?.length){
@@ -106,28 +106,51 @@
       return;
     }
 
-    // A 1-minute movie is produced as two sequential 30-second production shots.
-    // The two shots are saved and played together as ONE titled movie.
-    const oneMinute=Number(q("#length")?.value||15)===1;
+    const oneMinute=Number(q("#length")?.value||1)===1;
+    const requestedSegments=oneMinute?2:Math.min(shots.length,2);
+    let productionId=resumeProductionId||"";
+    let production=resumeProduction||null;
 
     try{
       await refreshMovieEntitlement();
-      const availableCredits=getMovieCredits();
 
-      if(availableCredits<=0){
-        status.className="pm-status error";
-        status.textContent="You have no movie credits left. Please purchase Pro credits to generate more movie shorts.";
-        generate.disabled=false;
-        return;
+      if(!productionId){
+        productionId=await createMovieProduction(blueprint,requestedSegments);
+        production=await getMovieProduction(productionId);
+      }else if(!production){
+        production=await getMovieProduction(productionId);
       }
 
-      const targetCount=oneMinute
-        ? Math.min(2,shots.length,availableCredits)
-        : Math.min(shots.length,2,availableCredits);
+      if(!production){
+        throw new Error("The saved movie production could not be found.");
+      }
 
+      const targetCount=Math.min(
+        shots.length,
+        Number(production.total_segments||requestedSegments)
+      );
+      const savedUrls=Array.isArray(production.video_urls)?production.video_urls:[];
       const results=[];
+      let generatedNow=0;
+
       for(let i=0;i<targetCount;i++){
         const item=shots[i];
+        const savedUrl=String(savedUrls[i]||"").trim();
+
+        if(savedUrl){
+          results.push({scene:item.si,shot:item.hi,url:savedUrl});
+          continue;
+        }
+
+        await refreshMovieEntitlement();
+        if(getMovieCredits()<=0){
+          await setMovieProductionStatus(productionId,"paused").catch(()=>{});
+          status.className="pm-status";
+          status.textContent="Movie paused — your movie credits are finished. Purchase more credits and OBITREND will continue this same movie from the next unfinished scene.";
+          loadRecent();
+          return;
+        }
+
         status.className="pm-status";
         status.textContent=(oneMinute?"Producing 1-minute movie — scene ":"Generating 30-second movie scene ")+(i+1)+" of "+targetCount+"…";
 
@@ -136,59 +159,86 @@
             throw new Error("The cinematic generation engine is unavailable.");
           }
 
+          await setMovieProductionStatus(productionId,"generating").catch(()=>{});
           window.openShot(item.si,item.hi);
           await window.generateShot();
 
           const shotStatus=(document.getElementById("shotStatus")?.textContent||"").trim();
           const video=document.getElementById("shotVideo");
           if(!video?.src||/failed|unavailable|could not|no movie credits|taking longer/i.test(shotStatus)){
-            throw new Error(shotStatus||"This movie short could not be generated.");
+            throw new Error(shotStatus||"This movie scene could not be generated.");
           }
 
-          results.push({scene:item.si,shot:item.hi,url:video.src});
-          try{localStorage.setItem("obitrend_auto_movie_videos",JSON.stringify(results))}catch{}
-          try{loadRecent()}catch(_){ }
+          const url=video.src;
+          await saveMovieProductionSegment(productionId,i,url);
+          results.push({scene:item.si,shot:item.hi,url});
+          generatedNow++;
+          savedUrls[i]=url;
+          try{localStorage.setItem("obitrend_auto_movie_videos",JSON.stringify(results))}catch(_){}
 
-          // Get the authoritative remaining credit count before starting the
-          // next short. Reservation/commit is handled by the generation engine.
           await refreshMovieEntitlement();
 
-          if(i<targetCount-1 && getMovieCredits()<=0) break;
+          if(i<targetCount-1 && getMovieCredits()<=0){
+            await setMovieProductionStatus(productionId,"paused").catch(()=>{});
+            status.className="pm-status";
+            status.textContent="Movie paused after scene "+(i+1)+" of "+targetCount+". Your credits are finished. Purchase more credits to continue from scene "+(i+2)+".";
+            loadRecent();
+            return;
+          }
         }catch(error){
+          await setMovieProductionStatus(productionId,"paused").catch(()=>{});
           status.className="pm-status error";
-          status.textContent=error?.message||"Movie short generation stopped.";
+          status.textContent=error?.message||"Movie generation stopped. Your completed scenes are saved.";
           return;
         }
       }
 
+      await setMovieProductionStatus(productionId,"completed").catch(()=>{});
       await refreshMovieEntitlement();
-      const remaining=getMovieCredits();
-      const generated=results.length;
-      if(oneMinute && generated===2 && typeof saveHistory==="function" && blueprint){
-        try{saveHistory(blueprint,results[0]?.url||"",null,results.map(v=>v.url))}catch(_){}
-        try{localStorage.setItem("obitrend_auto_movie_videos",JSON.stringify(results))}catch(_){}
-        loadRecent();
+
+      if(oneMinute && results.length===2 && typeof saveHistory==="function"){
+        try{
+          saveHistory(blueprint,results[0]?.url||"",null,results.map(v=>v.url));
+          loadRecent();
+        }catch(_){}
       }
 
-      if(remaining<=0 && generated<shots.length){
-        status.className="pm-status";
-        status.textContent="You have generated "+generated+" movie short"+(generated===1?"":"s")+". Your movie credits are finished. Please purchase Pro credits to generate more.";
-      }else if(generated<shots.length){
-        status.className="pm-status";
-        status.textContent="Generated "+generated+" movie short"+(generated===1?"":"s")+" successfully. "+remaining+" movie credit"+(remaining===1?" remains":"s remain")+". Generate again to continue.";
-      }else{
-        status.className="pm-status";
-        status.textContent="All movie shorts are ready to watch. "+remaining+" movie credit"+(remaining===1?" remains":"s remain")+".";
-      }
+      try{localStorage.setItem("obitrend_auto_movie_videos",JSON.stringify(results))}catch(_){}
+      localStorage.removeItem("obitrend_movie_active_production_id");
+
+      const remaining=getMovieCredits();
+      status.className="pm-status";
+      status.textContent=oneMinute
+        ?"Your 1-minute movie is complete. Both 30-second scenes are saved together under one titled movie."
+        :"Your movie production is complete.";
       loadRecent();
     }catch(error){
       status.className="pm-status error";
-      status.textContent=error?.message||"Movie short generation stopped.";
+      status.textContent=error?.message||"Movie generation stopped. Your completed scenes are saved.";
     }finally{
       composer?.classList.remove("pm-loading");
       generate.disabled=false;
     }
   }
+
+  window.resumeMovieProduction=async function(productionId,production){
+    if(!productionId)return false;
+    try{
+      const saved=production||await getMovieProduction(productionId);
+      if(!saved)return false;
+      if(saved.status==="completed"||Number(saved.completed_segments)>=Number(saved.total_segments)){
+        localStorage.removeItem("obitrend_movie_active_production_id");
+        return false;
+      }
+      await autoGenerateMovie(productionId,saved);
+      return true;
+    }catch(error){
+      status.className="pm-status error";
+      status.textContent=error?.message||"Could not continue the unfinished movie.";
+      return false;
+    }
+  };
+
   window.showGeneratedBlueprint=window.showGeneratedBlueprint||function(){};
   try{showGeneratedBlueprint=function(){};}catch{}
 
