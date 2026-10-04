@@ -1,4 +1,4 @@
-const OPENAI_URL="https://api.openai.com/v1/chat/completions";
+// Ensure the latest Vercel environment variables are included in this deployment.\nconst OPENAI_URL="https://api.openai.com/v1/chat/completions";
 const schema={type:"object",additionalProperties:false,properties:{
  title:{type:"string"},logline:{type:"string"},genre:{type:"string"},
  visualBible:{type:"object",additionalProperties:false,properties:{world:{type:"string"},colorGrade:{type:"string"},lighting:{type:"string"},realism:{type:"string"},continuity:{type:"string"}},required:["world","colorGrade","lighting","realism","continuity"]},
