@@ -11,7 +11,7 @@
 .row{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:20px 0;border-bottom:1px solid #242c37}.row:last-child{border:0}
 .row span{display:block;color:#9aa3b1;font-size:13px;margin-top:5px}.value{color:#f5f5f5;font-weight:700;text-align:right;overflow-wrap:anywhere}
 .action{cursor:pointer}.danger{border-color:#694040;color:#ffbaba}.gold{border-color:#806523;color:#f0c95c}
-.status{padding:14px 0;color:#9aa3b1;font-size:13px}.error{color:#ff9c9c}
+.status{padding:14px 0;color:#9aa3b1;font-size:13px}.error{color:#ff9c9c}.modal{position:fixed;inset:0;background:rgba(0,0,0,.62);display:grid;align-items:end;z-index:20}.modal[hidden]{display:none}.modal-card{width:min(620px,100%);margin:auto;padding:24px;border:1px solid #3a4350;border-radius:22px 22px 0 0;background:#0d121a;box-shadow:0 -20px 60px rgba(0,0,0,.45)}.modal-card h2{margin:0 0 16px}.modal-close{float:right;border:0;background:none;color:#fff;font-size:28px;cursor:pointer}.account-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #242c37}.account-avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#d4af37;color:#080b10;font-weight:900}.account-email{flex:1;overflow-wrap:anywhere}.active-badge{font-size:11px;color:#b8df9e}
 @media(max-width:560px){.row{align-items:flex-start;flex-direction:column}.value{text-align:left}}
 </style>
 </head>
@@ -23,7 +23,7 @@
 <div class="row"><div><strong>Current plan</strong><span>Your active movie plan.</span></div><div class="value" id="plan">Loading…</div></div>
 <div class="row"><div><strong>Movie credits</strong><span>Credits currently available for movie generation.</span></div><div class="value" id="credits">Loading…</div></div>
 <div class="row"><div><strong>Plan expiry date/time</strong><span>Exact server expiry time for your current plan.</span></div><div class="value" id="expiry">Loading…</div></div>
-<div class="row"><div><strong>Account settings</strong><span>Manage your current movie creator session.</span></div><button class="action" type="button" id="clear">Clear Cache</button></div>
+<div class="row"><div><strong>Account settings</strong><span>Manage your current movie creator session.</span></div><div><button class="action" type="button" id="switchAccount">Switch Account</button> <button class="action" type="button" id="clear">Clear Cache</button></div></div>
 <div class="row"><div><strong>Upgrade/Pro options</strong><span>View available movie creator plans.</span></div><button class="action gold" type="button" id="upgrade">Upgrade</button></div>
 <div class="row"><div><strong>Logout</strong><span>Sign out of the current movie creator session.</span></div><button class="action danger" type="button" id="logout">Logout</button></div>
 <div id="status" class="status">Loading account…</div>
@@ -51,7 +51,7 @@ async function loadProfile(){
     $("status").textContent="Live account balance loaded.";
   }catch(e){$("status").textContent=e.message||"Could not load account."; $("status").className="status error";}
 }
-$("clear").onclick=()=>{["obitrend_movie_history","obitrend_movie_blueprint","obitrend_auto_movie_videos"].forEach(k=>localStorage.removeItem(k));alert("Saved movie data cleared.");};
+\n$("switchAccount").onclick=()=>{const m=$("accountModal");const list=$("accountList");let accounts=[];try{accounts=JSON.parse(localStorage.getItem("obitrend_accounts")||"[]")}catch(_){};if(!Array.isArray(accounts))accounts=[];const current=localStorage.getItem("obitrend_movie_email")||"";list.innerHTML=accounts.map(email=>'<button class="account-item" data-email="'+email.replace(/"/g,"&quot;")+'" type="button"><span class="account-avatar">'+email.charAt(0).toUpperCase()+'</span><span class="account-email">'+email+'</span>'+(email===current?'<span class="active-badge">Active</span>':'')+'</button>').join("")||'<div class="status">No saved accounts yet.</div>';list.querySelectorAll("[data-email]").forEach(b=>b.onclick=()=>location.href="/?auth=signin&email="+encodeURIComponent(b.dataset.email));m.hidden=false;};\n$("closeModal").onclick=()=>$("accountModal").hidden=true;\n$("accountModal").onclick=e=>{if(e.target.id==="accountModal")$("accountModal").hidden=true};\n$("addAccount").onclick=()=>location.href="/?auth=create";\n$("clear").onclick=()=>{["obitrend_movie_history","obitrend_movie_blueprint","obitrend_auto_movie_videos"].forEach(k=>localStorage.removeItem(k));alert("Saved movie data cleared.");};
 $("upgrade").onclick=()=>location.href="/pricing/";
 $("logout").onclick=async()=>{await c.auth.signOut();location.href="/";};
 loadProfile();
