@@ -109,7 +109,9 @@ async function reserveMovieCredit(){
   movieServerEntitlement=movieServerEntitlement||{};
   movieServerEntitlement.credits=Number(d.remaining_credits||0);
   updateAndroidStats();
-  return d.reservation_token;
+  const reservationToken=String(d?.reservation_token||d?.reservationToken||d?.token||"").trim();
+  if(!reservationToken) throw new Error("Could not create a secure movie credit reservation. Please try again.");
+  return reservationToken;
 }
 async function movieProductionRequest(action,payload={}){
   await window.movieAuthReady;
@@ -256,7 +258,7 @@ async function generateShot(){
     reservation=await reserveMovieCredit();
     const token=await window.getMovieAccessToken();
     status("shotStatus","Sending shot to the video generator…");
-    const r=await fetch("/api/generate-shot",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token,"x-movie-reservation":reservation},body:JSON.stringify({blueprint:state.blueprint,sceneIndex:state.sceneIndex,shotIndex:state.shotIndex,ratio:$("ratio").value})});
+    const r=await fetch("/api/generate-shot",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token,"x-movie-reservation":reservation},body:JSON.stringify({blueprint:state.blueprint,sceneIndex:state.sceneIndex,shotIndex:state.shotIndex,ratio:$("ratio").value,reservationToken:reservation})});
     const d=await r.json();
     if(!r.ok)throw new Error(d.error||"Shot generation failed.");
     if(d.videoUrl){await finishMovieCredit("commit",reservation);showVideo(d.videoUrl);status("shotStatus","Shot ready.")} 
