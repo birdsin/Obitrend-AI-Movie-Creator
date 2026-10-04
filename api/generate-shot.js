@@ -22,7 +22,8 @@ async function runwayRequest(path,options){
 
 module.exports=async(req,res)=>{
   const auth=req.headers.authorization||"";
-  const reservation=req.headers["x-movie-reservation"]||"";
+  const body=req.body&&typeof req.body==="object"?req.body:{};
+  const reservation=String(req.headers["x-movie-reservation"]||body.reservationToken||body.reservation_token||"").trim();
   if(!auth.startsWith("Bearer ")||!reservation){
     return json(res,401,{error:"Secure Movie Creator authentication and a valid credit reservation are required."});
   }
@@ -73,7 +74,7 @@ module.exports=async(req,res)=>{
   if(req.method!=="POST")return json(res,405,{error:"Method not allowed."});
 
   try{
-    const x=req.body||{};
+    const x=body;
     const b=x.blueprint;
     const si=Number(x.sceneIndex);
     const hi=Number(x.shotIndex);
