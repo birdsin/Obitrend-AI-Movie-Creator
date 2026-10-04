@@ -13,7 +13,7 @@ let rejectAuth;
 window.movieAuthReady=new Promise((resolve,reject)=>{resolveAuth=resolve;rejectAuth=reject});
 
 function applySession(session){
-  if(!session?.user?.id) return null;
+  if(!session?.user?.id || session.user.is_anonymous) return null;
   window.movieUserId=session.user.id;
   window.moviePublicUserId="OBI-"+session.user.id.replaceAll("-","").slice(0,8).toUpperCase();
   window.movieAuthSession=session;
@@ -25,7 +25,7 @@ window.setMovieAuthSession=applySession;
 
 (async()=>{
   const {data:{session}}=await client.auth.getSession();
-  if(session) applySession(session);
+  if(session && !session.user?.is_anonymous) applySession(session);
 })();
 
 client.auth.onAuthStateChange((_event,session)=>{
