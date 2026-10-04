@@ -202,7 +202,7 @@ module.exports = async function handler(req, res) {
       return send(res, 400, { error: "Movie idea is required." });
     }
 
-    const count = length <= 5 ? 4 : length <= 15 ? 8 : 12;
+    const count = length === 1 ? 2 : length <= 5 ? 4 : length <= 15 ? 8 : 12;
     const requestedModel = getMovieModel();
 
     let response = await callOpenAI({
