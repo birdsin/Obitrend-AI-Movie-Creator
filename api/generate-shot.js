@@ -37,6 +37,20 @@ module.exports=async(req,res)=>{
   }catch(e){
     return json(res,503,{error:"Secure credit authorization is temporarily unavailable. Please try again."});
   }
+  if(req.method==="POST" && process.env.RUNWAY_GENERATION_ENABLED==="false"){
+    try{
+      await fetch(supabaseUrl+"/functions/v1/movie-credit",{
+        method:"POST",
+        headers:{
+          "content-type":"application/json",
+          "apikey":publishable,
+          "Authorization":auth
+        },
+        body:JSON.stringify({action:"release",token:String(reservation)})
+      });
+    }catch(_){}
+    return json(res,503,{error:"Movie generation is temporarily paused while the video provider API credits are replenished. Your OBITREND movie credit was restored. Please try again later.",reservationReleased:true});
+  }
   if(!process.env.RUNWAY_API_KEY){
     return json(res,500,{error:"Video generation is temporarily unavailable. Please try again shortly."});
   }
