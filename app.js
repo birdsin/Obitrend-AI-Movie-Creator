@@ -277,7 +277,7 @@ async function generateShot(){
       throw new Error("The video provider did not return a task.");
     }
   }catch(e){
-    if(reservation&&!e?.creditReleased){
+    if(reservation&&!e?.creditReleased&&!e?.creditReleaseDeferred){
       try{await finishMovieCredit("release",reservation)}catch(_){}
     }
     status("shotStatus",e.message||"Shot generation failed.",true);
@@ -286,11 +286,11 @@ async function generateShot(){
 async function pollTask(id,reservation){
   for(let i=0;i<360;i++){
     status("shotStatus","Generating cinematic shot… "+Math.min(99,Math.round((i+1)/360*100))+"%");
-    await new Promise(r=>setTimeout(r,5000));
+    await new Promise(r=>setTimeout(r,5000+Math.floor(Math.random()*1500)));
     const token=await window.getMovieAccessToken();
     const r=await fetch("/api/generate-shot?taskId="+encodeURIComponent(id),{headers:{"Authorization":"Bearer "+token,"x-movie-reservation":reservation}});
     const d=await r.json().catch(()=>({}));
-    if(!r.ok)throw new Error(d.error||"Video status check failed.");
+    if(!r.ok){const e=new Error(d.error||"Video status check failed. Your movie credit remains protected while the provider status is checked.");e.creditReleaseDeferred=true;throw e;}
     if(d.status==="SUCCEEDED"&&d.videoUrl){
       await finishMovieCredit("commit",reservation);
       showVideo(d.videoUrl);
@@ -628,11 +628,11 @@ async function generateAssemblyItem(item){
 
     for(let i=0;i<360;i++){
       $("assemblyStatus").textContent="Generating Scene "+(item.si+1)+" Shot "+(item.hi+1)+"… "+Math.min(99,Math.round((i+1)/360*100))+"%";
-      await new Promise(r=>setTimeout(r,5000));
+      await new Promise(r=>setTimeout(r,5000+Math.floor(Math.random()*1500)));
       const pollToken=await window.getMovieAccessToken();
       const s=await fetch("/api/generate-shot?taskId="+encodeURIComponent(d.taskId),{headers:{"Authorization":"Bearer "+pollToken,"x-movie-reservation":reservation}});
       const x=await s.json().catch(()=>({}));
-      if(!s.ok)throw new Error(x.error||"Video status check failed.");
+      if(!s.ok){const e=new Error(x.error||"Video status check failed. Your movie credit remains protected while the provider status is checked.");e.creditReleaseDeferred=true;throw e;}
       if(x.status==="SUCCEEDED"&&x.videoUrl){
         await finishMovieCredit("commit",reservation);
         reservation=null;
@@ -646,7 +646,7 @@ async function generateAssemblyItem(item){
     }
     throw new Error("The shot is still processing. Keep this page open and wait for the movie to finish.");
   }catch(e){
-    if(reservation&&!e?.creditReleased){
+    if(reservation&&!e?.creditReleased&&!e?.creditReleaseDeferred){
       try{await finishMovieCredit("release",reservation)}catch(_){}
     }
     throw e;
