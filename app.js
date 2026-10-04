@@ -278,7 +278,8 @@ function openMenu(name){
     '<div class="credit-box"><strong>'+getMovieCredits()+'</strong><span>Credits available</span></div>'+
     '<div class="status">User ID: '+esc(getMovieEntitlement().userId||"Creating…")+'</div>'+
     '<div class="status">Plan: '+esc(getMoviePlanLabel())+'</div>'+
-    renderMenuCard("How credits work","One movie credit is consumed only after a video shot is successfully generated.","credits-info")),
+    renderMenuCard("How credits work","One movie credit is consumed only after a video shot is successfully generated.","credits-info")+
+    '<div id="menuActionStatus" class="status"></div>'),
   settings:()=>menuOpen("Settings","Movie Creator settings are saved on this device.",'<div class="settings-list"><label class="setting-row"><span>Save movie history</span><input id="settingHistory" type="checkbox" checked></label><button class="outline-btn menu-action" data-menu-action="clear-history">Clear saved history</button><button class="outline-btn menu-action" data-menu-action="clear-project">Clear current project</button></div><div id="menuActionStatus" class="status"></div>'),
   help:()=>menuOpen("Help & Support","Quick help for the Movie Creator.",renderMenuCard("How do I create a movie?","Open Create Image, enter an idea, then build your cinematic blueprint.","help:create")+renderMenuCard("How do I generate video?","Open Create Video, choose a shot, then use Generate This Shot.","help:video")+renderMenuCard("Generation failed?","Your blueprint stays saved so you can try the shot again.","help:error"))
  };
