@@ -745,7 +745,7 @@ document.addEventListener("DOMContentLoaded",()=>{
         const a=b.dataset.drawerAction;
         if(a==="home"){close();window.scrollTo({top:0,behavior:"smooth"});}
         else if(a==="create"){close();showCreate();}
-        else if(a==="movies"){close();document.querySelector(".android-projects")?.scrollIntoView({behavior:"smooth"});}
+        else if(a==="movies"){close();window.navigateTo?.("my-movies");}
         else if(a==="credits"){close();openMenu("credits");}
         else {close();notify(a==="settings"?"Settings will be available here.":"Help & Support will be available here.");}
       });
