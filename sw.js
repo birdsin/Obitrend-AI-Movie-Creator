@@ -1,4 +1,4 @@
-const CACHE="obitrend-movie-shell-v1";
+const CACHE="obitrend-movie-shell-v2";
 const CORE=["/","/index.html","/styles.css","/app.js","/movie-auth.js"];
 self.addEventListener("install",event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE).catch(()=>{})).then(()=>self.skipWaiting()));
