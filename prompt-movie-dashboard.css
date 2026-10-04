@@ -255,3 +255,7 @@ body.pm-menu-open{overflow:hidden}
 @media(prefers-reduced-motion:reduce){
   .pm-engine-step.processing svg,.pm-engine-processing .pm-cinema-lens,.pm-engine-processing .pm-floating-icon{animation:none}
 }
+
+/* GENERATE PROCESSING SPINNER — FIX ONLY */
+.pm-generate-spinner{width:18px!important;height:18px!important;display:inline-block;vertical-align:-4px;animation:pmGenerateSpin .8s linear infinite}
+@keyframes pmGenerateSpin{to{transform:rotate(360deg)}}
