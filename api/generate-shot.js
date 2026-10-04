@@ -101,20 +101,17 @@ module.exports=async(req,res)=>{
       "Aspect ratio "+ratio+"."
     ].join(" ");
 
-    // Use Runway's current Model Router text-to-video path.
-    // This avoids the Gen-4.5 /image_to_video promptImage validation that
-    // rejects prompt-only requests on the current production API.
+    // Runway Gen-4.5 supports prompt-only text-to-video on the
+    // image_to_video endpoint when promptImage is omitted.
     const safePrompt=prompt.length>1000?prompt.slice(0,997)+"...":prompt;
     const body={
-      configId:"preview-fast",
-      input:{
-        promptText:safePrompt,
-        duration:5,
-        aspectRatio:ratio==="9:16"?"9:16":"16:9"
-      }
+      model:"gen4.5",
+      promptText:safePrompt,
+      duration:5,
+      ratio:ratio==="9:16"?"720:1280":"1280:720"
     };
 
-    const r=await runwayRequest("/generate/video",{
+    const r=await runwayRequest("/image_to_video",{
       method:"POST",
       body:JSON.stringify(body)
     });
@@ -123,7 +120,18 @@ module.exports=async(req,res)=>{
     if(!r.ok){
       const providerMessage=d&&d.error?String(d.error):d&&d.message?String(d.message):"";
       console.error("Runway start failed:",r.status,JSON.stringify(d));
-      return json(res,502,{error:"The video generator could not start this shot. Please try again."});
+      try{
+        await fetch(supabaseUrl+"/functions/v1/movie-credit",{
+          method:"POST",
+          headers:{
+            "content-type":"application/json",
+            "apikey":publishable,
+            "Authorization":auth
+          },
+          body:JSON.stringify({action:"release",token:String(reservation)})
+        });
+      }catch(_){}
+      return json(res,502,{error:"The video generator could not start this shot. Your credit was restored. Please try again."});
     }
 
     const taskId=d.id||d.task_id;
