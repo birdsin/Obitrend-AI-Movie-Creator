@@ -1,3 +1,91 @@
+function obiAuthToast(message,ok=false){
+  const e=$("authToast");if(!e)return;e.textContent=message;e.className="obi-toast"+(ok?" ok":"");
+}
+function obiSaveAccount(email){
+  const key="obitrend_accounts";
+  let list=[];try{list=JSON.parse(localStorage.getItem(key)||"[]")}catch(_){}
+  if(!Array.isArray(list))list=[];
+  list=list.filter(x=>String(x).toLowerCase()!==email.toLowerCase());
+  list.unshift(email.toLowerCase());
+  localStorage.setItem(key,JSON.stringify(list.slice(0,10)));
+  localStorage.setItem("obitrend_movie_email",email.toLowerCase());
+}
+function obiShowAuth(showCreate=false){
+  const auth=$("obitrendAuth"),dash=$("promptDashboard"),signIn=$("authSignIn"),create=$("authCreate");
+  if(auth)auth.hidden=false;
+  dash?.classList.remove("auth-unlocked");dash?.classList.add("auth-locked");
+  if(signIn)signIn.hidden=showCreate;
+  if(create)create.hidden=!showCreate;
+}
+function obiShowDashboard(){
+  const auth=$("obitrendAuth"),dash=$("promptDashboard");
+  if(auth)auth.hidden=true;
+  dash?.classList.remove("auth-locked");dash?.classList.add("auth-unlocked");
+}
+function obiTogglePassword(id,buttonId){
+  const input=$(id),button=$(buttonId);if(!input||!button)return;
+  button.onclick=()=>{const visible=input.type==="text";input.type=visible?"password":"text";button.textContent=visible?"👁️":"🙈";};
+}
+function obiPasswordStrength(value){
+  let score=0;if(value.length>=8)score++;if(/[A-Z]/.test(value)&&/[a-z]/.test(value))score++;if(/\\d/.test(value)&&/[^A-Za-z0-9]/.test(value))score++;
+  const label=score>=3?"Strong":score===2?"Medium":"Weak",e=$("passwordStrength");
+  if(e){e.innerHTML='Password strength: <b>'+label+'</b>';e.querySelector("b").style.color=label==="Strong"?"#b8df9e":label==="Medium"?"#e4bd50":"#ff9b9b";}
+}
+function obiSetupAuth(){
+  if(!$("obitrendAuth")||!window.movieSupabase)return;
+  const existingSession=window.movieAuthSession;
+  if(existingSession)obiShowDashboard();else obiShowAuth(false);
+  $("showCreate")?.addEventListener("click",()=>obiShowAuth(true));
+  $("showSignIn")?.addEventListener("click",()=>obiShowAuth(false));
+  obiTogglePassword("authPassword","togglePassword");
+  obiTogglePassword("createPassword","toggleCreatePassword");
+  $("createPassword")?.addEventListener("input",e=>obiPasswordStrength(e.target.value));
+  $("signInForm")?.addEventListener("submit",async e=>{
+    e.preventDefault();const email=$("authEmail").value.trim().toLowerCase(),password=$("authPassword").value;
+    if(!email||!password){obiAuthToast("Enter your email and password.");return}
+    const btn=e.submitter;btn.disabled=true;obiAuthToast("Signing in…");
+    try{await window.movieSignIn(email,password);obiSaveAccount(email);obiShowDashboard();await refreshMovieEntitlement();obiAuthToast("Signed in successfully.",true);}
+    catch(err){obiAuthToast(err.message||"Sign in failed.");}
+    finally{btn.disabled=false}
+  });
+  $("createAccountForm")?.addEventListener("submit",async e=>{
+    e.preventDefault();
+    const name=$("authFullName").value.trim(),email=$("createEmail").value.trim().toLowerCase(),password=$("createPassword").value,confirm=$("confirmPassword").value;
+    if(!name||!email||!password){obiAuthToast("Complete all required fields.");return}
+    if(password!==confirm){obiAuthToast("Passwords do not match.");return}
+    if(password.length<8){obiAuthToast("Password must be at least 8 characters.");return}
+    if(!$("termsCheck").checked){obiAuthToast("Please agree to the Terms.");return}
+    const btn=e.submitter;btn.disabled=true;obiAuthToast("Creating your account…");
+    try{
+      const data=await window.movieSignUp(email,password,name);
+      if(!data.session){
+        const signed=await window.movieSignIn(email,password);
+        if(!signed?.session)throw new Error("Please confirm your email, then sign in.");
+      }
+      obiSaveAccount(email);obiShowDashboard();await refreshMovieEntitlement();obiAuthToast("Account created. 5 free movie credits are ready.",true);
+    }catch(err){obiAuthToast(err.message||"Could not create account.");}
+    finally{btn.disabled=false}
+  });
+  $("forgotPassword")?.addEventListener("click",async()=>{
+    const email=$("authEmail").value.trim().toLowerCase();
+    if(!email){obiAuthToast("Enter your email first.");return}
+    try{const r=await window.movieSupabase.auth.resetPasswordForEmail(email,{redirectTo:location.origin+"/"});if(r.error)throw r.error;obiAuthToast("Password reset email sent.",true);}
+    catch(err){obiAuthToast(err.message||"Could not send reset email.");}
+  });
+  $("biometricBtn")?.addEventListener("click",async()=>{
+    if(!window.PublicKeyCredential||!navigator.credentials){obiAuthToast("Biometric not available on this device.");return}
+    const session=window.movieAuthSession;
+    if(!session){obiAuthToast("Sign in with your password first to enable secure biometric unlock.");return}
+    try{
+      await navigator.credentials.get({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),timeout:60000,userVerification:"required",allowCredentials:[]}});
+      localStorage.setItem("obitrend_biometric_enabled","1");obiAuthToast("Biometric verification successful.",true);obiShowDashboard();
+    }catch(err){obiAuthToast("Biometric verification was cancelled or unavailable.");}
+  });
+}
+document.addEventListener("DOMContentLoaded",()=>{
+  const wait=()=>{if(window.movieSupabase)obiSetupAuth();else setTimeout(wait,25)};wait();
+});
+
 document.addEventListener("DOMContentLoaded",()=>{
   if(state.blueprint && localStorage.getItem("obitrend_movie_blueprint")){
     renderBlueprint(state.blueprint);
