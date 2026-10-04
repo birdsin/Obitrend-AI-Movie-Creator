@@ -101,7 +101,7 @@ module.exports=async(req,res)=>{
       "Aspect ratio "+ratio+"."
     ].join(" ");
 
-    // Runway's current documented text-only video flow uses imageToVideo with no prompt image.
+    // Runway Gen-4.5 text-to-video uses the imageToVideo endpoint with no prompt image.
     // Gen-4.5 accepts 16:9 and 9:16 outputs; unsupported UI ratios safely fall back to landscape.
     const safePrompt=prompt.length>1000?prompt.slice(0,997)+"...":prompt;
     const model=process.env.RUNWAY_MODEL||"gen4.5";
@@ -112,7 +112,7 @@ module.exports=async(req,res)=>{
       ratio:runwayRatio(ratio)
     };
 
-    const r=await runwayRequest("/text_to_video",{
+    const r=await runwayRequest("/image_to_video",{
       method:"POST",
       body:JSON.stringify(body)
     });
