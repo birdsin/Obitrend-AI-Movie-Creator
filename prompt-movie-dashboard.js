@@ -149,7 +149,7 @@
 
   function renderDemos(){
     if(!recent)return;
-    recent.innerHTML='<div class="pm-demo-grid">'+demoMovies.map((m,i)=>
+    recent.innerHTML='<div class="pm-empty pm-demo-empty">No movies yet<br><button class="pm-player-cta" type="button" id="pmFirstMovieCta">Generate your first movie →</button></div><div class="pm-demo-grid">'+demoMovies.map((m,i)=>
       '<button class="pm-project pm-demo" type="button" data-demo-index="'+i+'">'+
         '<div class="pm-project-art pm-demo-art" style="background-image:url('+m.image+')">'+
           '<span class="pm-genre">'+m.genre+'</span><span class="pm-badge">'+m.length+' min</span>'+
@@ -158,6 +158,7 @@
         '</div><div class="pm-demo-copy"><b>'+m.title+'</b><span>'+m.genre+' · Tap to use this story</span></div>'+
       '</button>'
     ).join("")+'</div>';
+    recent.querySelector("#pmFirstMovieCta")?.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
     recent.querySelectorAll("[data-demo-index]").forEach(card=>card.addEventListener("click",()=>fillPrompt(demoMovies[Number(card.dataset.demoIndex)]?.prompt)));
     recent.querySelectorAll(".pm-demo .pm-play").forEach(play=>play.addEventListener("click",e=>{
       e.preventDefault();e.stopPropagation();
