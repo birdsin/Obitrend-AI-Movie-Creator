@@ -23,11 +23,11 @@
 
 <main class="pm-dashboard" id="promptDashboard">
   <header class="pm-topbar">
-    <button class="pm-menu" type="button" aria-label="Open menu">☰</button>
+    <button class="pm-menu" id="pmMenuBtn" type="button" aria-label="Open menu"><i data-lucide="menu"></i></button>
     <div class="pm-brand"><span class="pm-crown">♛</span><div><b>OBITREND</b><span>AI MOVIE CREATOR</span></div></div>
     <div class="pm-top-actions">
-      <div class="pm-credit" id="pmCredit">AI CREATOR</div>
-      <div class="pm-avatar">P</div>
+      <button class="pm-credit pm-nav-btn" id="pmCreatorBtn" type="button">AI CREATOR</button>
+      <button class="pm-avatar pm-nav-btn" id="pmProfileBtn" type="button" aria-label="Profile">P</button>
     </div>
   </header>
 
@@ -38,7 +38,7 @@
       <p>Write what you want to see. OBITREND automatically turns your idea into the story, characters, scenes, cinematic camera direction, lighting, sound and visual continuity.</p>
     </div>
     <div class="pm-cinema" aria-hidden="true">
-      <div class="pm-cinema-grid"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="pm-cinema-grid"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="pm-cinema-lens"><i data-lucide="camera"></i><span></span></div><div class="pm-floating-icon pm-fi-one"><i data-lucide="film"></i></div><div class="pm-floating-icon pm-fi-two"><i data-lucide="clapperboard"></i></div><div class="pm-floating-icon pm-fi-three"><i data-lucide="video"></i></div>
       <div class="pm-cinema-copy"><strong>OBITREND CINEMATIC ENGINE</strong><span>Story · Cast · Scenes · Camera · Lighting · Sound · Continuity</span></div>
     </div>
   </section>
@@ -52,7 +52,7 @@
       <textarea id="pmPrompt" class="pm-prompt" maxlength="8000" placeholder="Example: A young man returns to Lagos after many years and discovers that his family business is in danger. Make it emotional, cinematic and realistic..."></textarea>
     </div>
     <div class="pm-composer-foot">
-      <button id="pmGenerate" class="pm-generate" type="button">✦ Generate My Movie</button>
+      <button id="pmGenerate" class="pm-generate" type="button"><i data-lucide="sparkles"></i> Generate My Movie</button>
       <span class="pm-shortcut">Ctrl / ⌘ + Enter</span>
     </div>
     <div id="pmStatus" class="pm-status" aria-live="polite"></div>
@@ -64,17 +64,15 @@
   </section>
 
   <section class="pm-auto-grid" aria-label="Automatic movie features">
-    <div class="pm-auto-card"><b>STORY</b><span>AI creates the title, logline, story structure and pacing.</span></div>
-    <div class="pm-auto-card"><b>CHARACTERS</b><span>AI builds consistent characters, appearances and wardrobe.</span></div>
-    <div class="pm-auto-card"><b>CINEMATOGRAPHY</b><span>AI selects framing, lenses, movement, lighting and atmosphere.</span></div>
-    <div class="pm-auto-card"><b>CONTINUITY</b><span>AI keeps locations, characters and visual details consistent.</span></div>
+    <div class="pm-auto-card"><div class="pm-feature-icon"><i data-lucide="book-open"></i></div><div><b>STORY</b><span>AI creates the title, logline, story structure and pacing.</span></div></div>
+    <div class="pm-auto-card"><div class="pm-feature-icon"><i data-lucide="users"></i></div><div><b>CHARACTERS</b><span>AI builds consistent characters, appearances and wardrobe.</span></div></div>
+    <div class="pm-auto-card"><div class="pm-feature-icon"><i data-lucide="camera"></i></div><div><b>CINEMATOGRAPHY</b><span>AI selects framing, lenses, movement, lighting and atmosphere.</span></div></div>
+    <div class="pm-auto-card"><div class="pm-feature-icon"><i data-lucide="layers"></i></div><div><b>CONTINUITY</b><span>AI keeps locations, characters and visual details consistent.</span></div></div>
   </section>
 
   <section class="pm-recent">
     <div class="pm-section-title"><h2>Recent Movies</h2><span>Your latest creations</span></div>
-    <div class="pm-projects" id="pmProjects">
-      <div class="pm-project"><div class="pm-project-art">YOUR STORY</div><b>Your next movie</b><span>Start with one prompt above</span></div>
-    </div>
+    <div class="pm-projects" id="pmProjects"><div class="pm-empty">No movies yet</div></div>
   </section>
 
   <section id="pmResult" class="pm-engine" aria-hidden="true">
@@ -102,6 +100,7 @@
   <section id="shotStudio" class="shot-studio"><h2 id="shotTitle"></h2><p id="shotDescription"></p><div id="shotDetails"></div><div id="videoPlaceholder"></div><video id="shotVideo"></video><button id="generateShotBtn" type="button">Generate</button><div id="shotStatus"></div></section>
 </section>
 
+<script src="https://unpkg.com/lucide@latest"></script>
 <script type="module" src="/movie-auth.js?v=20261004-4"></script>
 <script src="/app.js?v=20261004-4"></script>
 <script src="/mobile-pro-fix.js?v=20260927-1"></script>
