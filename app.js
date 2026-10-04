@@ -17,12 +17,12 @@ function getMovieHistory(){
   }catch(e){return []}
 }
 const MOVIE_PLANS={
-  oneDay:{name:"1 Day Pro",priceNaira:4000,credits:2,durationDays:1},
-  twoDays:{name:"2 Day Pro",priceNaira:8000,credits:4,durationDays:2},
-  sixDays:{name:"6 Day Pro",priceNaira:12000,credits:6,durationDays:6},
-  weekly:{name:"7 Day Pro",priceNaira:16000,credits:8,durationDays:7},
-  fourteenDays:{name:"14 Day Pro",priceNaira:34000,credits:17,durationDays:14},
-  monthly:{name:"1 Month Pro",priceNaira:68000,credits:35,durationDays:30}
+  oneDay:{name:"1 Day Pro",priceNaira:5000,credits:1,durationDays:1},
+  twoDays:{name:"2 Day Pro",priceNaira:10000,credits:2,durationDays:2},
+  sixDays:{name:"6 Day Pro",priceNaira:20000,credits:4,durationDays:6},
+  weekly:{name:"7 Day Pro",priceNaira:40000,credits:8,durationDays:7},
+  fourteenDays:{name:"14 Day Pro",priceNaira:50000,credits:10,durationDays:14},
+  monthly:{name:"1 Month Pro",priceNaira:100000,credits:20,durationDays:30}
 };
 function getMovieEntitlement(){
   if(movieServerEntitlement){
@@ -339,9 +339,12 @@ function openMenu(name){
         '<div class="credit-box"><strong>'+esc(e.plan||"Free")+'</strong><span>Current plan</span></div>'+
         '<div class="status">User ID: '+esc(e.userId||window.moviePublicUserId||"Creating…")+'</div>'+
         '<div class="status">Movie credits: '+getMovieCredits()+' · Expiry: '+esc(expiry)+'</div>'+
-        renderMenuCard("3 Day Creator","₦13,000 · 10 credits · 3 days","pro:threeDays")+
-        renderMenuCard("Weekly Creator","₦26,000 · 22 credits · 7 days","pro:weekly")+
-        renderMenuCard("Monthly Creator","₦90,000 · 70 credits · 30 days","pro:monthly")+
+        renderMenuCard("1 Day Pro","₦5,000 · 1 video credit · 1 day","pro:oneDay")+
+        renderMenuCard("2 Day Pro","₦10,000 · 2 video credits · 2 days","pro:twoDays")+
+        renderMenuCard("6 Day Pro","₦20,000 · 4 video credits · 6 days","pro:sixDays")+
+        renderMenuCard("7 Day Pro","₦40,000 · 8 video credits · 7 days","pro:weekly")+
+        renderMenuCard("14 Day Pro","₦50,000 · 10 video credits · 14 days","pro:fourteenDays")+
+        renderMenuCard("1 Month Pro","₦100,000 · 20 video credits · 1 month","pro:monthly")+
         '<div class="status">Plan activation must come from the payment/entitlement system. This screen does not create a paid subscription by itself.</div>');
     };
     renderPro();
