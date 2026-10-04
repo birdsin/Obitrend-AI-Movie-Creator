@@ -245,10 +245,24 @@
       drawer.querySelectorAll("[data-pm-nav]").forEach(btn=>btn.addEventListener("click",()=>{
         const action=btn.dataset.pmNav;
         closeDrawer();
-        if(action==="home")window.scrollTo({top:0,behavior:"smooth"});
-        else if(action==="create"){prompt?.focus();q(".pm-composer")?.scrollIntoView({behavior:"smooth",block:"center"});}
-        else if(action==="creations"||action==="pro"||action==="settings"){if(typeof openMenu==="function")openMenu(action==="creations"?"creations":action);}
+        if(action==="home"){
+          window.scrollTo({top:0,behavior:"smooth"});
+        }else if(action==="create"){
+          document.getElementById("create")?.scrollIntoView({behavior:"smooth",block:"start"});
+          prompt?.focus();
+        }else if(action==="creations"){
+          document.getElementById("movies")?.scrollIntoView({behavior:"smooth",block:"start"});
+        }else if(action==="pro"){
+          window.location.assign("/pricing");
+        }else if(action==="settings"){
+          window.location.assign("/settings");
+        }
       }));
+      document.addEventListener("click",e=>{
+        if(!menuOpenState)return;
+        if(e.target.closest("#pmDrawer")||e.target.closest("#pmMenuBtn"))return;
+        closeDrawer();
+      });
       iconRefresh();
     }
     menuOpenState=!menuOpenState;
