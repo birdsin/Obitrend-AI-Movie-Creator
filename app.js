@@ -284,8 +284,8 @@ async function generateShot(){
   }finally{b.disabled=false}
 }
 async function pollTask(id,reservation){
-  for(let i=0;i<120;i++){
-    status("shotStatus","Generating cinematic shot… "+Math.min(99,Math.round((i+1)/120*100))+"%");
+  for(let i=0;i<360;i++){
+    status("shotStatus","Generating cinematic shot… "+Math.min(99,Math.round((i+1)/360*100))+"%");
     await new Promise(r=>setTimeout(r,5000));
     const token=await window.getMovieAccessToken();
     const r=await fetch("/api/generate-shot?taskId="+encodeURIComponent(id),{headers:{"Authorization":"Bearer "+token,"x-movie-reservation":reservation}});
@@ -303,7 +303,7 @@ async function pollTask(id,reservation){
       throw e;
     }
   }
-  throw new Error("The shot is still processing. Please wait before starting another generation.");
+  throw new Error("The shot is still processing. Keep this page open and wait for the movie to finish.");
 }
 function showVideo(url){$("videoPlaceholder").classList.add("hidden");$("shotVideo").src=url;$("shotVideo").classList.remove("hidden");$("shotVideo").load()}
 
@@ -626,8 +626,8 @@ async function generateAssemblyItem(item){
     }
     if(!d.taskId)throw new Error("The video provider did not return a task.");
 
-    for(let i=0;i<120;i++){
-      $("assemblyStatus").textContent="Generating Scene "+(item.si+1)+" Shot "+(item.hi+1)+"… "+Math.min(99,Math.round((i+1)/120*100))+"%";
+    for(let i=0;i<360;i++){
+      $("assemblyStatus").textContent="Generating Scene "+(item.si+1)+" Shot "+(item.hi+1)+"… "+Math.min(99,Math.round((i+1)/360*100))+"%";
       await new Promise(r=>setTimeout(r,5000));
       const pollToken=await window.getMovieAccessToken();
       const s=await fetch("/api/generate-shot?taskId="+encodeURIComponent(d.taskId),{headers:{"Authorization":"Bearer "+pollToken,"x-movie-reservation":reservation}});
@@ -644,7 +644,7 @@ async function generateAssemblyItem(item){
         throw e;
       }
     }
-    throw new Error("The shot is still processing. Please wait before starting another generation.");
+    throw new Error("The shot is still processing. Keep this page open and wait for the movie to finish.");
   }catch(e){
     if(reservation&&!e?.creditReleased){
       try{await finishMovieCredit("release",reservation)}catch(_){}
