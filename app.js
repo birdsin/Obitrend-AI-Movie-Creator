@@ -50,68 +50,77 @@ function setMoviePlan(plan,expiresAt=null){
 async function startMoviePayment(planKey){
   const plan=MOVIE_PLANS[planKey];
   if(!plan){status("status","Invalid movie plan.",true);return}
-  let email=localStorage.getItem("obitrend_movie_email")||"";
-  email=window.prompt("Enter the email you use for Paystack payment:",email)||"";
-  email=email.trim().toLowerCase();
-  if(!email)return;
-  localStorage.setItem("obitrend_movie_email",email);
-  status("status","Opening secure Paystack checkout…");
   try{
-    const r=await fetch("/api/movie-payment",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"initialize",plan:planKey,email})});
+    await window.movieAuthReady;
+    let email=localStorage.getItem("obitrend_movie_email")||"";
+    email=window.prompt("Enter the email you use for Paystack payment:",email)||"";
+    email=email.trim().toLowerCase();
+    if(!email)return;
+    localStorage.setItem("obitrend_movie_email",email);
+    status("status","Opening secure Paystack checkout…");
+    const token=await window.getMovieAccessToken();
+    const r=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-payment",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({action:"initialize",plan:planKey,email})});
     const d=await r.json().catch(()=>({}));
     if(!r.ok)throw new Error(d.error||"Could not start payment.");
     localStorage.setItem("obitrend_movie_pending_reference",d.reference);
     localStorage.setItem("obitrend_movie_pending_plan",planKey);
     window.location.href=d.authorization_url;
-  }catch(e){status("status",e.message,true)}
+  }catch(e){status("status",e.message||"Secure payment setup failed.",true)}
 }
 async function verifyMoviePaymentReturn(){
   const q=new URLSearchParams(window.location.search);
   if(q.get("movie_payment")!=="success")return;
   const reference=q.get("reference")||localStorage.getItem("obitrend_movie_pending_reference")||"";
   if(!reference)return;
-  const already=localStorage.getItem("obitrend_movie_verified_reference");
-  if(already===reference){
-    history.replaceState({},document.title,window.location.pathname);
-    return;
-  }
   status("status","Verifying your movie payment…");
   try{
-    const r=await fetch("/api/movie-payment",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"verify",reference})});
+    await window.movieAuthReady;
+    const token=await window.getMovieAccessToken();
+    const r=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-payment",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({action:"verify",reference})});
     const d=await r.json().catch(()=>({}));
     if(!r.ok||!d.success)throw new Error(d.error||"Payment verification failed.");
-    const expiry=new Date(Date.now()+Number(d.durationDays||0)*86400000).toISOString();
-    setMoviePlan(d.planName,expiry);
-    setMovieCredits(d.credits);
     localStorage.setItem("obitrend_movie_verified_reference",reference);
     localStorage.removeItem("obitrend_movie_pending_reference");
     localStorage.removeItem("obitrend_movie_pending_plan");
     if(d.email)localStorage.setItem("obitrend_movie_email",d.email);
     history.replaceState({},document.title,window.location.pathname);
-    updateAndroidStats();
-    status("status",d.planName+" activated. "+d.credits+" movie credits added.");
-  }catch(e){status("status",e.message,true)}
+    await refreshMovieEntitlement();
+    status("status",d.planName+" activated. "+d.credits+" movie credits added. User ID: "+(d.user_id||window.movieUserId));
+  }catch(e){status("status",e.message||"Payment verification failed.",true)}
 }
-function getMovieCredits(){
-  const raw=localStorage.getItem("obitrend_movie_credits");
-  const n=Number(raw);
-  if(Number.isFinite(n)&&n>=0)return Math.floor(n);
-  localStorage.setItem("obitrend_movie_credits","0");
-  return 0;
-}
-function setMovieCredits(n){
-  const value=Math.max(0,Math.floor(Number(n)||0));
-  localStorage.setItem("obitrend_movie_credits",String(value));
+let movieServerEntitlement=null;
+async function refreshMovieEntitlement(){
+  await window.movieAuthReady;
+  const token=await window.getMovieAccessToken();
+  const r=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-credit",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({action:"status"})});
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(d.error||"Could not load your movie entitlement.");
+  movieServerEntitlement=d||{plan_name:"Free",credits:0,active:false};
   updateAndroidStats();
-  return value;
+  return movieServerEntitlement;
 }
-function consumeMovieCredit(){
-  const current=getMovieCredits();
-  if(current<=0)return false;
-  setMovieCredits(current-1);
+function getMovieCredits(){return Number(movieServerEntitlement?.credits||0)}
+function setMovieCredits(){updateAndroidStats();return getMovieCredits()}
+async function reserveMovieCredit(){
+  await window.movieAuthReady;
+  const token=await window.getMovieAccessToken();
+  const r=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-credit",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({action:"reserve"})});
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(d.error||"No movie credits available. Please upgrade your Pro plan.");
+  movieServerEntitlement=movieServerEntitlement||{};
+  movieServerEntitlement.credits=Number(d.remaining_credits||0);
+  updateAndroidStats();
+  return d.reservation_token;
+}
+async function finishMovieCredit(action,token){
+  const access=await window.getMovieAccessToken();
+  const r=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-credit",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+access},body:JSON.stringify({action,token})});
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok||!d.ok)throw new Error(d.error||("Could not "+action+" movie credit."));
+  await refreshMovieEntitlement();
   return true;
 }
-function getMoviePlan(){return getMovieEntitlement().plan||"Free"}
+function getMoviePlan(){return movieServerEntitlement?.plan_name||"Free"}
 function getMoviePlanLabel(){
   const e=getMovieEntitlement();
   if(e.plan==="Free")return "Free";
@@ -176,8 +185,28 @@ function renderBlueprint(b){
 }
 function openShot(si,hi){state.sceneIndex=si;state.shotIndex=hi;const s=state.blueprint.scenes[si],sh=s.shots[hi];$("shotStudio").classList.remove("hidden");$("shotTitle").textContent="Scene "+(si+1)+" · Shot "+(hi+1);$("shotDescription").textContent=s.heading||"";$("shotDetails").innerHTML=[["Camera",sh.camera],["Lens",sh.lens],["Framing",sh.framing],["Angle",sh.angle],["Movement",sh.movement],["Focus",sh.focus],["Lighting",sh.lighting],["Sound",sh.sound],["Continuity",sh.continuity]].filter(x=>x[1]).map(x=>"<div class=\"detail\"><b>"+esc(x[0])+"</b><span>"+esc(x[1])+"</span></div>").join("");$("shotVideo").classList.add("hidden");$("shotVideo").removeAttribute("src");$("videoPlaceholder").classList.remove("hidden");status("shotStatus","");$("shotStudio").scrollIntoView({behavior:"smooth",block:"start"})}
 $("generateShotBtn").onclick=generateShot;$("closeStudio").onclick=()=>{$("shotStudio").classList.add("hidden")};const legacyMenuBtn=$("menuBtn");if(legacyMenuBtn){legacyMenuBtn.onclick=()=>{const sidebar=$("sidebar");if(!sidebar)return;const opening=!sidebar.classList.contains("open");if(opening){sidebar.classList.add("open");$("menuWorkspace")?.classList.add("hidden");document.querySelectorAll(".nav-dropdown.open").forEach(x=>x.classList.remove("open"));document.querySelectorAll(".nav-chevron.open").forEach(x=>x.classList.remove("open"));legacyMenuBtn.setAttribute("aria-expanded","true")}else{sidebar.classList.remove("open");$("menuWorkspace")?.classList.add("hidden");document.querySelectorAll(".nav-dropdown.open").forEach(x=>x.classList.remove("open"));document.querySelectorAll(".nav-chevron.open").forEach(x=>x.classList.remove("open"));legacyMenuBtn.setAttribute("aria-expanded","false")}}}
-async function generateShot(){if(!state.blueprint)return;if(getMovieCredits()<=0){status("shotStatus","No movie credits remaining. Please add credits before generating another shot.",true);return}const b=$("generateShotBtn");b.disabled=true;status("shotStatus","Sending shot to the video generator…");try{const r=await fetch("/api/generate-shot",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({blueprint:state.blueprint,sceneIndex:state.sceneIndex,shotIndex:state.shotIndex,ratio:$("ratio").value})});const d=await r.json();if(!r.ok)throw new Error(d.error||"Shot generation failed.");if(d.videoUrl){if(!consumeMovieCredit())throw new Error("No movie credit is available for this shot.");showVideo(d.videoUrl);status("shotStatus","Shot ready.")}else if(d.taskId){await pollTask(d.taskId)}else throw new Error("The video provider did not return a task.")}catch(e){status("shotStatus",e.message,true)}finally{b.disabled=false}}
-async function pollTask(id){for(let i=0;i<90;i++){status("shotStatus","Generating cinematic shot… "+Math.min(99,Math.round((i+1)/90*100))+"%");await new Promise(r=>setTimeout(r,5000));const r=await fetch("/api/generate-shot?taskId="+encodeURIComponent(id));const d=await r.json();if(!r.ok)throw new Error(d.error||"Video status check failed.");if(d.status==="SUCCEEDED"&&d.videoUrl){if(!consumeMovieCredit())throw new Error("No movie credit is available for this shot.");showVideo(d.videoUrl);status("shotStatus","Shot ready.");return}if(d.status==="FAILED"||d.status==="CANCELED")throw new Error("The shot could not be generated. Your project was not changed.")}throw new Error("Generation is taking longer than expected. Check the shot again shortly.")}
+async function generateShot(){
+  if(!state.blueprint)return;
+  const b=$("generateShotBtn");b.disabled=true;
+  let reservation=null;
+  try{
+    await window.movieAuthReady;
+    await refreshMovieEntitlement();
+    reservation=await reserveMovieCredit();
+    const token=await window.getMovieAccessToken();
+    status("shotStatus","Sending shot to the video generator…");
+    const r=await fetch("/api/generate-shot",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token,"x-movie-reservation":reservation},body:JSON.stringify({blueprint:state.blueprint,sceneIndex:state.sceneIndex,shotIndex:state.shotIndex,ratio:$("ratio").value})});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error||"Shot generation failed.");
+    if(d.videoUrl){await finishMovieCredit("commit",reservation);showVideo(d.videoUrl);status("shotStatus","Shot ready.")} 
+    else if(d.taskId){await pollTask(d.taskId,reservation)}
+    else throw new Error("The video provider did not return a task.");
+  }catch(e){
+    if(reservation){try{await finishMovieCredit("release",reservation)}catch(_){}}
+    status("shotStatus",e.message||"Shot generation failed.",true);
+  }finally{b.disabled=false}
+}
+async function pollTask(id,reservation){for(let i=0;i<90;i++){status("shotStatus","Generating cinematic shot… "+Math.min(99,Math.round((i+1)/90*100))+"%");await new Promise(r=>setTimeout(r,5000));const token=await window.getMovieAccessToken();const r=await fetch("/api/generate-shot?taskId="+encodeURIComponent(id),{headers:{"Authorization":"Bearer "+token,"x-movie-reservation":reservation}});const d=await r.json();if(!r.ok)throw new Error(d.error||"Video status check failed.");if(d.status==="SUCCEEDED"&&d.videoUrl){await finishMovieCredit("commit",reservation);showVideo(d.videoUrl);status("shotStatus","Shot ready.");return}if(d.status==="FAILED"||d.status==="CANCELED")throw new Error("The shot could not be generated. Your credit was restored.")}throw new Error("Generation is taking longer than expected. Check the shot again shortly.")}
 function showVideo(url){$("videoPlaceholder").classList.add("hidden");$("shotVideo").src=url;$("shotVideo").classList.remove("hidden");$("shotVideo").load()}
 
 window.addEventListener("DOMContentLoaded",()=>{updateAndroidStats();if(state.blueprint)renderBlueprint(state.blueprint)});
