@@ -106,12 +106,12 @@ module.exports=async(req,res)=>{
     const model=process.env.RUNWAY_MODEL||"gen4.5";
     const body={
       model,
-      promptText:prompt,
+      promptText:safePrompt,
       duration:5,
       ratio:runwayRatio(ratio)
     };
 
-    const r=await runwayRequest("/image_to_video",{
+    const r=await runwayRequest("/text_to_video",{
       method:"POST",
       body:JSON.stringify(body)
     });
@@ -119,7 +119,7 @@ module.exports=async(req,res)=>{
 
     if(!r.ok){
       const providerMessage=d&&d.error?String(d.error):d&&d.message?String(d.message):"";
-      console.error("Runway start failed:",r.status,providerMessage);
+      console.error("Runway start failed:",r.status,JSON.stringify(d));
       return json(res,502,{error:"The video generator could not start this shot. Please try again."});
     }
 
