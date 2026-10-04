@@ -17,9 +17,12 @@ function getMovieHistory(){
   }catch(e){return []}
 }
 const MOVIE_PLANS={
-  threeDays:{name:"3 Day Creator",priceNaira:13000,credits:10,durationDays:3},
-  weekly:{name:"Weekly Creator",priceNaira:26000,credits:22,durationDays:7},
-  monthly:{name:"Monthly Creator",priceNaira:90000,credits:70,durationDays:30}
+  oneDay:{name:"1 Day Pro",priceNaira:4000,credits:2,durationDays:1},
+  twoDays:{name:"2 Day Pro",priceNaira:8000,credits:4,durationDays:2},
+  sixDays:{name:"6 Day Pro",priceNaira:12000,credits:6,durationDays:6},
+  weekly:{name:"7 Day Pro",priceNaira:16000,credits:8,durationDays:7},
+  fourteenDays:{name:"14 Day Pro",priceNaira:34000,credits:17,durationDays:14},
+  monthly:{name:"1 Month Pro",priceNaira:68000,credits:35,durationDays:30}
 };
 function getMovieEntitlement(){
   if(movieServerEntitlement){
