@@ -65,7 +65,7 @@ module.exports=async(req,res)=>{
         }catch(_){}
       }
 
-      return json(res,200,{status:d.status,videoUrl});
+      return json(res,200,{status:d.status,videoUrl,reservationReleased:(d.status==="FAILED"||d.status==="CANCELED")});
     }catch(e){
       return json(res,500,{error:"Could not check video status. Please try again."});
     }
@@ -147,7 +147,9 @@ module.exports=async(req,res)=>{
           body:JSON.stringify({action:"release",token:String(reservation)})
         });
       }catch(_){}
-      return json(res,502,{error:"The video generator could not start this shot. Your credit was restored. Please try again."});
+      const providerMessage=String(d?.error||"");
+      const insufficient=/not enough credits|insufficient credits|enough credits to run this task/i.test(providerMessage);
+      return json(res,502,{error:insufficient?"The video provider does not have enough API credits to start this shot. Your OBITREND movie credit was restored. Please try again later.":"The video generator could not start this shot. Your credit was restored. Please try again.",reservationReleased:true});
     }
 
     const taskId=d.id||d.task_id;
@@ -163,7 +165,7 @@ module.exports=async(req,res)=>{
           body:JSON.stringify({action:"release",token:String(reservation)})
         });
       }catch(_){}
-      return json(res,502,{error:"The video generator did not return a task. Your credit was restored. Please try again."});
+      return json(res,502,{error:"The video generator did not return a task. Your credit was restored. Please try again.",reservationReleased:true});
     }
 
     return json(res,200,{taskId,videoUrl:Array.isArray(d.output)?d.output[0]:null});
