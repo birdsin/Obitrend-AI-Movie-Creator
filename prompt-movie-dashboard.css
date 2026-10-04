@@ -30,3 +30,41 @@ body.pm-mode{background:radial-gradient(circle at 75% 0%,rgba(194,142,39,.12),tr
 @media(max-width:900px){.pm-dashboard{padding:0 14px 35px}.pm-hero{grid-template-columns:1fr;min-height:0;padding:45px 0 28px}.pm-cinema{height:280px}.pm-auto-grid{grid-template-columns:1fr 1fr}.pm-projects{grid-template-columns:1fr}}
 @media(max-width:600px){.pm-topbar{height:64px}.pm-brand b{font-size:16px}.pm-brand span{font-size:7px}.pm-credit{font-size:10px;padding:8px 10px}.pm-avatar{width:34px;height:34px}.pm-hero h1{font-size:45px}.pm-hero p{font-size:14px}.pm-composer{padding:18px;border-radius:20px}.pm-composer-head{display:block}.pm-auto{display:inline-block;margin-top:12px}.pm-prompt{min-height:175px;font-size:15px}.pm-composer-foot{display:block}.pm-generate{width:100%}.pm-shortcut{display:block;text-align:center;margin-top:9px}.pm-auto-grid{grid-template-columns:1fr}.pm-cinema{height:235px;border-radius:22px}}
 @media(prefers-reduced-motion:reduce){.pm-cinema:before{animation:none}.pm-startup-logo,.pm-loader i{animation:none}}
+
+/* Requested dashboard visual upgrade — only */
+.pm-nav-btn{cursor:pointer;font:inherit}
+.pm-topbar{z-index:50}
+.pm-hero{position:relative}
+.pm-hero:before{content:"";position:absolute;inset:0;z-index:-1;border-radius:28px;background:radial-gradient(circle at 18% 32%,rgba(212,175,55,.12),transparent 25%),radial-gradient(circle at 80% 45%,rgba(255,255,255,.07),transparent 18%),linear-gradient(115deg,rgba(5,7,11,.98),rgba(12,13,16,.78),rgba(58,42,16,.42));pointer-events:none}
+.pm-cinema{background:radial-gradient(circle at 52% 44%,rgba(212,175,55,.28),transparent 15%),linear-gradient(145deg,#111a27,#05070b 52%,#4b3511);box-shadow:0 35px 100px rgba(0,0,0,.55),inset 0 0 80px rgba(212,175,55,.08)}
+.pm-cinema-lens{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);width:150px;height:150px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(255,226,154,.42);background:radial-gradient(circle at 42% 38%,#ffe59a 0 5%,#765d25 13%,#111722 32%,#05070b 62%);box-shadow:0 0 80px rgba(212,175,55,.35),inset 0 0 35px rgba(255,255,255,.08);animation:pmLensGlow 3s ease-in-out infinite alternate}
+.pm-cinema-lens svg{width:48px;height:48px;color:#ffe29a;opacity:.8}
+.pm-cinema-lens span{position:absolute;width:72%;height:72%;border-radius:50%;border:1px solid rgba(255,255,255,.12)}
+.pm-floating-icon{position:absolute;width:42px;height:42px;border:1px solid rgba(212,175,55,.28);border-radius:13px;background:rgba(8,11,16,.75);display:grid;place-items:center;color:#e8c762;box-shadow:0 12px 35px rgba(0,0,0,.35);animation:pmFloat 4s ease-in-out infinite}
+.pm-floating-icon svg{width:19px}.pm-fi-one{top:22%;left:10%}.pm-fi-two{top:18%;right:13%;animation-delay:-1.3s}.pm-fi-three{bottom:20%;right:9%;animation-delay:-2.4s}
+.pm-auto-grid{grid-template-columns:repeat(4,1fr)}
+.pm-auto-card{display:flex;align-items:center;gap:14px;border-color:rgba(212,175,55,.16);position:relative;overflow:hidden;transition:transform .22s,border-color .22s,box-shadow .22s}
+.pm-auto-card:before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(212,175,55,.08),transparent 50%);pointer-events:none}
+.pm-auto-card:hover{transform:translateY(-4px);border-color:#d4af37;box-shadow:0 15px 40px rgba(0,0,0,.35)}
+.pm-feature-icon{flex:0 0 48px;width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(145deg,#f1cf70,#9c7420);color:#161006;box-shadow:0 8px 24px rgba(212,175,55,.18);animation:pmIconPulse 3.2s ease-in-out infinite}
+.pm-feature-icon svg{width:22px;height:22px}
+.pm-auto-card b{position:relative}.pm-auto-card span{position:relative}
+.pm-generate{display:flex;align-items:center;justify-content:center;gap:9px;animation:pmGeneratePulse 2.4s ease-in-out infinite}
+.pm-generate svg{width:18px;height:18px}
+.pm-projects{grid-template-columns:repeat(3,1fr)}
+.pm-project{padding:10px;overflow:hidden;min-height:245px;position:relative;cursor:pointer}
+.pm-project-art{height:165px;margin:0 0 14px;position:relative;background-size:cover;background-position:center;border-radius:14px;overflow:hidden;display:flex;align-items:flex-end;justify-content:flex-start;padding:12px}
+.pm-project-art:before{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.82),rgba(0,0,0,.08) 70%)}
+.pm-project-art .pm-poster-title{position:relative;z-index:1;font-size:16px;letter-spacing:.04em;color:#fff}
+.pm-play{position:absolute;z-index:2;top:50%;left:50%;transform:translate(-50%,-50%);width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:rgba(212,175,55,.92);color:#111}
+.pm-play svg{width:20px;fill:currentColor}
+.pm-badge{position:absolute;z-index:2;top:10px;right:10px;padding:5px 8px;border-radius:999px;background:rgba(5,7,11,.78);border:1px solid rgba(255,255,255,.16);font-size:9px;color:#fff}
+.pm-genre{position:absolute;z-index:2;top:10px;left:10px;padding:5px 8px;border-radius:999px;background:rgba(212,175,55,.9);color:#161006;font-size:9px;font-weight:800}
+.pm-empty{grid-column:1/-1;min-height:120px;border:1px dashed rgba(255,255,255,.14);border-radius:18px;display:grid;place-items:center;color:#7f8998}
+@keyframes pmLensGlow{from{box-shadow:0 0 55px rgba(212,175,55,.22),inset 0 0 35px rgba(255,255,255,.06);transform:translate(-50%,-50%) scale(.98)}to{box-shadow:0 0 105px rgba(212,175,55,.48),inset 0 0 45px rgba(255,255,255,.12);transform:translate(-50%,-50%) scale(1.02)}}
+@keyframes pmFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes pmIconPulse{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+@keyframes pmGeneratePulse{0%,100%{box-shadow:0 14px 34px rgba(218,169,57,.18)}50%{box-shadow:0 16px 42px rgba(218,169,57,.34)}}
+@media(max-width:900px){.pm-auto-grid{grid-template-columns:1fr 1fr}.pm-projects{grid-template-columns:1fr}}
+@media(max-width:600px){.pm-hero:before{border-radius:0}.pm-cinema-lens{width:110px;height:110px}.pm-floating-icon{width:36px;height:36px}.pm-auto-card{align-items:flex-start}.pm-project{min-height:230px}.pm-project-art{height:155px}}
+@media(prefers-reduced-motion:reduce){.pm-cinema-lens,.pm-floating-icon,.pm-feature-icon,.pm-generate{animation:none}}
