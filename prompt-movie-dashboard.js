@@ -106,12 +106,9 @@
       return;
     }
 
-    // One generated short costs exactly one movie credit.
-    // If the user explicitly asks for only one short, generate one.
-    // Otherwise generate as many planned shots as the user's credits allow,
-    // sequentially, never more than one active Runway job at a time.
-    const promptText=String(prompt?.value||"").toLowerCase();
-    const wantsOne=/\bonly\s+(?:1|one)\s+(?:short\s+)?(?:movie\s+)?video\b|\b(?:1|one)\s+(?:short\s+)?movie\s+short\b/.test(promptText);
+    // A 1-minute movie is produced as two sequential 30-second production shots.
+    // The two shots are saved and played together as ONE titled movie.
+    const oneMinute=Number(q("#length")?.value||15)===1;
 
     try{
       await refreshMovieEntitlement();
@@ -124,17 +121,15 @@
         return;
       }
 
-      const targetCount=Math.min(
-        shots.length,
-        wantsOne?1:2,
-        availableCredits
-      );
+      const targetCount=oneMinute
+        ? Math.min(2,shots.length,availableCredits)
+        : Math.min(shots.length,2,availableCredits);
 
       const results=[];
       for(let i=0;i<targetCount;i++){
         const item=shots[i];
         status.className="pm-status";
-        status.textContent="Generating 30-second movie scene "+(i+1)+" of "+targetCount+"…";
+        status.textContent=(oneMinute?"Producing 1-minute movie — scene ":"Generating 30-second movie scene ")+(i+1)+" of "+targetCount+"…";
 
         try{
           if(typeof window.openShot!=="function"||typeof window.generateShot!=="function"){
@@ -152,7 +147,7 @@
 
           results.push({scene:item.si,shot:item.hi,url:video.src});
           try{localStorage.setItem("obitrend_auto_movie_videos",JSON.stringify(results))}catch{}
-          try{if(typeof saveHistory==="function"&&blueprint)saveHistory(blueprint,video.src,i+1);loadRecent()}catch(_){}
+          try{loadRecent()}catch(_){ }
 
           // Get the authoritative remaining credit count before starting the
           // next short. Reservation/commit is handled by the generation engine.
@@ -169,6 +164,11 @@
       await refreshMovieEntitlement();
       const remaining=getMovieCredits();
       const generated=results.length;
+      if(oneMinute && generated===2 && typeof saveHistory==="function" && blueprint){
+        try{saveHistory(blueprint,results[0]?.url||"",null,results.map(v=>v.url))}catch(_){}
+        try{localStorage.setItem("obitrend_auto_movie_videos",JSON.stringify(results))}catch(_){}
+        loadRecent();
+      }
 
       if(remaining<=0 && generated<shots.length){
         status.className="pm-status";
@@ -230,7 +230,8 @@
   function openPlayerModal(item, poster, title){
     closePlayerModal();
     let videos=[];try{videos=JSON.parse(localStorage.getItem("obitrend_auto_movie_videos")||"[]")}catch{}
-    const firstVideo=Array.isArray(videos)&&videos.length?videos[0]?.url:null;
+    const playlist=Array.isArray(item?.videoUrls)&&item.videoUrls.length?item.videoUrls:(Array.isArray(videos)?videos.map(v=>v?.url).filter(Boolean):[]);
+    const firstVideo=playlist.length?playlist[0]:null;
     const backdrop=document.createElement("div");
     backdrop.id="pmPlayerBackdrop";backdrop.className="pm-player-backdrop";
     backdrop.innerHTML='<div class="pm-player-modal" role="dialog" aria-modal="true" aria-label="Movie player">'+
@@ -240,6 +241,17 @@
       '<button class="pm-player-cta" type="button">Use this story</button>')+
       '</div>';
     document.body.appendChild(backdrop);document.body.style.overflow="hidden";
+    const player=backdrop.querySelector(".pm-player-video");
+    if(player&&playlist.length>1){
+      let index=0;
+      player.addEventListener("ended",()=>{
+        index++;
+        if(index<playlist.length){
+          player.src=playlist[index];
+          player.play().catch(()=>{});
+        }
+      });
+    }
     backdrop.querySelector(".pm-player-close")?.addEventListener("click",closePlayerModal);
     backdrop.addEventListener("click",e=>{if(e.target===backdrop)closePlayerModal()});
     backdrop.querySelector(".pm-player-cta")?.addEventListener("click",()=>{closePlayerModal();fillPrompt(item?.prompt||item?.blueprint?.logline||title||"");});
