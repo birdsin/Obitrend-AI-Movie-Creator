@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#05070b">
+<title>OBITREND · Pro Plans</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#05070b;color:#f6f7fa;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+.wrap{width:min(980px,94vw);margin:auto;padding:28px 0 50px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:30px}
+.brand{color:#d4af37;font-weight:950;letter-spacing:.14em}.back{border:1px solid #303846;background:#101620;color:#fff;border-radius:11px;padding:10px 14px;font-weight:800;cursor:pointer}
+h1{font-size:clamp(30px,6vw,54px);margin:0 0 8px}.sub{color:#98a3b2;margin:0 0 28px}.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{background:linear-gradient(145deg,#101722,#090e15);border:1px solid #293442;border-radius:18px;padding:22px;min-height:330px;display:flex;flex-direction:column}.card.featured{border-color:#d4af37;box-shadow:0 0 0 1px rgba(212,175,55,.12),0 18px 55px rgba(0,0,0,.35)}
+.tag{font-size:10px;color:#d4af37;font-weight:900;letter-spacing:.16em;text-transform:uppercase}.price{font-size:34px;font-weight:950;margin:12px 0 4px}.period{color:#8994a3;font-size:12px}.features{margin:22px 0;padding:0;list-style:none;color:#cbd2dc;line-height:2}.choose{margin-top:auto;border:1px solid #4a3b1b;background:#17130a;color:#ffe29a;border-radius:11px;padding:12px;font-weight:900;cursor:pointer}.choose:hover{border-color:#d4af37;background:#211a0b}
+@media(max-width:760px){.plans{grid-template-columns:1fr}.card{min-height:auto}.top{margin-bottom:22px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header class="top"><div class="brand">♛ OBITREND · AI MOVIE CREATOR</div><button class="back" onclick="location.href='/'">← Back to Creator</button></header>
+<h1>Choose your movie plan.</h1><p class="sub">Simple plans for turning ideas into cinematic stories.</p>
+<section class="plans" aria-label="Movie plans">
+<article class="card"><span class="tag">Free</span><div class="price">₦0</div><span class="period">Start creating</span><ul class="features"><li>✓ Movie blueprint creation</li><li>✓ Story and character planning</li><li>✓ Cinematic direction</li></ul><button class="choose" onclick="location.href='/#create'">Start Free</button></article>
+<article class="card featured"><span class="tag">Pro</span><div class="price">₦5,000</div><span class="period">Pro creator plan</span><ul class="features"><li>✓ Everything in Free</li><li>✓ More cinematic generations</li><li>✓ Priority creator workflow</li></ul><button class="choose" onclick="location.href='/#create'">Choose Pro</button></article>
+<article class="card"><span class="tag">Studio</span><div class="price">₦15,000</div><span class="period">Studio creator plan</span><ul class="features"><li>✓ Everything in Pro</li><li>✓ Studio movie workflow</li><li>✓ Advanced production capacity</li></ul><button class="choose" onclick="location.href='/#create'">Choose Studio</button></article>
+</section>
+</main>
+</body>
+</html>

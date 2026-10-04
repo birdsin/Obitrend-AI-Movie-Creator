@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#05070b">
+<title>OBITREND · Settings</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#05070b;color:#f6f7fa;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}.wrap{width:min(720px,94vw);margin:auto;padding:28px 0 50px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:28px}.brand{color:#d4af37;font-weight:950;letter-spacing:.14em}.back,.action{border:1px solid #303846;background:#101620;color:#fff;border-radius:11px;padding:11px 14px;font-weight:800;cursor:pointer}.panel{background:linear-gradient(145deg,#101722,#090e15);border:1px solid #293442;border-radius:18px;padding:20px;margin-top:14px}.row{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:16px 0;border-bottom:1px solid #202936}.row:last-child{border-bottom:0}.row strong{display:block}.row span{display:block;color:#8994a3;font-size:12px;margin-top:4px}.danger{border-color:#633a3a;color:#ffb2b2;background:#1a0e0e}.message{color:#d4af37;font-weight:800;min-height:22px;margin-top:14px}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header class="top"><div class="brand">♛ OBITREND · SETTINGS</div><button class="back" onclick="location.href='/'">← Back</button></header>
+<h1>Settings</h1>
+<p style="color:#98a3b2">Manage this device's movie-creator data and secure session.</p>
+<section class="panel">
+<div class="row"><div><strong>Clear saved cache</strong><span>Removes local movie history, saved blueprint and generated movie references from this device.</span></div><button class="action" id="clearCache">Clear Cache</button></div>
+<div class="row"><div><strong>Logout</strong><span>Signs out the current secure Movie Creator session.</span></div><button class="action danger" id="logout">Logout</button></div>
+<div class="message" id="message"></div>
+</section>
+</main>
+<script type="module">
+import{createClient}from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/+esm";
+const client=createClient("https://vjlitqujcujwsislprfg.supabase.co","sb_publishable_vxKAcrlrdZ3wfNH_n7EuZg_joZKejD6",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+const msg=document.getElementById("message");
+document.getElementById("clearCache").addEventListener("click",()=>{
+  ["obitrend_movie_history","obitrend_movie_blueprint","obitrend_auto_movie_videos","obitrend_movie_assembly","obitrend_movie_entitlement","obitrend_movie_plan","obitrend_movie_credits"].forEach(k=>localStorage.removeItem(k));
+  msg.textContent="Saved movie cache cleared.";
+});
+document.getElementById("logout").addEventListener("click",async()=>{
+  msg.textContent="Signing out…";
+  const{error}=await client.auth.signOut();
+  if(error){msg.textContent=error.message;return}
+  localStorage.removeItem("obitrend_movie_pending_reference");
+  localStorage.removeItem("obitrend_movie_pending_plan");
+  location.href="/";
+});
+</script>
+</body>
+</html>
