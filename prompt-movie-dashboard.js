@@ -126,14 +126,15 @@
 
       const targetCount=Math.min(
         shots.length,
-        wantsOne?1:availableCredits
+        wantsOne?1:2,
+        availableCredits
       );
 
       const results=[];
       for(let i=0;i<targetCount;i++){
         const item=shots[i];
         status.className="pm-status";
-        status.textContent="Generating movie short "+(i+1)+" of "+targetCount+"…";
+        status.textContent="Generating 30-second movie scene "+(i+1)+" of "+targetCount+"…";
 
         try{
           if(typeof window.openShot!=="function"||typeof window.generateShot!=="function"){
