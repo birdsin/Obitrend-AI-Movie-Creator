@@ -188,3 +188,70 @@ body.pm-mode{background:radial-gradient(circle at 75% 0%,rgba(194,142,39,.12),tr
 @media(prefers-reduced-motion:reduce){.pm-composer.pm-loading:after{animation:none}}
 
 .pm-demo-empty{grid-column:1/-1;min-height:92px;margin-bottom:2px;border:1px dashed rgba(212,175,55,.22);color:#8f9aaa}.pm-demo-empty .pm-player-cta{display:inline-block;margin-top:10px}
+
+/* MENU + REAL CINEMATIC ENGINE — FIX ONLY */
+.pm-drawer-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(3px);
+  opacity:0;pointer-events:none;transition:opacity .2s ease;z-index:9998;
+}
+.pm-drawer-backdrop.open{opacity:1;pointer-events:auto}
+.pm-drawer{z-index:9999}
+.pm-drawer>button{
+  display:flex;align-items:center;gap:12px;
+  border:1px solid transparent;
+}
+.pm-drawer>button svg{width:18px;height:18px;color:#aeb6c2}
+.pm-drawer>button.active{
+  background:rgba(212,175,55,.13);
+  border-color:rgba(212,175,55,.32);
+  color:#d4af37;
+}
+.pm-drawer>button.active svg{color:#d4af37;filter:drop-shadow(0 0 7px rgba(212,175,55,.35))}
+.pm-drawer-close{cursor:pointer}
+body.pm-menu-open{overflow:hidden}
+
+/* Seven-step engine status */
+.pm-engine-steps{
+  display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px;
+  width:min(760px,94%);margin:16px auto 0;
+}
+.pm-engine-step{
+  min-width:0;display:flex;flex-direction:column;align-items:center;gap:5px;
+  color:rgba(255,255,255,.46);font-size:9px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.06em;
+  transition:color .25s ease,transform .25s ease,filter .25s ease;
+}
+.pm-engine-step svg{
+  width:18px;height:18px;padding:7px;box-sizing:content-box;
+  border:1px solid rgba(255,255,255,.13);border-radius:10px;
+  background:rgba(8,11,16,.52);transition:all .25s ease;
+}
+.pm-engine-step.active,.pm-engine-step.complete{color:#d4af37}
+.pm-engine-step.active svg,.pm-engine-step.complete svg{
+  color:#d4af37;border-color:rgba(212,175,55,.68);
+  background:rgba(212,175,55,.12);box-shadow:0 0 18px rgba(212,175,55,.22);
+}
+.pm-engine-step.processing svg{animation:pmEngineStepSpin 1s linear infinite}
+.pm-engine-step.complete svg{filter:drop-shadow(0 0 8px rgba(212,175,55,.35))}
+.pm-engine-processing .pm-cinema-lens{
+  animation:pmCameraPulse 1.15s ease-in-out infinite;
+}
+.pm-engine-processing .pm-floating-icon{
+  animation:pmCornerEngine 1.15s ease-in-out infinite;
+  filter:drop-shadow(0 0 12px rgba(212,175,55,.48));
+}
+.pm-engine-processing .pm-fi-two{animation-delay:.12s}
+.pm-engine-processing .pm-fi-three{animation-delay:.24s}
+.pm-engine-processing .pm-fi-one{animation-delay:.36s}
+.pm-engine-processing .pm-cinema-copy strong{color:#ffe29a;text-shadow:0 0 16px rgba(212,175,55,.28)}
+@keyframes pmEngineStepSpin{to{transform:rotate(360deg)}}
+@keyframes pmCameraPulse{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(1.12) rotate(8deg)}}
+@keyframes pmCornerEngine{0%,100%{transform:translateY(0) rotate(0) scale(1)}50%{transform:translateY(-5px) rotate(8deg) scale(1.08)}}
+@media(max-width:700px){
+  .pm-engine-steps{gap:3px;width:98%;margin-top:12px}
+  .pm-engine-step{font-size:7px;letter-spacing:.03em}
+  .pm-engine-step svg{width:13px;height:13px;padding:6px;border-radius:8px}
+}
+@media(prefers-reduced-motion:reduce){
+  .pm-engine-step.processing svg,.pm-engine-processing .pm-cinema-lens,.pm-engine-processing .pm-floating-icon{animation:none}
+}
