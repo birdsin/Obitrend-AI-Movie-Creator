@@ -237,14 +237,16 @@ function menuButton(label,action,cls="outline-btn"){return '<button class="'+cls
 function renderMenuCard(title,text,action){
  return '<div class="menu-card"><div><h3>'+esc(title)+'</h3><p>'+esc(text)+'</p></div>'+menuButton("Open",action)+'</div>'
 }
-function saveHistory(b,videoUrl="",shortNumber=null){
+function saveHistory(b,videoUrl="",shortNumber=null,videoUrls=null){
  try{
-  if(!b||!videoUrl)return false;
+  if(!b||(!videoUrl&&(!Array.isArray(videoUrls)||!videoUrls.length)))return false;
   const h=JSON.parse(localStorage.getItem("obitrend_movie_history")||"[]");
+  const urls=Array.isArray(videoUrls)?videoUrls.filter(Boolean).map(String):[];
+  const primary=String(videoUrl||urls[0]||"");
   const baseTitle=b.title||"Untitled Movie";
   const title=Number(shortNumber)>1?baseTitle+" — Short "+Number(shortNumber):baseTitle;
-  h.unshift({title,genre:b.genre||"",length:b.length||"",created:new Date().toISOString(),generated:true,videoUrl:String(videoUrl),blueprint:b,shortNumber:Number(shortNumber)||1});
-  localStorage.setItem("obitrend_movie_history",JSON.stringify(h.filter(x=>x&&x.generated===true&&x.videoUrl).slice(0,20)));
+  h.unshift({title,genre:b.genre||"",length:b.length||"",created:new Date().toISOString(),generated:true,videoUrl:primary,videoUrls:urls,blueprint:b,shortNumber:Number(shortNumber)||1});
+  localStorage.setItem("obitrend_movie_history",JSON.stringify(h.filter(x=>x&&x.generated===true&&(x.videoUrl||(Array.isArray(x.videoUrls)&&x.videoUrls.length))).slice(0,20)));
   return true;
  }catch(e){return false}
 }
