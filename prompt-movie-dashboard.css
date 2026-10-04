@@ -68,3 +68,12 @@ body.pm-mode{background:radial-gradient(circle at 75% 0%,rgba(194,142,39,.12),tr
 @media(max-width:900px){.pm-auto-grid{grid-template-columns:1fr 1fr}.pm-projects{grid-template-columns:1fr}}
 @media(max-width:600px){.pm-hero:before{border-radius:0}.pm-cinema-lens{width:110px;height:110px}.pm-floating-icon{width:36px;height:36px}.pm-auto-card{align-items:flex-start}.pm-project{min-height:230px}.pm-project-art{height:155px}}
 @media(prefers-reduced-motion:reduce){.pm-cinema-lens,.pm-floating-icon,.pm-feature-icon,.pm-generate{animation:none}}
+
+.pm-drawer{position:fixed;left:0;top:0;bottom:0;width:min(86vw,330px);z-index:100;background:rgba(8,11,16,.98);border-right:1px solid rgba(212,175,55,.28);box-shadow:24px 0 70px rgba(0,0,0,.55);padding:20px 14px;transform:translateX(-105%);transition:transform .25s ease;backdrop-filter:blur(18px)}
+.pm-drawer.open{transform:translateX(0)}
+.pm-drawer:after{content:"";position:fixed;left:100%;top:0;bottom:0;width:100vw;background:rgba(0,0,0,.48);pointer-events:none}
+.pm-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:8px 8px 22px;color:#ffe29a;letter-spacing:.18em;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:10px}
+.pm-drawer-head button{width:40px;height:40px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:#111722;color:#fff;font-size:25px}
+.pm-drawer>button:not(.pm-drawer-head button){width:100%;height:52px;border:0;border-radius:13px;background:transparent;color:#dce1e9;text-align:left;padding:0 15px;display:flex;align-items:center;gap:13px;font:600 13px/1 system-ui;margin:4px 0}
+.pm-drawer>button:not(.pm-drawer-head button):hover{background:linear-gradient(90deg,rgba(212,175,55,.16),rgba(212,175,55,.04));color:#ffe29a}
+.pm-drawer svg{width:18px;height:18px;color:#d4af37}
