@@ -2247,3 +2247,17 @@ body.menu-workspace-open{overflow:hidden}
 @media(max-width:420px){
   #androidDrawer.android-drawer{width:calc(100vw - 24px);max-width:calc(100vw - 24px)}
 }
+
+
+/* FINAL MOBILE SETTINGS CLOSE BUTTON — immediate touch response */
+#menuWorkspaceClose{
+  position:relative!important;
+  z-index:100!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  -webkit-tap-highlight-color:transparent!important;
+  cursor:pointer!important;
+  user-select:none!important;
+  -webkit-user-select:none!important;
+}
+#menuWorkspaceClose:active{transform:scale(.96)}
