@@ -811,7 +811,10 @@ document.addEventListener("DOMContentLoaded",()=>{
         return;
       }
       if(page==="my-movies"){
-        openMenu("creations");
+        let h=[];
+        try{h=JSON.parse(localStorage.getItem("obitrend_movie_history")||"[]")}catch(_){h=[]}
+        const body=h.length?h.map((x,i)=>'<div class="menu-card"><div><h3>'+esc(x.title||"Untitled Movie")+'</h3><p>'+esc(x.genre||"")+' · '+esc(x.length||"")+' minutes · '+new Date(x.created||Date.now()).toLocaleString()+'</p></div>'+menuButton("Open","history:"+i)+'</div>').join(""):'<div class="empty-menu">No saved movies yet. Build your first movie blueprint.</div>';
+        menuOpen("My Movies","Your saved movie projects on this device.",body);
         return;
       }
       if(page==="pro"){
