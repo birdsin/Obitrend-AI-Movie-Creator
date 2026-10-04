@@ -69,20 +69,22 @@
     cinema?.classList.add("pm-engine-processing");
     engineSteps.forEach(step=>step.classList.remove("active","complete","processing"));
     if(engineStatus)engineStatus.textContent="ENGINE PROCESSING: Creating Story…";
-    for(let i=0;i<engineSteps.length;i++){
+
+    engineSteps.forEach((step,i)=>{
       engineTimers.push(setTimeout(()=>{
         if(token!==engineToken)return;
         renderEngineStep(i);
         if(engineStatus)engineStatus.textContent="ENGINE PROCESSING: Creating "+engineNames[i]+"…";
-      },i*800));
-    }
+      },i*1000));
+    });
+
     engineTimers.push(setTimeout(()=>{
       if(token!==engineToken)return;
       engineSteps.forEach(step=>step.classList.remove("active","processing"));
       engineSteps.forEach(step=>step.classList.add("complete"));
-      if(engineStatus)engineStatus.textContent="ENGINE COMPLETE: Story ✓ · Cast ✓ · Scenes ✓ · Camera ✓ · Lighting ✓ · Sound ✓ · Continuity ✓";
+      if(engineStatus)engineStatus.textContent="ENGINE COMPLETE ✓";
       cinema?.classList.remove("pm-engine-processing");
-    },engineSteps.length*800+250));
+    },7000));
   }
 
     const examples=[...document.querySelectorAll(".pm-example")];
@@ -124,38 +126,87 @@
     window.setTimeout(()=>q(".pm-prompt-wrap")?.classList.remove("pm-invalid"),900);
   }
 
-  generate?.addEventListener("click",()=>{
-    const value=prompt.value.trim();
+  async function handleGenerate(){
+    const value=prompt?.value.trim();
     if(!value){showEmptyPromptError();return}
+    if(generate?.disabled)return;
+
     setAutoDefaults();
     startEngineProcessing();
-    status.className="pm-status";status.textContent="AI is turning your prompt into a complete cinematic blueprint…";
+    status.className="pm-status";
+    status.textContent="ENGINE PROCESSING: Creating Story…";
     generate.disabled=true;
     composer?.classList.add("pm-loading");
-    engineBuild?.click();
+
+    const originalHtml=generate.innerHTML;
+    generate.innerHTML='<i data-lucide="loader-circle" class="pm-generate-spinner"></i> Processing…';
+    iconRefresh();
+
     const started=Date.now();
-    const timer=setInterval(()=>{
-      const source=document.getElementById("status")?.textContent||"";
-      if(/Blueprint ready\./i.test(source)){
-        clearInterval(timer);
+    const minimumProcessing=7000;
+    let blueprintReady=false;
+    let backendError="";
+
+    try{
+      engineBuild?.click();
+
+      await new Promise((resolve,reject)=>{
+        const timer=setInterval(()=>{
+          const source=document.getElementById("status")?.textContent||"";
+          if(/Blueprint ready\./i.test(source)){
+            clearInterval(timer);
+            blueprintReady=true;
+            resolve();
+            return;
+          }
+          if(/temporarily unavailable|failed|error|required/i.test(source)&&Date.now()-started>1200){
+            clearInterval(timer);
+            backendError=source;
+            reject(new Error(source));
+            return;
+          }
+          if(Date.now()-started>90000){
+            clearInterval(timer);
+            reject(new Error(source||"Movie generation is taking longer than expected."));
+          }
+          mirrorStatus();
+        },250);
+      });
+
+      const elapsed=Date.now()-started;
+      if(elapsed<minimumProcessing)await new Promise(resolve=>setTimeout(resolve,minimumProcessing-elapsed));
+
+      if(blueprintReady){
         engineSteps.forEach(step=>{step.classList.remove("active","processing");step.classList.add("complete")});
-        cinema?.classList.remove("pm-engine-processing");
         clearEngineTimers();
-        if(engineStatus)engineStatus.textContent="ENGINE COMPLETE: Real AI blueprint created from /api/plan.";
-        status.textContent="Movie blueprint ready. AI selected the story structure, characters, scenes, camera, lighting and sound automatically.";
-        generate.disabled=false;
-        composer?.classList.remove("pm-loading");
-        q("#pmResult")?.classList.add("ready");
+        cinema?.classList.remove("pm-engine-processing");
+        if(engineStatus)engineStatus.textContent="ENGINE COMPLETE ✓";
+        status.className="pm-status";
+        status.textContent="Movie created. AI blueprint added to Recent Movies.";
         try{if(typeof saveHistory==="function"&&state?.blueprint)saveHistory(state.blueprint)}catch(_){}
         loadRecent();
-        autoGenerateMovie();
+        q("#pmResult")?.classList.add("ready");
         q("#pmResultTitle")&&(q("#pmResultTitle").textContent=document.getElementById("movieTitle")?.textContent||"Your movie");
-        return;
+        autoGenerateMovie();
       }
-      if(Date.now()-started>90000){clearInterval(timer);generate.disabled=false;composer?.classList.remove("pm-loading");status.textContent=source||"Movie generation is taking longer than expected.";status.className="pm-status error"}
-      mirrorStatus();
-    },500);
-  });
+    }catch(error){
+      clearEngineTimers();
+      engineSteps.forEach(step=>step.classList.remove("active","processing"));
+      cinema?.classList.remove("pm-engine-processing");
+      if(engineStatus)engineStatus.textContent="ENGINE ERROR";
+      status.className="pm-status error";
+      status.textContent=backendError||error?.message||"Movie generation failed.";
+    }finally{
+      generate.disabled=false;
+      composer?.classList.remove("pm-loading");
+      generate.innerHTML=originalHtml;
+      iconRefresh();
+    }
+  }
+
+  generate?.addEventListener("click",handleGenerate);
+
+
 
   prompt?.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();generate?.click()}});
 
@@ -376,10 +427,16 @@
       drawer.querySelectorAll("[data-pm-nav]").forEach(btn=>btn.addEventListener("click",()=>{
         const action=btn.dataset.pmNav;
         setIsMenuOpen(false);
-        if(action==="home")scrollHome();
-        else if(action==="create")scrollCreate();
-        else if(action==="creations")scrollMovies();
-        else if(action==="pro")window.location.assign("/pricing");
+        if(action==="home"){
+          if(window.location.pathname!=="/"){window.location.assign("/");return}
+          window.scrollTo({top:0,behavior:"smooth"});
+        }else if(action==="create"){
+          if(window.location.pathname!=="/"){window.location.assign("/#create");return}
+          document.getElementById("create")?.scrollIntoView({behavior:"smooth",block:"start"});
+        }else if(action==="creations"){
+          if(window.location.pathname!=="/"){window.location.assign("/#movies");return}
+          document.getElementById("movies")?.scrollIntoView({behavior:"smooth",block:"start"});
+        }else if(action==="pro")window.location.assign("/pricing");
         else if(action==="settings")window.location.assign("/settings");
       }));
       iconRefresh();
