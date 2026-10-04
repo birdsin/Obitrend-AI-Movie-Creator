@@ -41,10 +41,36 @@
     const o=new MutationObserver(mirrorStatus);o.observe(el,{childList:true,subtree:true,characterData:true});return o;
   });
 
-  function setAutoDefaults(){
+  function getCreditDuration(credits){
+    const c=Math.max(0,Math.floor(Number(credits)||0));
+    const seconds=c*30;
+    const minutes=seconds/60;
+    return {credits:c,seconds,minutes};
+  }
+
+  function applyCreditDuration(credits){
+    const d=getCreditDuration(credits);
+    const el=document.getElementById("length");
+    if(el){
+      const value=String(d.minutes);
+      let option=[...el.options].find(o=>o.value===value);
+      if(!option){
+        option=document.createElement("option");
+        option.value=value;
+        option.textContent=d.seconds<60?d.seconds+" seconds":(d.seconds%60===0?(d.minutes+" minute"+(d.minutes===1?"":"s")):(d.seconds+" seconds"));
+        option.dataset.creditDuration="true";
+        el.appendChild(option);
+      }
+      el.value=value;
+    }
+    return d;
+  }
+
+  function setAutoDefaults(credits){
     if(enginePrompt)enginePrompt.value=prompt.value.trim();
-    const values={length:"15",genre:"Drama",visualStyle:"Cinematic realism",ratio:"16:9"};
+    const values={genre:"Drama",visualStyle:"Cinematic realism",ratio:"16:9"};
     Object.entries(values).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v});
+    return applyCreditDuration(credits);
   }
 
   function showEmptyPromptError(){
@@ -58,13 +84,28 @@
     window.setTimeout(()=>q(".pm-prompt-wrap")?.classList.remove("pm-invalid"),900);
   }
 
-  generate?.addEventListener("click",()=>{
+  generate?.addEventListener("click",async()=>{
     const value=prompt.value.trim();
     if(!value){showEmptyPromptError();return}
-    setAutoDefaults();
-    status.className="pm-status";status.textContent="AI is turning your prompt into a complete cinematic blueprint…";
     generate.disabled=true;
     composer?.classList.add("pm-loading");
+    try{
+      await refreshMovieEntitlement();
+      const credits=getMovieCredits();
+      if(credits<=0){
+        throw new Error("You have no movie credits. Choose a Pro plan to generate your movie.");
+      }
+      const d=setAutoDefaults(credits);
+      status.className="pm-status";
+      status.textContent="AI is preparing your "+(d.seconds<60?d.seconds+"-second":(d.minutes+"-minute"))+" movie using "+d.credits+" available credit"+(d.credits===1?"":"s")+"…";
+    }catch(error){
+      composer?.classList.remove("pm-loading");
+      generate.disabled=false;
+      status.className="pm-status error";
+      status.textContent=error?.message||"Could not load your movie credits.";
+      return;
+    }
+    status.className="pm-status";status.textContent="AI is turning your prompt into a complete cinematic blueprint…";
     engineBuild?.click();
     const started=Date.now();
     const timer=setInterval(()=>{
@@ -106,13 +147,20 @@
       return;
     }
 
-    const oneMinute=Number(q("#length")?.value||1)===1;
-    const requestedSegments=oneMinute?2:Math.min(shots.length,2);
     let productionId=resumeProductionId||"";
     let production=resumeProduction||null;
 
     try{
       await refreshMovieEntitlement();
+
+      const availableCredits=Math.max(0,Math.floor(getMovieCredits()));
+      if(!productionId && availableCredits<=0){
+        throw new Error("You have no movie credits. Choose a Pro plan to generate your movie.");
+      }
+
+      const requestedSegments=productionId
+        ? null
+        : Math.min(Math.max(1,availableCredits),20);
 
       if(!productionId){
         productionId=await createMovieProduction(blueprint,requestedSegments);
@@ -152,7 +200,9 @@
         }
 
         status.className="pm-status";
-        status.textContent=(oneMinute?"Producing 1-minute movie — scene ":"Generating 30-second movie scene ")+(i+1)+" of "+targetCount+"…";
+        const totalSeconds=targetCount*30;
+        const durationLabel=totalSeconds<60?totalSeconds+"-second":(totalSeconds/60)+"-minute";
+        status.textContent="Producing your "+durationLabel+" movie — 30-second segment "+(i+1)+" of "+targetCount+"…";
 
         try{
           if(typeof window.openShot!=="function"||typeof window.generateShot!=="function"){
@@ -181,7 +231,7 @@
           if(i<targetCount-1 && getMovieCredits()<=0){
             await setMovieProductionStatus(productionId,"paused").catch(()=>{});
             status.className="pm-status";
-            status.textContent="Movie paused after scene "+(i+1)+" of "+targetCount+". Your credits are finished. Purchase more credits to continue from scene "+(i+2)+".";
+            status.textContent="Movie paused after "+((i+1)*30)+" seconds. Your credits are finished. Purchase more credits to continue from the next 30-second segment.";
             loadRecent();
             return;
           }
@@ -196,7 +246,7 @@
       await setMovieProductionStatus(productionId,"completed").catch(()=>{});
       await refreshMovieEntitlement();
 
-      if(oneMinute && results.length===2 && typeof saveHistory==="function"){
+      if(results.length===targetCount && typeof saveHistory==="function"){
         try{
           saveHistory(blueprint,results[0]?.url||"",null,results.map(v=>v.url));
           loadRecent();
@@ -208,9 +258,9 @@
 
       const remaining=getMovieCredits();
       status.className="pm-status";
-      status.textContent=oneMinute
-        ?"Your 1-minute movie is complete. Both 30-second scenes are saved together under one titled movie."
-        :"Your movie production is complete.";
+      const completedSeconds=targetCount*30;
+      const completedLabel=completedSeconds<60?completedSeconds+" seconds":(completedSeconds/60)+" minute"+(completedSeconds/60===1?"":"s");
+      status.textContent="Your "+completedLabel+" movie is complete. "+targetCount+" x 30-second segments were generated using exactly "+targetCount+" movie credit"+(targetCount===1?"":"s")+".";
       loadRecent();
     }catch(error){
       status.className="pm-status error";
