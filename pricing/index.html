@@ -38,6 +38,20 @@ body{margin:0;background:#080b10;color:#f5f5f5;font-family:Inter,system-ui,sans-
 </section>
 <section class="plans">
 <article class="plan">
+<span class="tag">2 DAY CREATOR</span>
+<div class="price">₦3,000</div>
+<div class="credits">2 movie credits · 2 days</div>
+<p>Quick access for creators making a short cinematic project.</p>
+<button class="choose secondary" data-plan="twoDays">Choose 2 Day Creator</button>
+</article>
+<article class="plan">
+<span class="tag">1 DAY CREATOR</span>
+<div class="price">₦6,500</div>
+<div class="credits">4 movie credits · 1 day</div>
+<p>Fast creator access with four movie credits for one day.</p>
+<button class="choose secondary" data-plan="oneDay">Choose 1 Day Creator</button>
+</article>
+<article class="plan">
 <span class="tag">3 DAY CREATOR</span>
 <div class="price">₦13,000</div>
 <div class="credits">10 movie credits · 3 days</div>
@@ -64,7 +78,7 @@ body{margin:0;background:#080b10;color:#f5f5f5;font-family:Inter,system-ui,sans-
 <script type="module">
 import "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/+esm";
 import "../movie-auth.js";
-const MOVIE_PLANS={threeDays:{priceNaira:13000},weekly:{priceNaira:26000},monthly:{priceNaira:90000}};
+const MOVIE_PLANS={twoDays:{priceNaira:3000},oneDay:{priceNaira:6500},threeDays:{priceNaira:13000},weekly:{priceNaira:26000},monthly:{priceNaira:90000}};
 async function startPayment(planKey,button){
   const plan=MOVIE_PLANS[planKey];
   if(!plan)return;
@@ -91,7 +105,7 @@ async function startPayment(planKey,button){
     window.location.href=d.authorization_url;
   }catch(e){
     button.disabled=false;
-    button.textContent=planKey==="threeDays"?"Choose 3 Day Creator":planKey==="weekly"?"Choose Weekly Creator":"Choose Monthly Creator";
+    button.textContent=planKey==="twoDays"?"Choose 2 Day Creator":planKey==="oneDay"?"Choose 1 Day Creator":planKey==="threeDays"?"Choose 3 Day Creator":planKey==="weekly"?"Choose Weekly Creator":"Choose Monthly Creator";
     alert(e.message||"Secure payment setup failed.");
   }
 }
