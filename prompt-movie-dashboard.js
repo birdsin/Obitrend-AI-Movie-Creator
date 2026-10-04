@@ -109,7 +109,7 @@
       const genre=String(b.genre||x.genre||"Cinematic").replace(/[&<>]/g,"");
       const length=String(b.length||x.length||15).replace(/[&<>]/g,"");
       const image=posterImages[i%posterImages.length];
-      return '<button class="pm-project" type="button" data-movie-index="'+i+'"><div class="pm-project-art" style="background-image:url("'+image+'")"><span class="pm-genre">'+genre+'</span><span class="pm-badge">'+length+' min</span><span class="pm-play"><i data-lucide="play"></i></span><span class="pm-poster-title">'+title+'</span></div><b>'+title+'</b><span>'+genre+' · '+length+' min</span></button>';
+      return '<button class="pm-project" type="button" data-movie-index="'+i+'"><div class="pm-project-art" style="background-image:url('+image+')"><span class="pm-genre">'+genre+'</span><span class="pm-badge">'+length+' min</span><span class="pm-play"><i data-lucide="play"></i></span><span class="pm-poster-title">'+title+'</span></div><b>'+title+'</b><span>'+genre+' · '+length+' min</span></button>';
     }).join("");
     recent.querySelectorAll(".pm-project").forEach((card,i)=>card.addEventListener("click",()=>{
       const item=history[i];
