@@ -2136,3 +2136,14 @@ img{max-width:100%}
 
 /* Show the generated movie blueprint after a successful build without changing the existing Create Movie UI. */
 #legacyMovieDashboard.movie-blueprint-visible{display:block!important;}
+
+/* FIX: mobile navigation drawer width and viewport behavior */
+.android-drawer{
+  width:360px !important;
+  max-width:calc(100vw - 48px) !important;
+  box-sizing:border-box !important;
+  overflow-x:hidden !important;
+}
+@media(max-width:400px){
+  .android-drawer{width:calc(100vw - 32px) !important;max-width:calc(100vw - 32px) !important;}
+}
