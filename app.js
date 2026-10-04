@@ -809,7 +809,6 @@ document.addEventListener("DOMContentLoaded",()=>{
       closeWorkspace();
       openDrawer();
     };
-    workspaceBack.addEventListener("click",goBackToMenu,{passive:false});
     workspaceBack.addEventListener("pointerup",goBackToMenu,{passive:false});
   }
   document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeDrawer();closeWorkspace();}});
