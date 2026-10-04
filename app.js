@@ -45,13 +45,13 @@ async function startMoviePayment(planKey){
   const plan=MOVIE_PLANS[planKey];
   if(!plan){status("status","Invalid movie plan.",true);return}
   try{
-    await window.movieAuthReady;
     let email=localStorage.getItem("obitrend_movie_email")||"";
     email=window.prompt("Enter the email you use for Paystack payment:",email)||"";
     email=email.trim().toLowerCase();
     if(!email)return;
     localStorage.setItem("obitrend_movie_email",email);
     status("status","Opening secure Paystack checkout…");
+    await window.movieAuthReady;
     const token=await window.getMovieAccessToken();
     const r=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-payment",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({action:"initialize",plan:planKey,email})});
     const d=await r.json().catch(()=>({}));
