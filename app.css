@@ -1,0 +1,151 @@
+#authOverlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  box-sizing:border-box;
+  background:rgba(0,0,0,.96);
+  overflow:auto;
+}
+#authOverlay .obi-auth-card{
+  width:min(430px,100%);
+  box-sizing:border-box;
+  padding:28px;
+  border:1px solid rgba(230,185,94,.62);
+  border-radius:24px;
+  background:linear-gradient(145deg,rgba(20,20,24,.98),rgba(7,8,11,.99));
+  box-shadow:0 24px 80px rgba(0,0,0,.6),0 0 34px rgba(230,185,94,.12);
+  color:#fff;
+}
+#authOverlay .obi-auth-logo{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  margin-bottom:24px;
+  color:#e6b95e;
+  font-size:22px;
+  font-weight:800;
+  letter-spacing:.08em;
+}
+#authOverlay .obi-auth-card h1{
+  margin:0 0 7px;
+  font-size:26px;
+  line-height:1.15;
+  color:#fff;
+}
+#authOverlay .obi-auth-card p{
+  margin:0 0 20px;
+  color:#aaa;
+}
+#authOverlay .obi-field{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:12px 0;
+  padding:0 12px;
+  min-height:54px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:14px;
+  background:#0d0f14;
+}
+#authOverlay .obi-field:focus-within{
+  border-color:#e6b95e;
+  box-shadow:0 0 0 2px rgba(230,185,94,.12),0 0 20px rgba(230,185,94,.12);
+}
+#authOverlay .obi-field>span{opacity:.75}
+#authOverlay .obi-field input{
+  flex:1;
+  min-width:0;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:#fff;
+  font-size:16px;
+}
+#authOverlay .obi-field input::placeholder{color:#70737a}
+#authOverlay .obi-field button{
+  flex:0 0 auto;
+  border:0;
+  background:transparent;
+  color:#e6b95e;
+  cursor:pointer;
+  font-size:17px;
+}
+#authOverlay .obi-gold-btn,
+#authOverlay .obi-secondary-btn,
+#authOverlay .obi-text-btn,
+#authOverlay .obi-account{
+  width:100%;
+  box-sizing:border-box;
+  min-height:50px;
+  border-radius:13px;
+  cursor:pointer;
+  font-size:15px;
+}
+#authOverlay .obi-gold-btn{
+  margin-top:10px;
+  border:1px solid #e6b95e;
+  background:#e6b95e;
+  color:#090a0d;
+  font-weight:800;
+}
+#authOverlay .obi-secondary-btn{
+  margin-top:12px;
+  border:1px solid rgba(230,185,94,.4);
+  background:#111318;
+  color:#e6b95e;
+}
+#authOverlay .obi-text-btn{
+  margin-top:12px;
+  border:0;
+  background:transparent;
+  color:#e6b95e;
+}
+#authOverlay .obi-check{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:14px 0;
+  color:#aaa;
+  font-size:13px;
+}
+#authOverlay #passwordStrength{
+  margin:4px 2px 10px;
+  color:#aaa;
+  font-size:12px;
+}
+#authOverlay #authMessage{
+  min-height:20px;
+  margin-top:14px;
+  color:#e6b95e;
+  font-size:13px;
+  text-align:center;
+}
+#authOverlay #authMessage.error{color:#ff8d8d}
+#authOverlay .obi-saved-title{
+  margin-top:18px;
+  margin-bottom:8px;
+  color:#777;
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+#authOverlay .obi-account{
+  margin-top:7px;
+  min-height:42px;
+  border:1px solid rgba(255,255,255,.1);
+  background:#0d0f14;
+  color:#ddd;
+  text-align:left;
+  padding:0 12px;
+}
+@media(max-width:520px){
+  #authOverlay{padding:12px}
+  #authOverlay .obi-auth-card{padding:22px 18px;border-radius:20px}
+  #authOverlay .obi-auth-card h1{font-size:23px}
+}

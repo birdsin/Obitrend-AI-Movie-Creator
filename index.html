@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="/styles.css?v=20261004-2">
 <link rel="stylesheet" href="/dashboard-enhancements.css">
 <link rel="stylesheet" href="/prompt-movie-dashboard.css?v=20261004-2">
+<link rel="stylesheet" href="/app.css?v=20261004-safe-auth">
 </head>
 <body>
 <div id="obitrendStartup" class="pm-startup" aria-label="OBITREND starting">
@@ -106,5 +107,39 @@
 <script src="/mobile-pro-fix.js?v=20260927-1"></script>
 <script src="/dashboard-enhancements.js"></script>
 <script src="/prompt-movie-dashboard.js?v=20261004-2"></script>
+
+<div id="authOverlay" aria-hidden="true">
+  <div class="obi-auth-card">
+    <div class="obi-auth-logo">♛ <span>OBITREND</span></div>
+    <div id="authSignIn">
+      <h1>Welcome back to OBITREND</h1>
+      <p>Sign in to continue creating.</p>
+      <form id="signInForm" novalidate>
+        <label class="obi-field"><span>✉</span><input id="authEmail" type="email" autocomplete="email" placeholder="Email address" required></label>
+        <label class="obi-field"><span>🔒</span><input id="authPassword" type="password" autocomplete="current-password" placeholder="Password" required><button id="togglePassword" type="button" aria-label="Show password">◉</button></label>
+        <button class="obi-gold-btn" type="submit">Sign In</button>
+      </form>
+      <button id="bioBtn" class="obi-secondary-btn" type="button">◉ Sign in with Biometric</button>
+      <button id="showCreate" class="obi-text-btn" type="button">Create account</button>
+      <div id="savedAccounts"></div>
+    </div>
+    <div id="authCreate" hidden>
+      <h1>Create your OBITREND account</h1>
+      <p>Start creating with your real account.</p>
+      <form id="createAccountForm" novalidate>
+        <label class="obi-field"><span>●</span><input id="authFullName" type="text" autocomplete="name" placeholder="Full name" required></label>
+        <label class="obi-field"><span>✉</span><input id="createEmail" type="email" autocomplete="email" placeholder="Email address" required></label>
+        <label class="obi-field"><span>🔒</span><input id="createPassword" type="password" autocomplete="new-password" placeholder="Password" required><button id="toggleCreatePassword" type="button" aria-label="Show password">◉</button></label>
+        <div id="passwordStrength">Password strength: Weak</div>
+        <label class="obi-field"><span>🔒</span><input id="confirmPassword" type="password" autocomplete="new-password" placeholder="Confirm password" required></label>
+        <label class="obi-check"><input id="termsCheck" type="checkbox" required><span>I agree to the terms.</span></label>
+        <button class="obi-gold-btn" type="submit">Create Account &amp; Get 5 Free Credits</button>
+      </form>
+      <button id="showSignIn" class="obi-text-btn" type="button">Sign In</button>
+    </div>
+    <div id="authMessage" role="status" aria-live="polite"></div>
+  </div>
+</div>
+
 </body>
 </html>
