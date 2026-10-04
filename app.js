@@ -97,6 +97,41 @@ async function refreshMovieEntitlement(){
   return movieServerEntitlement;
 }
 function getMovieCredits(){return Number(movieServerEntitlement?.credits||0)}
+function formatMovieExactTime(value){
+  if(!value)return "No expiry date";
+  const d=new Date(value);
+  if(Number.isNaN(d.getTime()))return "No expiry date";
+  return d.toLocaleString(undefined,{dateStyle:"medium",timeStyle:"medium"});
+}
+function updateMovieLiveBalance(){
+  const creditsEl=$("pmBalanceCredits"),expiryEl=$("pmBalanceExpiry");
+  const locationEl=$("pmBalanceLocation");
+  if(creditsEl)creditsEl.textContent=getMovieCredits()+" movie credit"+(getMovieCredits()===1?"":"s")+" available";
+  if(expiryEl){
+    const expiry=movieServerEntitlement?.expires_at;
+    expiryEl.textContent=expiry?"Expires: "+formatMovieExactTime(expiry):"No expiry — Free plan";
+  }
+  if(locationEl && !locationEl.dataset.locationReady)locationEl.textContent="Location: waiting for permission…";
+}
+function startMovieLiveLocation(){
+  const el=$("pmBalanceLocation");
+  if(!el||el.dataset.locationStarted==="1")return;
+  el.dataset.locationStarted="1";
+  if(!navigator.geolocation){
+    el.textContent="Location: unavailable on this device";
+    return;
+  }
+  navigator.geolocation.watchPosition(position=>{
+    const lat=position.coords.latitude.toFixed(6);
+    const lon=position.coords.longitude.toFixed(6);
+    const accuracy=Math.round(position.coords.accuracy||0);
+    el.dataset.locationReady="1";
+    el.textContent="Live location: "+lat+", "+lon+" (±"+accuracy+"m)";
+  },()=>{
+    el.dataset.locationReady="1";
+    el.textContent="Location: permission not granted";
+  },{enableHighAccuracy:true,maximumAge:30000,timeout:10000});
+}
 function setMovieCredits(){updateAndroidStats();return getMovieCredits()}
 async function reserveMovieCredit(){
   await window.movieAuthReady;
@@ -139,6 +174,7 @@ function updateAndroidStats(){
   if(scenesEl)scenesEl.textContent=String(scenes);
   if(creditsEl)creditsEl.textContent=String(getMovieCredits());
   if(planEl)planEl.textContent=getMoviePlanLabel();
+  updateMovieLiveBalance();
 }
 function status(id,msg,error){const e=$(id);e.textContent=msg;e.className="status"+(error?" error":"")}
 $("buildBtn").onclick=async()=>{const prompt=$("moviePrompt").value.trim();if(!prompt){status("status","Enter your movie idea first.",true);return}const b=$("buildBtn");b.disabled=true;status("status","Building your cinematic blueprint…");try{const r=await fetch("/api/plan",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({prompt,length:Number($("length").value),genre:$("genre").value,visualStyle:$("visualStyle").value,ratio:$("ratio").value})});const text=await r.text();let d={};try{d=JSON.parse(text)}catch{}if(!r.ok)throw new Error(d.error||"Movie planning service is temporarily unavailable. Please try again.");state.blueprint=d.blueprint;try{localStorage.setItem("obitrend_movie_blueprint",JSON.stringify(d.blueprint))}catch(e){}renderBlueprint(d.blueprint);status("status","Blueprint ready.")}catch(e){status("status",e.message,true)}finally{b.disabled=false}};
@@ -206,8 +242,9 @@ async function generateShot(){
 async function pollTask(id,reservation){for(let i=0;i<90;i++){status("shotStatus","Generating cinematic shot… "+Math.min(99,Math.round((i+1)/90*100))+"%");await new Promise(r=>setTimeout(r,5000));const token=await window.getMovieAccessToken();const r=await fetch("/api/generate-shot?taskId="+encodeURIComponent(id),{headers:{"Authorization":"Bearer "+token,"x-movie-reservation":reservation}});const d=await r.json();if(!r.ok)throw new Error(d.error||"Video status check failed.");if(d.status==="SUCCEEDED"&&d.videoUrl){await finishMovieCredit("commit",reservation);showVideo(d.videoUrl);status("shotStatus","Shot ready.");return}if(d.status==="FAILED"||d.status==="CANCELED")throw new Error("The shot could not be generated. Your credit was restored.")}throw new Error("Generation is taking longer than expected. Check the shot again shortly.")}
 function showVideo(url){$("videoPlaceholder").classList.add("hidden");$("shotVideo").src=url;$("shotVideo").classList.remove("hidden");$("shotVideo").load()}
 
-window.addEventListener("DOMContentLoaded",()=>{updateAndroidStats();if(state.blueprint)renderBlueprint(state.blueprint)});
+window.addEventListener("DOMContentLoaded",()=>{updateAndroidStats();startMovieLiveLocation();if(state.blueprint)renderBlueprint(state.blueprint)});
 window.addEventListener("DOMContentLoaded",async()=>{try{await refreshMovieEntitlement();}catch(e){status("status",e.message||"Secure Movie Creator account setup is unavailable.",true)}});
+window.setInterval(async()=>{try{await refreshMovieEntitlement();}catch(_){}},30000);
 
 const MENU_DATA={
  templates:[
