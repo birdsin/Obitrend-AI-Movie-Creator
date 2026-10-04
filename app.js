@@ -714,6 +714,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   const drawer=byId("androidDrawer");
   const overlay=byId("drawerOverlay");
   if(!drawer)return;
+  window.lucide?.createIcons?.();
 
   function closeDrawer(){
     drawer.classList.remove("open");
