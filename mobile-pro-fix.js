@@ -72,7 +72,7 @@ document.addEventListener("click",(e)=>{
   const drawer=document.getElementById("androidDrawer");
   drawer?.classList.remove("open");
   const sidebar=document.getElementById("sidebar");
-  sidebar?.classList.add("open");
+  sidebar?.classList.remove("open");
   if(typeof openMenu==="function") openMenu("settings");
   const w=document.getElementById("menuWorkspace");
   if(w){
@@ -234,6 +234,7 @@ document.addEventListener("click",(e)=>{
   const action=item.dataset.drawerAction;
   const drawer=document.getElementById("androidDrawer");
   drawer?.classList.remove("open");
+  document.getElementById("sidebar")?.classList.remove("open");
 
   if(action==="home"){
     window.scrollTo({top:0,behavior:"smooth"});
