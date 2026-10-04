@@ -118,7 +118,7 @@ module.exports=async(req,res)=>{
     ].join(" ");
 
     const safePrompt=prompt.length>1000?prompt.slice(0,997)+"...":prompt;
-    const body={
+    const runwayBody={
       model:"wan3",
       promptText:safePrompt,
       audio:true,
@@ -130,7 +130,7 @@ module.exports=async(req,res)=>{
     // This keeps prompt-only generation independent of promptImage validation.
     const r=await runwayRequest("/text_to_video",{
       method:"POST",
-      body:JSON.stringify(body)
+      body:JSON.stringify(runwayBody)
     });
     const d=await r.json().catch(()=>({}));
 
