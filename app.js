@@ -260,6 +260,7 @@ function openMenu(name){
     const expiry=e.expiresAt?new Date(e.expiresAt).toLocaleDateString():"Not set";
     menuOpen("Pro Plans","Premium movie creation options.",
       '<div class="credit-box"><strong>'+esc(e.plan||"Free")+'</strong><span>Current plan</span></div>'+
+      '<div class="status">User ID: '+esc(e.userId||"Creating…")+'</div>'+
       '<div class="status">Movie credits: '+getMovieCredits()+' · Expiry: '+esc(expiry)+'</div>'+
       renderMenuCard("3 Day Creator","₦13,000 · 10 credits · 3 days","pro:threeDays")+
       renderMenuCard("Weekly Creator","₦26,000 · 22 credits · 7 days","pro:weekly")+
@@ -268,6 +269,7 @@ function openMenu(name){
   },
   credits:()=>menuOpen("My Credits","Your current movie studio credit balance.",
     '<div class="credit-box"><strong>'+getMovieCredits()+'</strong><span>Credits available</span></div>'+
+    '<div class="status">User ID: '+esc(getMovieEntitlement().userId||"Creating…")+'</div>'+
     '<div class="status">Plan: '+esc(getMoviePlanLabel())+'</div>'+
     renderMenuCard("How credits work","One movie credit is consumed only after a video shot is successfully generated.","credits-info")),
   settings:()=>menuOpen("Settings","Movie Creator settings are saved on this device.",'<div class="settings-list"><label class="setting-row"><span>Save movie history</span><input id="settingHistory" type="checkbox" checked></label><button class="outline-btn menu-action" data-menu-action="clear-history">Clear saved history</button><button class="outline-btn menu-action" data-menu-action="clear-project">Clear current project</button></div><div id="menuActionStatus" class="status"></div>'),
