@@ -259,17 +259,52 @@ async function generateShot(){
     const token=await window.getMovieAccessToken();
     status("shotStatus","Sending shot to the video generator…");
     const r=await fetch("/api/generate-shot",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token,"x-movie-reservation":reservation},body:JSON.stringify({blueprint:state.blueprint,sceneIndex:state.sceneIndex,shotIndex:state.shotIndex,ratio:$("ratio").value,reservationToken:reservation})});
-    const d=await r.json();
-    if(!r.ok)throw new Error(d.error||"Shot generation failed.");
-    if(d.videoUrl){await finishMovieCredit("commit",reservation);showVideo(d.videoUrl);status("shotStatus","Shot ready.")} 
-    else if(d.taskId){await pollTask(d.taskId,reservation)}
-    else throw new Error("The video provider did not return a task.");
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){
+      const e=new Error(d.error||"Shot generation failed.");
+      e.creditReleased=Boolean(d.reservationReleased);
+      throw e;
+    }
+    if(d.videoUrl){
+      await finishMovieCredit("commit",reservation);
+      reservation=null;
+      showVideo(d.videoUrl);
+      status("shotStatus","Shot ready.");
+    }else if(d.taskId){
+      await pollTask(d.taskId,reservation);
+      reservation=null;
+    }else{
+      throw new Error("The video provider did not return a task.");
+    }
   }catch(e){
-    if(reservation){try{await finishMovieCredit("release",reservation)}catch(_){}}
+    if(reservation&&!e?.creditReleased){
+      try{await finishMovieCredit("release",reservation)}catch(_){}
+    }
     status("shotStatus",e.message||"Shot generation failed.",true);
   }finally{b.disabled=false}
 }
-async function pollTask(id,reservation){for(let i=0;i<90;i++){status("shotStatus","Generating cinematic shot… "+Math.min(99,Math.round((i+1)/90*100))+"%");await new Promise(r=>setTimeout(r,5000));const token=await window.getMovieAccessToken();const r=await fetch("/api/generate-shot?taskId="+encodeURIComponent(id),{headers:{"Authorization":"Bearer "+token,"x-movie-reservation":reservation}});const d=await r.json();if(!r.ok)throw new Error(d.error||"Video status check failed.");if(d.status==="SUCCEEDED"&&d.videoUrl){await finishMovieCredit("commit",reservation);showVideo(d.videoUrl);status("shotStatus","Shot ready.");return}if(d.status==="FAILED"||d.status==="CANCELED")throw new Error("The shot could not be generated. Your credit was restored.")}throw new Error("Generation is taking longer than expected. Check the shot again shortly.")}
+async function pollTask(id,reservation){
+  for(let i=0;i<120;i++){
+    status("shotStatus","Generating cinematic shot… "+Math.min(99,Math.round((i+1)/120*100))+"%");
+    await new Promise(r=>setTimeout(r,5000));
+    const token=await window.getMovieAccessToken();
+    const r=await fetch("/api/generate-shot?taskId="+encodeURIComponent(id),{headers:{"Authorization":"Bearer "+token,"x-movie-reservation":reservation}});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(d.error||"Video status check failed.");
+    if(d.status==="SUCCEEDED"&&d.videoUrl){
+      await finishMovieCredit("commit",reservation);
+      showVideo(d.videoUrl);
+      status("shotStatus","Shot ready.");
+      return;
+    }
+    if(d.status==="FAILED"||d.status==="CANCELED"){
+      const e=new Error("The shot could not be generated. Your OBITREND movie credit was restored.");
+      e.creditReleased=Boolean(d.reservationReleased);
+      throw e;
+    }
+  }
+  throw new Error("The shot is still processing. Please wait before starting another generation.");
+}
 function showVideo(url){$("videoPlaceholder").classList.add("hidden");$("shotVideo").src=url;$("shotVideo").classList.remove("hidden");$("shotVideo").load()}
 
 window.addEventListener("DOMContentLoaded",()=>{updateAndroidStats();if(state.blueprint)renderBlueprint(state.blueprint)});
@@ -566,22 +601,56 @@ function renderAssembly(){
  }).join("");
 }
 async function generateAssemblyItem(item){
- if(getMovieCredits()<=0)throw new Error("No movie credits remaining. Please add credits before generating another shot.");
- item.state="generating";renderAssembly();
- const r=await fetch("/api/generate-shot",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({blueprint:state.blueprint,sceneIndex:item.si,shotIndex:item.hi,ratio:$("ratio").value})});
- const d=await r.json();
- if(!r.ok)throw new Error(d.error||"Shot generation failed.");
- if(d.videoUrl){if(!consumeMovieCredit())throw new Error("No movie credit is available for this shot.");return d.videoUrl;}
- if(!d.taskId)throw new Error("The video provider did not return a task.");
- for(let i=0;i<90;i++){
-  $("assemblyStatus").textContent="Generating Scene "+(item.si+1)+" Shot "+(item.hi+1)+"… "+Math.min(99,Math.round((i+1)/90*100))+"%";
-  await new Promise(r=>setTimeout(r,5000));
-  const s=await fetch("/api/generate-shot?taskId="+encodeURIComponent(d.taskId));const x=await s.json();
-  if(!s.ok)throw new Error(x.error||"Video status check failed.");
-  if(x.status==="SUCCEEDED"&&x.videoUrl){if(!consumeMovieCredit())throw new Error("No movie credit is available for this shot.");return x.videoUrl;}
-  if(x.status==="FAILED"||x.status==="CANCELED")throw new Error("The shot could not be generated.");
- }
- throw new Error("Generation is taking longer than expected.");
+  await window.movieAuthReady;
+  await refreshMovieEntitlement();
+  let reservation=null;
+  try{
+    reservation=await reserveMovieCredit();
+    const token=await window.getMovieAccessToken();
+    item.state="generating";renderAssembly();
+    const r=await fetch("/api/generate-shot",{
+      method:"POST",
+      headers:{"content-type":"application/json","Authorization":"Bearer "+token,"x-movie-reservation":reservation},
+      body:JSON.stringify({blueprint:state.blueprint,sceneIndex:item.si,shotIndex:item.hi,ratio:$("ratio").value,reservationToken:reservation})
+    });
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){
+      const e=new Error(d.error||"Shot generation failed.");
+      e.creditReleased=Boolean(d.reservationReleased);
+      throw e;
+    }
+    if(d.videoUrl){
+      await finishMovieCredit("commit",reservation);
+      reservation=null;
+      return d.videoUrl;
+    }
+    if(!d.taskId)throw new Error("The video provider did not return a task.");
+
+    for(let i=0;i<120;i++){
+      $("assemblyStatus").textContent="Generating Scene "+(item.si+1)+" Shot "+(item.hi+1)+"… "+Math.min(99,Math.round((i+1)/120*100))+"%";
+      await new Promise(r=>setTimeout(r,5000));
+      const pollToken=await window.getMovieAccessToken();
+      const s=await fetch("/api/generate-shot?taskId="+encodeURIComponent(d.taskId),{headers:{"Authorization":"Bearer "+pollToken,"x-movie-reservation":reservation}});
+      const x=await s.json().catch(()=>({}));
+      if(!s.ok)throw new Error(x.error||"Video status check failed.");
+      if(x.status==="SUCCEEDED"&&x.videoUrl){
+        await finishMovieCredit("commit",reservation);
+        reservation=null;
+        return x.videoUrl;
+      }
+      if(x.status==="FAILED"||x.status==="CANCELED"){
+        const e=new Error("The shot could not be generated. Your OBITREND movie credit was restored.");
+        e.creditReleased=Boolean(x.reservationReleased);
+        throw e;
+      }
+    }
+    throw new Error("The shot is still processing. Please wait before starting another generation.");
+  }catch(e){
+    if(reservation&&!e?.creditReleased){
+      try{await finishMovieCredit("release",reservation)}catch(_){}
+    }
+    throw e;
+  }
 }
 async function runAssembly(full){
  if(assemblyState.running||!state.blueprint)return;
