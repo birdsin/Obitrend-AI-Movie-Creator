@@ -17,6 +17,7 @@ window.movieAuthReady=(async()=>{
   }
   if(!session?.user?.id) throw new Error("Secure Movie Creator user identity is unavailable.");
   window.movieUserId=session.user.id;
+  window.moviePublicUserId="OBI-"+session.user.id.replaceAll("-","").slice(0,8).toUpperCase();
   return session;
 })();
 
