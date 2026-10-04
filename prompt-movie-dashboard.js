@@ -4,7 +4,7 @@
   const startup=q("#obitrendStartup");
   window.setTimeout(()=>startup?.classList.add("hide"),1700);
 
-  const prompt=q("#pmPrompt"), enginePrompt=q("#moviePrompt"), generate=q("#pmGenerate"), engineBuild=q("#buildBtn"), status=q("#pmStatus");
+  const prompt=q("#pmPrompt"), enginePrompt=q("#moviePrompt"), generate=q("#pmGenerate"), engineBuild=q("#buildBtn"), status=q("#pmStatus"), composer=q(".pm-composer");
   const iconRefresh=()=>window.lucide?.createIcons?.();
   iconRefresh();
 
@@ -64,15 +64,16 @@
     setAutoDefaults();
     status.className="pm-status";status.textContent="AI is turning your prompt into a complete cinematic blueprint…";
     generate.disabled=true;
+    composer?.classList.add("pm-loading");
     engineBuild?.click();
     const started=Date.now();
     const timer=setInterval(()=>{
-      const blueprintReady=!!(document.getElementById("movieTitle")?.textContent&&document.getElementById("movieTitle").textContent!=="Your Movie");
       const source=document.getElementById("status")?.textContent||"";
-      if(blueprintReady||/Blueprint ready\./i.test(source)){
+      if(/Blueprint ready\./i.test(source)){
         clearInterval(timer);
         status.textContent="Movie blueprint ready. AI selected the story structure, characters, scenes, camera, lighting and sound automatically.";
         generate.disabled=false;
+        composer?.classList.remove("pm-loading");
         q("#pmResult")?.classList.add("ready");
         try{if(typeof saveHistory==="function"&&state?.blueprint)saveHistory(state.blueprint)}catch(_){}
         loadRecent();
@@ -80,7 +81,7 @@
         q("#pmResultTitle")&&(q("#pmResultTitle").textContent=document.getElementById("movieTitle")?.textContent||"Your movie");
         return;
       }
-      if(Date.now()-started>90000){clearInterval(timer);generate.disabled=false;status.textContent=source||"Movie generation is taking longer than expected.";status.className="pm-status error"}
+      if(Date.now()-started>90000){clearInterval(timer);generate.disabled=false;composer?.classList.remove("pm-loading");status.textContent=source||"Movie generation is taking longer than expected.";status.className="pm-status error"}
       mirrorStatus();
     },500);
   });
@@ -148,7 +149,7 @@
 
   function renderDemos(){
     if(!recent)return;
-    recent.innerHTML='<div class="pm-demo-grid">'+demoMovies.map((m,i)=>
+    recent.innerHTML='<div class="pm-empty pm-demo-empty">No movies yet<br><button class="pm-player-cta" type="button" id="pmFirstMovieCta">Generate your first movie →</button></div><div class="pm-demo-grid">'+demoMovies.map((m,i)=>
       '<button class="pm-project pm-demo" type="button" data-demo-index="'+i+'">'+
         '<div class="pm-project-art pm-demo-art" style="background-image:url('+m.image+')">'+
           '<span class="pm-genre">'+m.genre+'</span><span class="pm-badge">'+m.length+' min</span>'+
@@ -157,9 +158,39 @@
         '</div><div class="pm-demo-copy"><b>'+m.title+'</b><span>'+m.genre+' · Tap to use this story</span></div>'+
       '</button>'
     ).join("")+'</div>';
+    recent.querySelector("#pmFirstMovieCta")?.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
     recent.querySelectorAll("[data-demo-index]").forEach(card=>card.addEventListener("click",()=>fillPrompt(demoMovies[Number(card.dataset.demoIndex)]?.prompt)));
+    recent.querySelectorAll(".pm-demo .pm-play").forEach(play=>play.addEventListener("click",e=>{
+      e.preventDefault();e.stopPropagation();
+      const card=play.closest(".pm-demo"), demo=demoMovies[Number(card?.dataset.demoIndex)];
+      openPlayerModal(demo,demo?.image,demo?.title);
+    }));
     iconRefresh();
   }
+
+  function closePlayerModal(){
+    const m=document.getElementById("pmPlayerBackdrop");
+    if(m)m.remove();
+    document.body.style.overflow="";
+  }
+  function openPlayerModal(item, poster, title){
+    closePlayerModal();
+    let videos=[];try{videos=JSON.parse(localStorage.getItem("obitrend_auto_movie_videos")||"[]")}catch{}
+    const firstVideo=Array.isArray(videos)&&videos.length?videos[0]?.url:null;
+    const backdrop=document.createElement("div");
+    backdrop.id="pmPlayerBackdrop";backdrop.className="pm-player-backdrop";
+    backdrop.innerHTML='<div class="pm-player-modal" role="dialog" aria-modal="true" aria-label="Movie player">'+
+      '<div class="pm-player-head"><strong>'+String(title||"OBITREND Movie").replace(/[&<>]/g,"")+'</strong><button class="pm-player-close" type="button" aria-label="Close player">×</button></div>'+
+      (firstVideo?'<video class="pm-player-video" controls autoplay playsinline src="'+firstVideo.replace(/"/g,"&quot;")+'"></video>':
+      '<img class="pm-player-poster" alt="" src="'+poster.replace(/"/g,"&quot;")+'"><div class="pm-player-note">Your cinematic movie player is ready. Generate the first shot to render the video.</div>'+
+      '<button class="pm-player-cta" type="button">Use this story</button>')+
+      '</div>';
+    document.body.appendChild(backdrop);document.body.style.overflow="hidden";
+    backdrop.querySelector(".pm-player-close")?.addEventListener("click",closePlayerModal);
+    backdrop.addEventListener("click",e=>{if(e.target===backdrop)closePlayerModal()});
+    backdrop.querySelector(".pm-player-cta")?.addEventListener("click",()=>{closePlayerModal();fillPrompt(item?.prompt||item?.blueprint?.logline||title||"");});
+  }
+  document.addEventListener("keydown",e=>{if(e.key==="Escape")closePlayerModal()});
 
   function loadRecent(){
     let history=[];try{history=JSON.parse(localStorage.getItem("obitrend_movie_history")||"[]")}catch{}
@@ -179,6 +210,13 @@
         fillPrompt(item.prompt||item.blueprint.logline||item.blueprint.title||"");
         status.textContent="Movie loaded from your recent creations.";
       }
+    }));
+    recent.querySelectorAll(".pm-play").forEach((play,i)=>play.addEventListener("click",e=>{
+      e.preventDefault();e.stopPropagation();
+      let history=[];try{history=JSON.parse(localStorage.getItem("obitrend_movie_history")||"[]")}catch{}
+      const item=history[i]||null;
+      const title=item?.blueprint?.title||item?.title||"OBITREND Movie";
+      openPlayerModal(item,posterImages[i%posterImages.length],title);
     }));
     iconRefresh();
   }
