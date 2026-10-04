@@ -269,6 +269,29 @@
     drawer.classList.toggle("open",menuOpenState);
     drawer.setAttribute("aria-hidden",String(!menuOpenState));
   }
+  const engineFocusPrompt=()=>{
+    q(".pm-composer")?.scrollIntoView({behavior:"smooth",block:"center"});
+    window.setTimeout(()=>prompt?.focus(),300);
+  };
+  q("#pmEngineCamera")?.addEventListener("click",engineFocusPrompt);
+  q("#pmEngineFilm")?.addEventListener("click",()=>{
+    if(prompt?.value.trim()) generate?.click();
+    else engineFocusPrompt();
+  });
+  q("#pmEngineClapper")?.addEventListener("click",()=>{
+    q(".pm-recent")?.scrollIntoView({behavior:"smooth",block:"start"});
+  });
+  q("#pmEngineVideo")?.addEventListener("click",()=>{
+    const studio=q("#shotStudio");
+    if(studio&&!studio.classList.contains("hidden")){
+      studio.scrollIntoView({behavior:"smooth",block:"start"});
+      q("#generateShotBtn")?.focus();
+      return;
+    }
+    q("#pmResult")?.scrollIntoView({behavior:"smooth",block:"start"});
+    status.textContent="Build your movie first. OBITREND will then open the video Shot Studio for generation.";
+  });
+
   q("#pmMenuBtn")?.addEventListener("click",openDrawer);
   q("#pmCreatorBtn")?.addEventListener("click",()=>{if(typeof openMenu==="function")openMenu("pro")});
   q("#pmProfileBtn")?.addEventListener("click",()=>{if(typeof openMenu==="function")openMenu("settings")});
