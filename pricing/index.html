@@ -38,39 +38,46 @@ body{margin:0;background:#080b10;color:#f5f5f5;font-family:Inter,system-ui,sans-
 </section>
 <section class="plans">
 <article class="plan">
-<span class="tag">2 DAY CREATOR</span>
-<div class="price">₦3,000</div>
-<div class="credits">2 movie credits · 2 days</div>
+<span class="tag">1 DAY PRO</span>
+<div class="price">₦5,000</div>
+<div class="credits">1 video credit · 1 day</div>
 <p>Quick access for creators making a short cinematic project.</p>
-<button class="choose secondary" data-plan="twoDays">Choose 2 Day Creator</button>
+<button class="choose secondary" data-plan="oneDay">Choose 1 Day Pro</button>
 </article>
 <article class="plan">
-<span class="tag">1 DAY CREATOR</span>
-<div class="price">₦6,500</div>
-<div class="credits">4 movie credits · 1 day</div>
-<p>Fast creator access with four movie credits for one day.</p>
-<button class="choose secondary" data-plan="oneDay">Choose 1 Day Creator</button>
+<span class="tag">2 DAY PRO</span>
+<div class="price">₦10,000</div>
+<div class="credits">2 video credits · 2 days</div>
+<p>Short-term creator access with two video credits.</p>
+<button class="choose secondary" data-plan="twoDays">Choose 2 Day Pro</button>
 </article>
 <article class="plan">
-<span class="tag">3 DAY CREATOR</span>
-<div class="price">₦13,000</div>
-<div class="credits">10 movie credits · 3 days</div>
-<p>Start creating short cinematic projects with a 3-day creator plan.</p>
-<button class="choose secondary" data-plan="threeDays">Choose 3 Day Creator</button>
-</article>
-<article class="plan pro">
-<span class="tag">WEEKLY CREATOR</span>
-<div class="price">₦26,000</div>
-<div class="credits">22 movie credits · 7 days</div>
-<p>More room for creators building cinematic projects throughout the week.</p>
-<button class="choose" data-plan="weekly">Choose Weekly Creator</button>
+<span class="tag">6 DAY PRO</span>
+<div class="price">₦20,000</div>
+<div class="credits">4 video credits · 6 days</div>
+<p>Creator access for nearly a full week with four video credits.</p>
+<button class="choose secondary" data-plan="sixDays">Choose 6 Day Pro</button>
 </article>
 <article class="plan">
-<span class="tag">MONTHLY CREATOR</span>
-<div class="price">₦90,000</div>
-<div class="credits">70 movie credits · 30 days</div>
-<p>For creators producing larger movie projects across the month.</p>
-<button class="choose secondary" data-plan="monthly">Choose Monthly Creator</button>
+<span class="tag">7 DAY PRO</span>
+<div class="price">₦40,000</div>
+<div class="credits">8 video credits · 7 days</div>
+<p>Weekly creator access with eight video credits.</p>
+<button class="choose" data-plan="weekly">Choose 7 Day Pro</button>
+</article>
+<article class="plan">
+<span class="tag">14 DAY PRO</span>
+<div class="price">₦50,000</div>
+<div class="credits">10 video credits · 14 days</div>
+<p>Two weeks of creator access with ten video credits.</p>
+<button class="choose secondary" data-plan="fourteenDays">Choose 14 Day Pro</button>
+</article>
+<article class="plan">
+<span class="tag">1 MONTH PRO</span>
+<div class="price">₦100,000</div>
+<div class="credits">20 video credits · 1 month</div>
+<p>Full-month creator access with twenty video credits.</p>
+<button class="choose secondary" data-plan="monthly">Choose 1 Month Pro</button>
 </article>
 </section>
 <p class="note">Secure checkout is handled by Paystack. Your movie credits are added only after the payment is verified by OBITREND.</p>
@@ -78,7 +85,14 @@ body{margin:0;background:#080b10;color:#f5f5f5;font-family:Inter,system-ui,sans-
 <script type="module">
 import "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/+esm";
 import "../movie-auth.js";
-const MOVIE_PLANS={twoDays:{priceNaira:3000},oneDay:{priceNaira:6500},threeDays:{priceNaira:13000},weekly:{priceNaira:26000},monthly:{priceNaira:90000}};
+const MOVIE_PLANS={
+  oneDay:{priceNaira:5000},
+  twoDays:{priceNaira:10000},
+  sixDays:{priceNaira:20000},
+  weekly:{priceNaira:40000},
+  fourteenDays:{priceNaira:50000},
+  monthly:{priceNaira:100000}
+};
 async function startPayment(planKey,button){
   const plan=MOVIE_PLANS[planKey];
   if(!plan)return;
