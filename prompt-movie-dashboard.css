@@ -259,3 +259,54 @@ body.pm-menu-open{overflow:hidden}
 /* GENERATE PROCESSING SPINNER — FIX ONLY */
 .pm-generate-spinner{width:18px!important;height:18px!important;display:inline-block;vertical-align:-4px;animation:pmGenerateSpin .8s linear infinite}
 @keyframes pmGenerateSpin{to{transform:rotate(360deg)}}
+
+/* MOBILE HEADER MENU VISUAL FIX — no workflow changes */
+.pm-menu{
+  position:relative!important;
+  width:42px!important;
+  height:42px!important;
+  min-width:42px!important;
+  min-height:42px!important;
+  flex:0 0 42px!important;
+  display:grid!important;
+  place-items:center!important;
+  padding:0!important;
+  overflow:hidden!important;
+  cursor:pointer!important;
+}
+.pm-menu svg{
+  width:22px!important;
+  height:22px!important;
+  display:block!important;
+  color:#ffe29a!important;
+  stroke:#ffe29a!important;
+  stroke-width:2.6!important;
+}
+.pm-menu::before{
+  content:"☰";
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  color:#ffe29a;
+  font-size:23px;
+  line-height:1;
+  pointer-events:none;
+  opacity:0;
+}
+.pm-menu:not(:has(svg))::before{opacity:1}
+.pm-brand{min-width:0}
+.pm-brand>div{min-width:0}
+.pm-brand b{white-space:nowrap}
+.pm-brand span{white-space:nowrap}
+@media(max-width:600px){
+  .pm-topbar{gap:10px;padding:0 10px;overflow:hidden}
+  .pm-menu{width:40px!important;height:40px!important;min-width:40px!important;flex-basis:40px!important}
+  .pm-brand{gap:7px;flex:1}
+  .pm-crown{font-size:19px}
+  .pm-brand b{font-size:15px;letter-spacing:.13em}
+  .pm-brand span{font-size:6px;letter-spacing:.22em}
+  .pm-top-actions{gap:7px}
+  .pm-credit{font-size:9px;padding:7px 9px}
+  .pm-avatar{width:34px;height:34px}
+}
