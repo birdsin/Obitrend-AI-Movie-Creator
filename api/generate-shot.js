@@ -101,17 +101,21 @@ module.exports=async(req,res)=>{
       "Aspect ratio "+ratio+"."
     ].join(" ");
 
-    // Runway Gen-4.5 supports prompt-only text-to-video on the
-    // image_to_video endpoint when promptImage is omitted.
-    const safePrompt=prompt.length>1000?prompt.slice(0,997)+"...":prompt;
+    // Runway's current Gen-4.5 image_to_video validator can require
+    // promptImage even when documentation describes prompt-only generation.
+    // Use the official multi-shot recipe for prompt-only 5-second generation;
+    // it accepts text directly and returns a normal Runway task id.
+    const safePrompt=prompt.length>2500?prompt.slice(0,2497)+"...":prompt;
     const body={
-      model:"gen4.5",
-      promptText:safePrompt,
+      version:"2026-06",
+      mode:"auto",
+      prompt:safePrompt,
       duration:5,
-      ratio:ratio==="9:16"?"720:1280":"1280:720"
+      ratio:ratio==="9:16"?"720:1280":"1280:720",
+      audio:false
     };
 
-    const r=await runwayRequest("/image_to_video",{
+    const r=await runwayRequest("/recipes/multi_shot_video",{
       method:"POST",
       body:JSON.stringify(body)
     });
@@ -135,7 +139,20 @@ module.exports=async(req,res)=>{
     }
 
     const taskId=d.id||d.task_id;
-    if(!taskId)return json(res,502,{error:"The video generator did not return a task. Please try again."});
+    if(!taskId){
+      try{
+        await fetch(supabaseUrl+"/functions/v1/movie-credit",{
+          method:"POST",
+          headers:{
+            "content-type":"application/json",
+            "apikey":publishable,
+            "Authorization":auth
+          },
+          body:JSON.stringify({action:"release",token:String(reservation)})
+        });
+      }catch(_){}
+      return json(res,502,{error:"The video generator did not return a task. Your credit was restored. Please try again."});
+    }
 
     return json(res,200,{taskId,videoUrl:Array.isArray(d.output)?d.output[0]:null});
   }catch(e){
