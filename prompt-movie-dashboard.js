@@ -22,14 +22,80 @@
     }
   }
 
-  const examples=[...document.querySelectorAll(".pm-example")];
+  const engineSteps=[...document.querySelectorAll(".pm-engine-step")];
+  const engineStatus=q("#pmEngineStatus");
+  const cinema=q(".pm-cinema");
+  let engineTimers=[];
+  let engineToken=0;
+  const engineNames=["Story","Cast","Scenes","Camera","Lighting","Sound","Continuity"];
+
+  function clearEngineTimers(){
+    engineTimers.forEach(t=>clearTimeout(t));
+    engineTimers=[];
+  }
+
+  function renderEngineStep(index,complete=false){
+    engineSteps.forEach((step,i)=>{
+      step.classList.toggle("active",i===index&&!complete);
+      step.classList.toggle("complete",complete||i<index);
+      step.classList.toggle("processing",i===index&&!complete);
+    });
+  }
+
+  function resetEngineProgress(){
+    clearEngineTimers();
+    engineToken++;
+    engineSteps.forEach(step=>step.classList.remove("active","complete","processing"));
+    cinema?.classList.remove("pm-engine-processing");
+    if(!prompt?.value.trim()){
+      if(engineStatus)engineStatus.textContent="READY · Story · Cast · Scenes · Camera · Lighting · Sound · Continuity";
+      return;
+    }
+    renderEngineStep(0);
+    if(engineStatus)engineStatus.textContent="ENGINE READY: Story";
+    const token=engineToken;
+    for(let i=1;i<engineSteps.length;i++){
+      engineTimers.push(setTimeout(()=>{
+        if(token!==engineToken)return;
+        renderEngineStep(i);
+        if(engineStatus)engineStatus.textContent="ENGINE PROCESSING: "+engineNames[i]+"…";
+      },i*2000));
+    }
+  }
+
+  function startEngineProcessing(){
+    clearEngineTimers();
+    const token=++engineToken;
+    cinema?.classList.add("pm-engine-processing");
+    engineSteps.forEach(step=>step.classList.remove("active","complete","processing"));
+    if(engineStatus)engineStatus.textContent="ENGINE PROCESSING: Creating Story…";
+    for(let i=0;i<engineSteps.length;i++){
+      engineTimers.push(setTimeout(()=>{
+        if(token!==engineToken)return;
+        renderEngineStep(i);
+        if(engineStatus)engineStatus.textContent="ENGINE PROCESSING: Creating "+engineNames[i]+"…";
+      },i*800));
+    }
+    engineTimers.push(setTimeout(()=>{
+      if(token!==engineToken)return;
+      engineSteps.forEach(step=>step.classList.remove("active","processing"));
+      engineSteps.forEach(step=>step.classList.add("complete"));
+      if(engineStatus)engineStatus.textContent="ENGINE COMPLETE: Story ✓ · Cast ✓ · Scenes ✓ · Camera ✓ · Lighting ✓ · Sound ✓ · Continuity ✓";
+      cinema?.classList.remove("pm-engine-processing");
+    },engineSteps.length*800+250));
+  }
+
+    const examples=[...document.querySelectorAll(".pm-example")];
   examples.forEach(b=>b.addEventListener("click",()=>{
     prompt.value=b.dataset.prompt||"";
     if(enginePrompt)enginePrompt.value=prompt.value;
     prompt.dispatchEvent(new Event("input",{bubbles:true}));
     prompt.focus();
   }));
-  prompt?.addEventListener("input",()=>{if(enginePrompt)enginePrompt.value=prompt.value;});
+  prompt?.addEventListener("input",()=>{
+    if(enginePrompt)enginePrompt.value=prompt.value;
+    resetEngineProgress();
+  });
 
   function mirrorStatus(){
     const a=q("#status"), b=q("#assemblyStatus"), c=q("#shotStatus");
@@ -62,6 +128,7 @@
     const value=prompt.value.trim();
     if(!value){showEmptyPromptError();return}
     setAutoDefaults();
+    startEngineProcessing();
     status.className="pm-status";status.textContent="AI is turning your prompt into a complete cinematic blueprint…";
     generate.disabled=true;
     composer?.classList.add("pm-loading");
@@ -71,6 +138,10 @@
       const source=document.getElementById("status")?.textContent||"";
       if(/Blueprint ready\./i.test(source)){
         clearInterval(timer);
+        engineSteps.forEach(step=>{step.classList.remove("active","processing");step.classList.add("complete")});
+        cinema?.classList.remove("pm-engine-processing");
+        clearEngineTimers();
+        if(engineStatus)engineStatus.textContent="ENGINE COMPLETE: Real AI blueprint created from /api/plan.";
         status.textContent="Movie blueprint ready. AI selected the story structure, characters, scenes, camera, lighting and sound automatically.";
         generate.disabled=false;
         composer?.classList.remove("pm-loading");
@@ -223,11 +294,65 @@
 
   let menuOpenState=false;
   let drawer=q("#pmDrawer");
+  let drawerBackdrop=q("#pmDrawerBackdrop");
+
+  function updateMenuActive(){
+    if(!drawer)return;
+    const path=window.location.pathname.replace(/\\/+$/,"")||"/";
+    const hash=window.location.hash;
+    drawer.querySelectorAll("[data-pm-nav]").forEach(btn=>btn.classList.remove("active"));
+    let action="home";
+    if(path==="/pricing")action="pro";
+    else if(path==="/settings")action="settings";
+    else if(hash==="#create")action="create";
+    else if(hash==="#movies")action="creations";
+    drawer.querySelector('[data-pm-nav="'+action+'"]')?.classList.add("active");
+  }
+
   function closeDrawer(){
     menuOpenState=false;
     drawer?.classList.remove("open");
+    drawerBackdrop?.classList.remove("open");
     drawer?.setAttribute("aria-hidden","true");
+    drawerBackdrop?.setAttribute("aria-hidden","true");
+    document.body.classList.remove("pm-menu-open");
   }
+
+  function setIsMenuOpen(value){
+    if(value)openDrawer();else closeDrawer();
+  }
+
+  function scrollHome(){
+    if(window.location.pathname!=="/"){
+      window.location.assign("/");return;
+    }
+    history.replaceState({},document.title,"/");
+    closeDrawer();
+    window.scrollTo({top:0,behavior:"smooth"});
+    updateMenuActive();
+  }
+
+  function scrollCreate(){
+    if(window.location.pathname!=="/"){
+      window.location.assign("/#create");return;
+    }
+    closeDrawer();
+    history.replaceState({},document.title,"/#create");
+    q(".pm-composer")?.scrollIntoView({behavior:"smooth",block:"start"});
+    prompt?.focus();
+    updateMenuActive();
+  }
+
+  function scrollMovies(){
+    if(window.location.pathname!=="/"){
+      window.location.assign("/#movies");return;
+    }
+    closeDrawer();
+    history.replaceState({},document.title,"/#movies");
+    q(".pm-recent")?.scrollIntoView({behavior:"smooth",block:"start"});
+    updateMenuActive();
+  }
+
   function openDrawer(){
     if(!drawer){
       drawer=document.createElement("aside");
@@ -240,25 +365,39 @@
         '<button type="button" data-pm-nav="creations"><i data-lucide="clapperboard"></i> My Movies</button>'+
         '<button type="button" data-pm-nav="pro"><i data-lucide="crown"></i> Pro Plans</button>'+
         '<button type="button" data-pm-nav="settings"><i data-lucide="settings"></i> Settings</button>';
+      drawerBackdrop=document.createElement("div");
+      drawerBackdrop.id="pmDrawerBackdrop";
+      drawerBackdrop.className="pm-drawer-backdrop";
+      drawerBackdrop.setAttribute("aria-hidden","true");
+      document.body.appendChild(drawerBackdrop);
       document.body.appendChild(drawer);
-      drawer.querySelector("#pmDrawerClose")?.addEventListener("click",closeDrawer);
+      drawer.querySelector("#pmDrawerClose")?.addEventListener("click",()=>setIsMenuOpen(false));
+      drawerBackdrop.addEventListener("click",()=>setIsMenuOpen(false));
       drawer.querySelectorAll("[data-pm-nav]").forEach(btn=>btn.addEventListener("click",()=>{
         const action=btn.dataset.pmNav;
-        closeDrawer();
-        if(action==="home")window.scrollTo({top:0,behavior:"smooth"});
-        else if(action==="create"){prompt?.focus();q(".pm-composer")?.scrollIntoView({behavior:"smooth",block:"center"});}
-        else if(action==="creations"||action==="pro"||action==="settings"){if(typeof openMenu==="function")openMenu(action==="creations"?"creations":action);}
+        setIsMenuOpen(false);
+        if(action==="home")scrollHome();
+        else if(action==="create")scrollCreate();
+        else if(action==="creations")scrollMovies();
+        else if(action==="pro")window.location.assign("/pricing");
+        else if(action==="settings")window.location.assign("/settings");
       }));
       iconRefresh();
     }
-    menuOpenState=!menuOpenState;
-    drawer.classList.toggle("open",menuOpenState);
-    drawer.setAttribute("aria-hidden",String(!menuOpenState));
+    menuOpenState=true;
+    drawer.classList.add("open");
+    drawerBackdrop?.classList.add("open");
+    drawer.setAttribute("aria-hidden","false");
+    drawerBackdrop?.setAttribute("aria-hidden","false");
+    document.body.classList.add("pm-menu-open");
+    updateMenuActive();
   }
-  q("#pmMenuBtn")?.addEventListener("click",openDrawer);
-  q("#pmCreatorBtn")?.addEventListener("click",()=>{if(typeof openMenu==="function")openMenu("pro")});
-  q("#pmProfileBtn")?.addEventListener("click",()=>{if(typeof openMenu==="function")openMenu("settings")});
 
+  q("#pmMenuBtn")?.addEventListener("click",()=>setIsMenuOpen(!menuOpenState));
+  q("#pmCreatorBtn")?.addEventListener("click",()=>window.location.assign("/pricing"));
+  q("#pmProfileBtn")?.addEventListener("click",()=>window.location.assign("/settings"));
+  window.addEventListener("hashchange",updateMenuActive);
+  window.addEventListener("popstate",updateMenuActive);
   loadRecent();
   window.addEventListener("beforeunload",()=>observers.forEach(o=>o?.disconnect()));
 })();
