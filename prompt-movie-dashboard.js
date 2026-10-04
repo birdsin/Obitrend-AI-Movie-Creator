@@ -151,7 +151,7 @@
 
           results.push({scene:item.si,shot:item.hi,url:video.src});
           try{localStorage.setItem("obitrend_auto_movie_videos",JSON.stringify(results))}catch{}
-          try{if(typeof saveHistory==="function"&&state?.blueprint)saveHistory(state.blueprint,video.src,i+1)}catch(_){}
+          try{if(typeof saveHistory==="function"&&blueprint)saveHistory(blueprint,video.src,i+1);loadRecent()}catch(_){}
 
           // Get the authoritative remaining credit count before starting the
           // next short. Reservation/commit is handled by the generation engine.
@@ -179,6 +179,7 @@
         status.className="pm-status";
         status.textContent="All movie shorts are ready to watch. "+remaining+" movie credit"+(remaining===1?" remains":"s remain")+".";
       }
+      loadRecent();
     }catch(error){
       status.className="pm-status error";
       status.textContent=error?.message||"Movie short generation stopped.";
@@ -250,7 +251,7 @@
     if(!history.length){renderDemos();return}
     recent.innerHTML=history.slice(0,3).map((x,i)=>{
       const b=x?.blueprint||{};
-      const title=String(b.title||x.title||"Untitled Movie").replace(/[&<>]/g,"");
+      const title=String(x.title||b.title||"Untitled Movie").replace(/[&<>]/g,"");
       const genre=String(b.genre||x.genre||"Cinematic").replace(/[&<>]/g,"");
       const length=String(b.length||x.length||15).replace(/[&<>]/g,"");
       const image=posterImages[i%posterImages.length];
