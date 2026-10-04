@@ -21,7 +21,7 @@
   </div>
 </div>
 
-<main class="pm-dashboard" id="promptDashboard">
+<main class="pm-dashboard" id="promptDashboard" data-page="home">
   <header class="pm-topbar">
     <button class="pm-menu" id="pmMenuBtn" type="button" aria-label="Open menu"><i data-lucide="menu"></i></button>
     <div class="pm-brand"><span class="pm-crown">♛</span><div><b>OBITREND</b><span>AI MOVIE CREATOR</span></div></div>
@@ -70,7 +70,7 @@
     <div class="pm-auto-card"><div class="pm-feature-icon"><i data-lucide="layers"></i></div><div><b>CONTINUITY</b><span>AI keeps locations, characters and visual details consistent.</span></div></div>
   </section>
 
-  <section class="pm-recent">
+  <section class="pm-recent" data-page="my-movies">
     <div class="pm-section-title"><h2>Recent Movies</h2><span>Your latest creations</span></div>
     <div class="pm-projects" id="pmProjects"><div class="pm-empty">No movies yet</div></div>
   </section>
@@ -82,7 +82,7 @@
 
 <!-- Existing movie engine kept hidden so the new dashboard uses the same working backend workflow. -->
 <section class="pm-engine" aria-hidden="true">
-  <section id="createPanel" class="content-card create-panel">
+  <section id="createPanel" class="content-card create-panel" data-page="create">
     <textarea id="moviePrompt"></textarea>
     <select id="length"><option value="5">5</option><option value="15" selected>15</option><option value="30">30</option></select>
     <select id="genre"><option>Drama</option><option>Action</option><option>Comedy</option><option>Romance</option><option>Thriller</option><option>Sci-Fi</option><option>Fantasy</option></select>
