@@ -925,13 +925,18 @@ document.addEventListener("DOMContentLoaded",()=>{
   byId("menuWorkspaceClose")?.addEventListener("click",closeWorkspace);
   const workspaceBack=byId("menuWorkspaceBack");
   if(workspaceBack){
+    let backLock=false;
     const goBackToMenu=(e)=>{
       e.preventDefault();
       e.stopPropagation();
+      if(backLock)return;
+      backLock=true;
       closeWorkspace();
       openDrawer();
+      window.setTimeout(()=>{backLock=false},400);
     };
     workspaceBack.addEventListener("pointerup",goBackToMenu,{passive:false});
+    workspaceBack.addEventListener("click",goBackToMenu,{passive:false});
   }
   document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeDrawer();closeWorkspace();}});
 })();
