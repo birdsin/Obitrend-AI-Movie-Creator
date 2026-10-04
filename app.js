@@ -27,14 +27,14 @@ function obiTogglePassword(id,buttonId){
   button.onclick=()=>{const visible=input.type==="text";input.type=visible?"password":"text";button.textContent=visible?"👁️":"🙈";};
 }
 function obiPasswordStrength(value){
-  let score=0;if(value.length>=8)score++;if(/[A-Z]/.test(value)&&/[a-z]/.test(value))score++;if(/\\d/.test(value)&&/[^A-Za-z0-9]/.test(value))score++;
+  let score=0;if(value.length>=8)score++;if(/[A-Z]/.test(value)&&/[a-z]/.test(value))score++;if(/\d/.test(value)&&/[^A-Za-z0-9]/.test(value))score++;
   const label=score>=3?"Strong":score===2?"Medium":"Weak",e=$("passwordStrength");
   if(e){e.innerHTML='Password strength: <b>'+label+'</b>';e.querySelector("b").style.color=label==="Strong"?"#b8df9e":label==="Medium"?"#e4bd50":"#ff9b9b";}
 }
 function obiSetupAuth(){
   if(!$("obitrendAuth")||!window.movieSupabase)return;
   const existingSession=window.movieAuthSession;
-  if(existingSession)obiShowDashboard();else obiShowAuth(false);
+  const authQuery=new URLSearchParams(location.search).get("auth");\n  const emailQuery=new URLSearchParams(location.search).get("email");\n  if(emailQuery&&$("authEmail"))$("authEmail").value=emailQuery;\n  if(existingSession)obiShowDashboard();else obiShowAuth(authQuery==="create");
   $("showCreate")?.addEventListener("click",()=>obiShowAuth(true));
   $("showSignIn")?.addEventListener("click",()=>obiShowAuth(false));
   obiTogglePassword("authPassword","togglePassword");
