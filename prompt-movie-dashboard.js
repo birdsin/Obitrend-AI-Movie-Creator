@@ -7,8 +7,28 @@
   const prompt=q("#pmPrompt"), enginePrompt=q("#moviePrompt"), generate=q("#pmGenerate"), engineBuild=q("#buildBtn"), status=q("#pmStatus");
   const iconRefresh=()=>window.lucide?.createIcons?.();
   iconRefresh();
+
+  // Cinematic atmosphere: lightweight floating gold particles.
+  const hero=q(".pm-hero");
+  if(hero && !hero.querySelector(".pm-dust")){
+    for(let i=0;i<18;i++){
+      const dust=document.createElement("i");
+      dust.className="pm-dust";
+      dust.style.left=(8+Math.random()*84).toFixed(1)+"%";
+      dust.style.top=(28+Math.random()*58).toFixed(1)+"%";
+      dust.style.setProperty("--dust-duration",(5.5+Math.random()*5).toFixed(1)+"s");
+      dust.style.animationDelay=(-Math.random()*7).toFixed(1)+"s";
+      hero.appendChild(dust);
+    }
+  }
+
   const examples=[...document.querySelectorAll(".pm-example")];
-  examples.forEach(b=>b.addEventListener("click",()=>{prompt.value=b.dataset.prompt||"";if(enginePrompt)enginePrompt.value=prompt.value;prompt.dispatchEvent(new Event("input",{bubbles:true}));prompt.focus()}));
+  examples.forEach(b=>b.addEventListener("click",()=>{
+    prompt.value=b.dataset.prompt||"";
+    if(enginePrompt)enginePrompt.value=prompt.value;
+    prompt.dispatchEvent(new Event("input",{bubbles:true}));
+    prompt.focus();
+  }));
   prompt?.addEventListener("input",()=>{if(enginePrompt)enginePrompt.value=prompt.value;});
 
   function mirrorStatus(){
@@ -27,9 +47,20 @@
     Object.entries(values).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v});
   }
 
+  function showEmptyPromptError(){
+    status.textContent="Describe your movie first";
+    status.className="pm-status error";
+    q(".pm-prompt-wrap")?.classList.add("pm-invalid");
+    generate?.classList.remove("pm-shake");
+    void generate?.offsetWidth;
+    generate?.classList.add("pm-shake");
+    prompt?.focus();
+    window.setTimeout(()=>q(".pm-prompt-wrap")?.classList.remove("pm-invalid"),900);
+  }
+
   generate?.addEventListener("click",()=>{
     const value=prompt.value.trim();
-    if(!value){status.textContent="Write your movie idea first.";status.className="pm-status error";prompt.focus();return}
+    if(!value){showEmptyPromptError();return}
     setAutoDefaults();
     status.className="pm-status";status.textContent="AI is turning your prompt into a complete cinematic blueprint…";
     generate.disabled=true;
@@ -88,21 +119,51 @@
     status.textContent="Your movie shots are ready. OBITREND generated the cinematic sequence automatically from your prompt.";
   }
 
-  // The new dashboard is the visible home. Keep the existing movie engine hidden and intact.
   window.showGeneratedBlueprint=window.showGeneratedBlueprint||function(){};
   try{showGeneratedBlueprint=function(){};}catch{}
+
   const recent=q("#pmProjects");
   const posterImages=[
-    "https://images.unsplash.com/photo-1723221890385-6949a72be9da?auto=format&fit=crop&fm=jpg&q=85&w=900",
-    "https://images.unsplash.com/photo-1542995719-06bfa52c0e11?auto=format&fit=crop&fm=jpg&q=85&w=900",
-    "https://images.unsplash.com/photo-1750768132075-1e0a93963ac9?auto=format&fit=crop&fm=jpg&q=85&w=900"
+    "https://images.unsplash.com/photo-1740741704998-8074200ce5d6?auto=format&fit=crop&fm=jpg&q=86&w=1000",
+    "https://images.unsplash.com/photo-1649502913092-fb7f0e8fc632?auto=format&fit=crop&fm=jpg&q=86&w=1000",
+    "https://images.unsplash.com/photo-1709854361252-813cfb80c9c0?auto=format&fit=crop&fm=jpg&q=86&w=1000"
   ];
+  const demoMovies=[
+    {title:"The Hotel Heiress",genre:"African Family Drama",length:"15",image:posterImages[0],prompt:"A powerful African family drama about a young woman who inherits a luxury hotel in Lagos after her father's death and must save the family business from a hidden betrayal. Cinematic realism, emotional, elegant and inspiring."},
+    {title:"Lagos Nights",genre:"Crime Thriller",length:"15",image:posterImages[1],prompt:"A dark Lagos crime thriller about an honest detective who discovers a dangerous conspiracy moving through the city's nightlife. Realistic, tense, cinematic and suspenseful."},
+    {title:"Love in Port Harcourt",genre:"Romantic Drama",length:"15",image:posterImages[2],prompt:"A beautiful romantic drama about two strangers who meet in Port Harcourt and slowly fall in love while their families and careers pull them in different directions. Warm cinematic realism, emotional and uplifting."}
+  ];
+
+  function fillPrompt(value){
+    if(!prompt)return;
+    prompt.value=value||"";
+    if(enginePrompt)enginePrompt.value=prompt.value;
+    prompt.dispatchEvent(new Event("input",{bubbles:true}));
+    status.className="pm-status";
+    status.textContent="Demo story loaded. Edit the idea or generate it as your own movie.";
+    q(".pm-prompt-wrap")?.classList.remove("pm-invalid");
+    q(".pm-composer")?.scrollIntoView({behavior:"smooth",block:"center"});
+    window.setTimeout(()=>prompt.focus(),350);
+  }
+
+  function renderDemos(){
+    if(!recent)return;
+    recent.innerHTML='<div class="pm-demo-grid">'+demoMovies.map((m,i)=>
+      '<button class="pm-project pm-demo" type="button" data-demo-index="'+i+'">'+
+        '<div class="pm-project-art pm-demo-art" style="background-image:url('+m.image+')">'+
+          '<span class="pm-genre">'+m.genre+'</span><span class="pm-badge">'+m.length+' min</span>'+
+          '<span class="pm-play"><i data-lucide="play"></i></span><span class="pm-demo-label">DEMO MOVIE</span>'+
+          '<span class="pm-poster-title">'+m.title+'</span>'+
+        '</div><div class="pm-demo-copy"><b>'+m.title+'</b><span>'+m.genre+' · Tap to use this story</span></div>'+
+      '</button>'
+    ).join("")+'</div>';
+    recent.querySelectorAll("[data-demo-index]").forEach(card=>card.addEventListener("click",()=>fillPrompt(demoMovies[Number(card.dataset.demoIndex)]?.prompt)));
+    iconRefresh();
+  }
+
   function loadRecent(){
     let history=[];try{history=JSON.parse(localStorage.getItem("obitrend_movie_history")||"[]")}catch{}
-    if(!Array.isArray(history)||!history.length){
-      recent.innerHTML='<div class="pm-empty">No movies yet</div>';
-      return;
-    }
+    if(!Array.isArray(history)||!history.length){renderDemos();return}
     recent.innerHTML=history.slice(0,3).map((x,i)=>{
       const b=x?.blueprint||{};
       const title=String(b.title||x.title||"Untitled Movie").replace(/[&<>]/g,"");
@@ -115,14 +176,13 @@
       const item=history[i];
       if(item?.blueprint){
         try{localStorage.setItem("obitrend_movie_blueprint",JSON.stringify(item.blueprint));state.blueprint=item.blueprint}catch(_){}
-        prompt.value=item.prompt||item.blueprint.logline||item.blueprint.title||"";
-        if(enginePrompt)enginePrompt.value=prompt.value;
-        status.className="pm-status";
+        fillPrompt(item.prompt||item.blueprint.logline||item.blueprint.title||"");
         status.textContent="Movie loaded from your recent creations.";
       }
     }));
     iconRefresh();
   }
+
   let menuOpenState=false;
   let drawer=q("#pmDrawer");
   function closeDrawer(){
@@ -160,5 +220,7 @@
   q("#pmMenuBtn")?.addEventListener("click",openDrawer);
   q("#pmCreatorBtn")?.addEventListener("click",()=>{if(typeof openMenu==="function")openMenu("pro")});
   q("#pmProfileBtn")?.addEventListener("click",()=>{if(typeof openMenu==="function")openMenu("settings")});
+
+  loadRecent();
   window.addEventListener("beforeunload",()=>observers.forEach(o=>o?.disconnect()));
 })();
