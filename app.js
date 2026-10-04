@@ -237,12 +237,14 @@ function menuButton(label,action,cls="outline-btn"){return '<button class="'+cls
 function renderMenuCard(title,text,action){
  return '<div class="menu-card"><div><h3>'+esc(title)+'</h3><p>'+esc(text)+'</p></div>'+menuButton("Open",action)+'</div>'
 }
-function saveHistory(b){
+function saveHistory(b,videoUrl=""){
  try{
+  if(!b||!videoUrl)return false;
   const h=JSON.parse(localStorage.getItem("obitrend_movie_history")||"[]");
-  h.unshift({title:b.title||"Untitled Movie",genre:b.genre||"",length:b.length||"",created:new Date().toISOString(),blueprint:b});
-  localStorage.setItem("obitrend_movie_history",JSON.stringify(h.slice(0,20)));
- }catch(e){}
+  h.unshift({title:b.title||"Untitled Movie",genre:b.genre||"",length:b.length||"",created:new Date().toISOString(),generated:true,videoUrl:String(videoUrl),blueprint:b});
+  localStorage.setItem("obitrend_movie_history",JSON.stringify(h.filter(x=>x&&x.generated===true&&x.videoUrl).slice(0,20)));
+  return true;
+ }catch(e){return false}
 }
 function openMenu(name){
  const actions={
