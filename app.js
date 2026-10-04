@@ -630,14 +630,30 @@ document.addEventListener("DOMContentLoaded",()=>{
   });
 
   const nav=document.querySelector(".android-bottom-nav");
-  nav?.querySelectorAll("button").forEach((b,i)=>b.addEventListener("click",()=>{
-    nav.querySelectorAll("button").forEach(x=>x.classList.remove("active"));b.classList.add("active");
-    if(i===0){menuClose();window.scrollTo({top:0,behavior:"smooth"});}
-    if(i===1){menuClose();showCreate();}
-    if(i===2){openMenu("creations");}
-    if(i===3){openMenu("templates");}
-    if(i===4){openMenu("pro");}
-  }));
+  const setNavActive=(id)=>{
+    nav?.querySelectorAll("button").forEach(x=>x.classList.remove("active"));
+    document.getElementById(id)?.classList.add("active");
+  };
+  $("androidHomeNav")?.addEventListener("click",()=>{
+    menuClose();document.getElementById("androidDrawer")?.classList.remove("open");
+    setNavActive("androidHomeNav");window.scrollTo({top:0,behavior:"smooth"});
+  });
+  $("androidCreateNav")?.addEventListener("click",()=>{
+    menuClose();document.getElementById("androidDrawer")?.classList.remove("open");
+    setNavActive("androidCreateNav");showCreate();
+  });
+  $("androidMoviesNav")?.addEventListener("click",()=>{
+    document.getElementById("androidDrawer")?.classList.remove("open");
+    setNavActive("androidMoviesNav");openMenu("creations");
+  });
+  $("androidTemplatesNav")?.addEventListener("click",()=>{
+    document.getElementById("androidDrawer")?.classList.remove("open");
+    setNavActive("androidTemplatesNav");openMenu("templates");
+  });
+  $("androidProfileNav")?.addEventListener("click",()=>{
+    document.getElementById("androidDrawer")?.classList.remove("open");
+    setNavActive("androidProfileNav");openMenu("pro");
+  });
 
   const menuBtn=$("androidMenuBtn");
   if(menuBtn){
