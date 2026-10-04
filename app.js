@@ -313,6 +313,10 @@ function openMenu(name){
 }
 document.querySelectorAll(".nav-item").forEach(a=>a.addEventListener("click",e=>{if(a.closest(".nav-group")?.querySelector(".nav-dropdown"))return;const href=a.getAttribute("href")||"#home";if(href.startsWith("#")){e.preventDefault();openMenu(href.slice(1));document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("selected"));a.classList.add("selected")}}));
 const closeWorkspaceButton=()=>{
+ if(typeof window.navigateTo==="function"){
+   window.navigateTo("home");
+   return;
+ }
  const w=$("menuWorkspace");
  if(!w)return;
  w.classList.add("hidden");
