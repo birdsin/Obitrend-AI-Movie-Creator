@@ -235,19 +235,33 @@
       drawer.className="pm-drawer";
       drawer.setAttribute("aria-hidden","true");
       drawer.innerHTML='<div class="pm-drawer-head"><strong>OBITREND</strong><button type="button" id="pmDrawerClose" aria-label="Close menu">×</button></div>'+
-        '<button type="button" data-pm-nav="home"><i data-lucide="home"></i> Home</button>'+
-        '<button type="button" data-pm-nav="create"><i data-lucide="film"></i> Create Movie</button>'+
-        '<button type="button" data-pm-nav="creations"><i data-lucide="clapperboard"></i> My Movies</button>'+
-        '<button type="button" data-pm-nav="pro"><i data-lucide="crown"></i> Pro Plans</button>'+
-        '<button type="button" data-pm-nav="settings"><i data-lucide="settings"></i> Settings</button>';
+        '<button type="button" data-nav="home"><i data-lucide="home"></i> Home</button>'+
+        '<button type="button" data-nav="create"><i data-lucide="film"></i> Create Movie</button>'+
+        '<button type="button" data-nav="creations"><i data-lucide="clapperboard"></i> My Movies</button>'+
+        '<button type="button" data-nav="pro"><i data-lucide="crown"></i> Pro Plans</button>'+
+        '<button type="button" data-nav="settings"><i data-lucide="settings"></i> Settings</button>';
       document.body.appendChild(drawer);
       drawer.querySelector("#pmDrawerClose")?.addEventListener("click",closeDrawer);
-      drawer.querySelectorAll("[data-pm-nav]").forEach(btn=>btn.addEventListener("click",()=>{
-        const action=btn.dataset.pmNav;
+      drawer.querySelectorAll("[data-nav]").forEach(btn=>btn.addEventListener("click",()=>{
+        const action=btn.dataset.nav;
         closeDrawer();
-        if(action==="home")window.scrollTo({top:0,behavior:"smooth"});
-        else if(action==="create"){prompt?.focus();q(".pm-composer")?.scrollIntoView({behavior:"smooth",block:"center"});}
-        else if(action==="settings"){window.location.assign("/settings/");}else if(action==="creations"||action==="pro"){if(typeof openMenu==="function")openMenu(action);}
+        try{
+          if(action==="home"){
+            window.scrollTo({top:0,behavior:"smooth"});
+          }else if(action==="create"){
+            prompt?.focus();
+            q(".pm-composer")?.scrollIntoView({behavior:"smooth",block:"center"});
+          }else if(action==="creations"){
+            if(typeof openMenu==="function")openMenu("creations");
+          }else if(action==="pro"){
+            if(typeof openMenu==="function")openMenu("pro");
+          }else if(action==="settings"){
+            window.location.assign("/settings/");
+          }
+        }catch(error){
+          console.error("OBITREND navigation error:",error);
+          window.scrollTo({top:0,behavior:"smooth"});
+        }
       }));
       iconRefresh();
     }
