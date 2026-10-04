@@ -12,14 +12,29 @@
 <link rel="stylesheet" href="/prompt-movie-dashboard.css?v=20261004-2">
 </head>
 <body>
-<div id="obitrendStartup" class="pm-startup" aria-label="OBITREND starting">
-  <div class="pm-startup-inner">
-    <div class="pm-startup-logo">♛</div>
-    <div class="pm-startup-name">OBITREND</div>
-    <div class="pm-startup-sub">AI MOVIE CREATOR</div>
-    <div class="pm-loader"><i></i></div>
+<div id="magnify-splash" aria-label="OBITREND scanning fabric details">
+  <div class="fabric-bg"></div>
+  <div class="magnifier" aria-hidden="true">
+    <div class="lens"><span>O</span><span>B</span><span>I</span><span>T</span><span>R</span><span>E</span><span>N</span><span>D</span></div>
+    <div class="handle"></div>
   </div>
+  <div class="magnify-copy">
+    <h1 class="obitrend-scan">OBITREND</h1>
+    <p class="magnify-status" id="magnifyStatus">SCANNING FABRIC DETAILS...</p>
+  </div>
+  <div class="scan-line"></div>
 </div>
+<script>
+(function(){
+  var splash=document.getElementById("magnify-splash");
+  if(!splash)return;
+  window.setTimeout(function(){
+    splash.classList.add("hide");
+    splash.setAttribute("aria-hidden","true");
+    splash.style.pointerEvents="none";
+  },3000);
+})();
+</script>
 
 <main class="pm-dashboard" id="promptDashboard">
   <header class="pm-topbar">
