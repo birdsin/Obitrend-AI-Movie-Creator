@@ -180,7 +180,7 @@ async function finishMovieCredit(action,token){
   const r=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-credit",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+access},body:JSON.stringify({action,token})});
   const d=await r.json().catch(()=>({}));
   if(!r.ok||!d.ok)throw new Error(d.error||("Could not "+action+" movie credit."));
-  await refreshMovieEntitlement();
+  try{await refreshMovieEntitlement()}catch(_){/* The credit operation already succeeded; never retry it automatically. */}
   return true;
 }
 function getMoviePlan(){return movieServerEntitlement?.plan_name||"Free"}
