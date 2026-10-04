@@ -194,3 +194,47 @@ body.pm-mode{background:radial-gradient(circle at 75% 0%,rgba(194,142,39,.12),tr
 .pm-engine-action{appearance:none;-webkit-appearance:none;border:0;padding:0;margin:0;font:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
 .pm-engine-action:focus-visible{outline:2px solid #e6b95e;outline-offset:4px;}
 .pm-engine-action:active{transform:scale(.97);}
+
+
+/* MOVIE GENERATION CARD — progress feedback only */
+.pm-generation-card{
+  display:none;
+  margin-top:14px;
+  padding:16px;
+  border:1px solid rgba(212,175,55,.34);
+  border-radius:18px;
+  background:linear-gradient(145deg,rgba(18,23,31,.98),rgba(7,10,15,.98));
+  box-shadow:0 16px 42px rgba(0,0,0,.34),inset 0 0 28px rgba(212,175,55,.035);
+}
+.pm-generation-card.visible{display:block;animation:pmGenerationIn .28s ease both}
+.pm-generation-head{display:flex;align-items:center;gap:11px}
+.pm-generation-icon{width:42px;height:42px;flex:0 0 42px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#f1cf70,#a67a25);color:#161006;box-shadow:0 7px 20px rgba(212,175,55,.2)}
+.pm-generation-icon svg{width:21px;height:21px}
+.pm-generation-head>div:nth-child(2){min-width:0;flex:1}
+.pm-generation-head strong{display:block;color:#fff;font-size:14px;letter-spacing:.01em}
+.pm-generation-head span{display:block;color:#8f9aaa;font-size:11px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pm-generation-head>b{color:#f1c65a;font-size:13px}
+.pm-generation-track{height:8px;margin-top:14px;border-radius:999px;background:#202734;overflow:hidden}
+.pm-generation-track i{display:block;height:100%;width:8%;border-radius:999px;background:linear-gradient(90deg,#c7952f,#ffe29a);box-shadow:0 0 16px rgba(212,175,55,.38);transition:width .5s ease;position:relative}
+.pm-generation-track i:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.48),transparent);animation:pmGenerationShine 1.3s linear infinite}
+.pm-generation-stage-text{margin-top:9px;color:#aab3c1;font-size:11px;line-height:1.45}
+.pm-generation-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:14px}
+.pm-generation-steps>div{text-align:center;color:#687383;font-size:9px}
+.pm-generation-steps i{width:27px;height:27px;margin:0 auto 5px;display:grid;place-items:center;border:1px solid #303947;border-radius:50%}
+.pm-generation-steps svg{width:13px;height:13px}
+.pm-generation-steps .active{color:#f1c65a;font-weight:800}
+.pm-generation-steps .active i{border-color:#f1c65a;color:#f1c65a;box-shadow:0 0 16px rgba(212,175,55,.2)}
+.pm-generation-steps .done{color:#a9b3c0}
+.pm-generation-steps .done i{border-color:#78602a;color:#f1c65a;background:rgba(212,175,55,.08)}
+@keyframes pmGenerationIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+@keyframes pmGenerationShine{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+@media(max-width:600px){
+  .pm-generation-card{padding:14px;border-radius:16px}
+  .pm-generation-head strong{font-size:13px}
+  .pm-generation-head span{font-size:10px}
+  .pm-generation-steps{gap:2px}
+}
+@media(prefers-reduced-motion:reduce){
+  .pm-generation-track i:after{animation:none}
+  .pm-generation-card.visible{animation:none}
+}
