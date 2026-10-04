@@ -151,7 +151,7 @@
 
           results.push({scene:item.si,shot:item.hi,url:video.src});
           try{localStorage.setItem("obitrend_auto_movie_videos",JSON.stringify(results))}catch{}
-          try{if(typeof saveHistory==="function"&&state?.blueprint)saveHistory(state.blueprint,video.src)}catch(_){}
+          try{if(i===0&&typeof saveHistory==="function"&&state?.blueprint)saveHistory(state.blueprint,video.src)}catch(_){}
 
           // Get the authoritative remaining credit count before starting the
           // next short. Reservation/commit is handled by the generation engine.
