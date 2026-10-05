@@ -65,6 +65,7 @@
         completed_segments:Number(p?.completed_segments)||0,
         total_segments:Number(p?.total_segments)||0,
         last_error:p?.last_error||"",
+        video_urls:Array.isArray(p?.video_urls)?p.video_urls.filter(Boolean).map(String):[],
         updated_at:p?.updated_at||new Date().toISOString()
       }));
     }catch(_){}
