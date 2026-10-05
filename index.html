@@ -286,6 +286,7 @@ async function start(){
     if(source)setStatus(source,true);
   }finally{$("pipelineGenerate").disabled=false}
 }
+window.obitrendMovieProvider="kling";
 document.querySelectorAll(".provider-btn").forEach(btn=>btn.addEventListener("click",()=>{
   selectedProvider=btn.dataset.provider==="flixly"?"flixly":"kling";
   window.obitrendMovieProvider=selectedProvider;
