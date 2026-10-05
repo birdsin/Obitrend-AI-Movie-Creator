@@ -181,6 +181,91 @@
 
   prompt?.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();generate?.click()}});
 
+  // New movie cards replace the old automatic feature cards.
+  document.querySelectorAll("[data-movie-card]").forEach(card=>{
+    card.addEventListener("click",()=>{
+      const type=card.dataset.movieCard;
+      if(type==="text"){
+        q(".pm-composer")?.scrollIntoView({behavior:"smooth",block:"center"});
+        window.setTimeout(()=>prompt?.focus(),250);
+        return;
+      }
+      if(type==="image"){
+        q("#pmImageInput")?.click();
+      }
+    });
+  });
+
+  q("#pmImageInput")?.addEventListener("change",async()=>{
+    const file=q("#pmImageInput")?.files?.[0];
+    if(!file)return;
+    status.className="pm-status";
+    status.textContent="Preparing "+file.name+" for Image-to-Movie…";
+    try{
+      selectedMovieImageDataUri=await prepareMovieImage(file);
+      status.textContent="Image ready: "+file.name+". Add a movement or scene description above, then generate.";
+    }catch(error){
+      selectedMovieImageDataUri="";
+      q("#pmImageInput").value="";
+      status.className="pm-status error";
+      status.textContent=error?.message||"Could not prepare the selected image.";
+    }
+    q(".pm-composer")?.scrollIntoView({behavior:"smooth",block:"center"});
+    window.setTimeout(()=>prompt?.focus(),250);
+  });
+
+  document.querySelectorAll('[data-choice-group="genre"] button').forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const genre=btn.dataset.choice||"";
+      const presets={
+        "Action":"A high-energy action movie with cinematic stunts, realistic characters and intense pacing.",
+        "Love":"A beautiful romantic love story with emotional chemistry, cinematic realism and a memorable ending.",
+        "Horror":"A suspenseful horror movie with atmospheric locations, frightening discoveries and cinematic tension.",
+        "Nollywood Drama":"A powerful Nollywood drama with family conflict, emotional performances and realistic Nigerian locations.",
+        "Comedy":"A hilarious Nigerian comedy with funny misunderstandings, expressive characters and family-friendly humor.",
+        "Sci-Fi":"A cinematic science-fiction movie with futuristic technology, dramatic world-building and realistic visual effects."
+      };
+      if(prompt)prompt.value=presets[genre]||genre;
+      if(enginePrompt)enginePrompt.value=prompt?.value||"";
+      document.querySelectorAll('[data-choice-group="genre"] button').forEach(x=>x.classList.toggle("selected",x===btn));
+      q(".pm-prompt-wrap")?.classList.remove("pm-invalid");
+      q(".pm-composer")?.scrollIntoView({behavior:"smooth",block:"center"});
+    });
+  });
+
+  document.querySelectorAll('[data-choice-group="style"] button').forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const style=btn.dataset.choice||"";
+      const current=(prompt?.value||"").trim();
+      const cleaned=current.replace(/\s*(Visual style:|Style:)\s*[^.\n]*/ig,"").trim();
+      if(prompt)prompt.value=(cleaned?cleaned+" ":"")+"Visual style: "+style+".";
+      if(enginePrompt)enginePrompt.value=prompt?.value||"";
+      document.querySelectorAll('[data-choice-group="style"] button').forEach(x=>x.classList.toggle("selected",x===btn));
+      q(".pm-composer")?.scrollIntoView({behavior:"smooth",block:"center"});
+    });
+  });
+
+  document.querySelectorAll('[data-choice-group="duration"] button').forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const seconds=btn.dataset.duration||"";
+      document.querySelectorAll('[data-choice-group="duration"] button').forEach(x=>x.classList.toggle("selected",x===btn));
+      let format;
+      if(seconds==="storyboard"){
+        format=setMovieFormatSelection(120,30,4,"4-scene storyboard","storyboard");
+        applyMovieFormatLength(format);
+        status.textContent="Storyboard selected — 4 cinematic segments will be generated in story order.";
+      }else{
+        const total=Number(seconds)||30;
+        const segment=total<=30?total:30;
+        const segments=Math.ceil(total/segment);
+        format=setMovieFormatSelection(total,segment,segments,total+"-second format","duration");
+        applyMovieFormatLength(format);
+        status.textContent=total+"-second format selected.";
+      }
+    });
+  });
+
+
   async function autoGenerateMovie(resumeProductionId=null,resumeProduction=null){
     let blueprint=null;
     try{blueprint=JSON.parse(localStorage.getItem("obitrend_movie_blueprint")||"null")}catch{}
