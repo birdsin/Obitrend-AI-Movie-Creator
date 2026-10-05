@@ -69,61 +69,43 @@
     </div>
   </section>
 
-  <section class="pm-control-deck" aria-label="Movie creation options">
-    <div class="pm-mode-switch">
-      <button class="pm-mode-card active" type="button" data-create-mode="text"><span class="pm-mode-icon"><i data-lucide="type"></i></span><span><b>Text-to-Movie</b><small>Turn one idea into a complete cinematic movie.</small></span><i data-lucide="check-circle-2" class="pm-mode-check"></i></button>
-      <button class="pm-mode-card" type="button" data-create-mode="image"><span class="pm-mode-icon"><i data-lucide="image"></i></span><span><b>Image-to-Movie</b><small>Start from a visual reference or character image.</small></span><i data-lucide="upload" class="pm-mode-check"></i></button>
-    </div>
-    <input id="pmImageInput" class="pm-image-input" type="file" accept="image/*">
-    <div id="pmImagePreview" class="pm-image-preview" hidden>
-      <img alt="Selected movie reference">
-      <div><b>Reference image ready</b><span>Use it as visual inspiration for your movie.</span></div>
-      <button id="pmImageRemove" type="button" aria-label="Remove image">×</button>
+    <section class="meaningful-cards" aria-label="Popular use cases">
+    <div class="meaningful-heading">
+      <span>POPULAR USE CASES</span>
+      <h3>What do you want to create?</h3>
+      <p>Start from a real goal and let OBITREND turn it into a cinematic movie.</p>
     </div>
 
-    <div class="pm-option-section">
-      <div class="pm-option-head"><div><span class="pm-option-kicker">QUICK START</span><h3>Genre Quick Cards</h3></div><span>Tap a genre to shape the story</span></div>
-      <div class="pm-genre-grid">
-        <button class="pm-genre-card active" type="button" data-genre-prompt="Create a realistic action movie with high-energy movement, cinematic stunts and intense pacing."><span>⚡</span><b>Action</b><small>High energy</small></button>
-        <button class="pm-genre-card" type="button" data-genre-prompt="Create a grounded African crime drama with suspense, moral conflict and realistic Lagos atmosphere."><span>◈</span><b>Crime</b><small>Dark & tense</small></button>
-        <button class="pm-genre-card" type="button" data-genre-prompt="Create an emotional romantic drama with believable chemistry, warm lighting and a powerful ending."><span>♡</span><b>Romance</b><small>Emotional</small></button>
-        <button class="pm-genre-card" type="button" data-genre-prompt="Create a funny modern comedy with natural dialogue, memorable characters and fast pacing."><span>✦</span><b>Comedy</b><small>Feel good</small></button>
-        <button class="pm-genre-card" type="button" data-genre-prompt="Create a suspenseful thriller with mystery, realistic characters and escalating tension."><span>⌁</span><b>Thriller</b><small>Suspense</small></button>
-        <button class="pm-genre-card" type="button" data-genre-prompt="Create an inspiring family drama with strong relationships, emotional conflict and a hopeful ending."><span>◇</span><b>Drama</b><small>Human story</small></button>
-      </div>
-    </div>
+    <button class="use-card" type="button" data-prompt="Business advert for fashion brand, model wearing Ankara, runway, luxury boutique, Lagos, 15s TV commercial">
+      <img src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=200" alt="Fashion business advert">
+      <span class="use-card-copy"><strong>For Your Business</strong><small>Turn your product photo into a TV advert in 15 seconds</small></span>
+      <span class="use-card-arrow" aria-hidden="true">›</span>
+    </button>
 
-    <div class="pm-option-section">
-      <div class="pm-option-head"><div><span class="pm-option-kicker">VISUAL DIRECTION</span><h3>Style Cards</h3></div><span>Choose the look</span></div>
-      <div class="pm-style-row">
-        <button class="pm-style-card active" type="button" data-style="Realistic Cinematic"><span class="pm-style-art pm-art-realistic"></span><b>Realistic</b><small>Cinematic</small></button>
-        <button class="pm-style-card" type="button" data-style="Anime Cinema"><span class="pm-style-art pm-art-anime"></span><b>Anime</b><small>Stylized</small></button>
-        <button class="pm-style-card" type="button" data-style="Premium 3D Animation"><span class="pm-style-art pm-art-3d"></span><b>3D</b><small>Animated</small></button>
-        <button class="pm-style-card" type="button" data-style="Vintage Film"><span class="pm-style-art pm-art-vintage"></span><b>Vintage</b><small>Classic</small></button>
-      </div>
-    </div>
+    <button class="use-card" type="button" data-prompt="Nollywood drama, Danfo bus, Lagos street market, okada, emotional family reunion, cinematic">
+      <img src="https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=200" alt="Lagos story">
+      <span class="use-card-copy"><strong>For Your Story</strong><small>Nollywood-style drama from just one sentence</small></span>
+      <span class="use-card-arrow" aria-hidden="true">›</span>
+    </button>
 
-    <div class="pm-option-section">
-      <div class="pm-option-head"><div><span class="pm-option-kicker">FORMAT</span><h3>Duration</h3></div><span id="pmDurationHint">15 seconds selected</span></div>
-      <div class="pm-duration-grid">
-        <button class="pm-duration-card" type="button" data-duration="5"><b>05s</b><span>Quick shot</span></button>
-        <button class="pm-duration-card active" type="button" data-duration="15"><b>15s</b><span>Short format</span></button>
-        <button class="pm-duration-card" type="button" data-duration="30"><b>30s</b><span>Full segment</span></button>
-        <button class="pm-duration-card" type="button" data-duration="auto"><b>AUTO</b><span>Smart format</span></button>
-      </div>
-    </div>
+    <button class="use-card" type="button" data-prompt="Birthday surprise movie for mother, family gathering, cake, gold balloons, emotional, joyful">
+      <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=200" alt="Birthday surprise movie">
+      <span class="use-card-copy"><strong>For Your Loved Ones</strong><small>Create a birthday or anniversary surprise movie</small></span>
+      <span class="use-card-arrow" aria-hidden="true">›</span>
+    </button>
   </section>
 
-  <section class="pm-auto-grid" aria-label="Automatic movie features">
-    <div class="pm-auto-card"><div class="pm-feature-icon"><i data-lucide="book-open"></i></div><div><b>STORY</b><span>AI creates the title, logline, story structure and pacing.</span></div></div>
-    <div class="pm-auto-card"><div class="pm-feature-icon"><i data-lucide="users"></i></div><div><b>CHARACTERS</b><span>AI builds consistent characters, appearances and wardrobe.</span></div></div>
-    <div class="pm-auto-card"><div class="pm-feature-icon"><i data-lucide="camera"></i></div><div><b>CINEMATOGRAPHY</b><span>AI selects framing, lenses, movement, lighting and atmosphere.</span></div></div>
-    <div class="pm-auto-card"><div class="pm-feature-icon"><i data-lucide="layers"></i></div><div><b>CONTINUITY</b><span>AI keeps locations, characters and visual details consistent.</span></div></div>
-  </section>
-
-  <section class="pm-recent">
-    <div class="pm-section-title"><h2>Recent Movies</h2><span>Your latest creations</span></div>
-    <div class="pm-projects" id="pmProjects"><div class="pm-empty">No movies yet</div></div>
+  <section class="real-movies" aria-label="Real movies made by users">
+    <div class="real-movies-head">
+      <div>
+        <span>COMMUNITY CREATIONS</span>
+        <h3>Real Movies Made by Users</h3>
+      </div>
+      <button id="pmSeeAllMovies" type="button">See all <span>→</span></button>
+    </div>
+    <div class="movie-scroll" id="pmProjects">
+      <div class="movie-empty">No movies made yet.<br><span>Your generated movies will appear here.</span></div>
+    </div>
   </section>
 
   <section id="pmResult" class="pm-engine" aria-hidden="true">
