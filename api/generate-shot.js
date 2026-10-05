@@ -4,7 +4,7 @@ function json(res,status,obj){res.status(status).setHeader("content-type","appli
 const KLING_BASE=(process.env.KLING_API_BASE_URL||"https://api-singapore.klingai.com").replace(/\/$/,"");
 const KLING_MODEL=process.env.KLING_MODEL_NAME||"kling-v3";
 const KLING_MAX_DURATION=Math.max(3,Math.min(30,Number(process.env.KLING_MAX_DURATION)||15));
-const MOVIE_VIDEO_PROVIDER=String(process.env.MOVIE_VIDEO_PROVIDER||((process.env.VERCEL_GIT_COMMIT_REF==="flixly-movie-structure-preview")?"flixly":"kling")).trim().toLowerCase();
+const ENV_MOVIE_VIDEO_PROVIDER=String(process.env.MOVIE_VIDEO_PROVIDER||((process.env.VERCEL_GIT_COMMIT_REF==="flixly-movie-structure-preview")?"flixly":"kling")).trim().toLowerCase();
 const flixly=require("./flixly-provider");
 
 function klingRatio(r){
@@ -124,8 +124,10 @@ module.exports=async(req,res)=>{
   }
   if(req.method!=="POST")return json(res,405,{error:"Method not allowed."});
 
-  // Flixly is selected only in Preview through MOVIE_VIDEO_PROVIDER=flixly.
-  // The existing Kling path remains untouched for production/main.
+  // Provider can be selected by the user without changing the existing dashboard workflow.
+  // The server-side environment remains the fallback/default.
+  const requestedProvider=String(req.headers["x-movie-provider"]||body.provider||ENV_MOVIE_VIDEO_PROVIDER).trim().toLowerCase();
+  const MOVIE_VIDEO_PROVIDER=requestedProvider==="flixly"?"flixly":"kling";
   if(MOVIE_VIDEO_PROVIDER==="flixly"){
     try{
       const x=body;
