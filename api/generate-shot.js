@@ -1,3 +1,4 @@
+// Preview test: 30-second shot support is enabled only on paystack-test-mode.
 function json(res,status,obj){res.status(status).setHeader("content-type","application/json");res.end(JSON.stringify(obj))}
 
 const KLING_BASE=(process.env.KLING_API_BASE_URL||"https://api-singapore.klingai.com").replace(/\/$/,"");
