@@ -2,11 +2,11 @@
   "use strict";
   const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
   const modes=[
-    ["t2v","🎬","Text-to-Video","Turn a description into a cinematic video.","Describe a scene, camera, lighting and action."],
-    ["i2v","📸","Image-to-Video","Bring a still image to life with realistic motion.","Upload an image, then describe natural movement."],
-    ["v2v","🎞","Video-to-Video","Transform an existing video while preserving its motion.","Change visual treatment, environment or style."],
-    ["frame","🔄","First-to-Last Frame","Create a smooth cinematic bridge between two images.","Choose a start frame and an end frame."],
-    ["avatar","🧑‍🎤","Avatar & Lip-Sync","Turn a portrait and script or audio into a talking video.","Create expressive, synchronized talking scenes."]
+    ["t2v","🎬","Text-to-Video","Generate cinematic video directly from descriptive text with camera, lighting and action control.","Describe a scene, camera, lighting and action."],
+    ["i2v","📸","Image-to-Video","Animate a still image with realistic motion, depth, physics and cinematic camera movement.","Upload an image, then describe natural movement."],
+    ["v2v","🎞","Video-to-Video","Modify existing footage while maintaining the original motion track and subject movement.","Change visual treatment, environment or style."],
+    ["frame","🔄","First-to-Last Frame","Generate a smooth cinematic sequence connecting a start frame to an end frame.","Choose a start frame and an end frame."],
+    ["avatar","🧑‍🎤","Avatar & Lip-Sync","Synchronize speech or audio with a portrait or digital character for realistic talking scenes.","Create expressive, synchronized talking scenes."]
   ];
 
   const style=document.createElement("style");
@@ -23,7 +23,7 @@
     if(!anchor)return;
     const section=document.createElement("section");
     section.id="obitrendMovieModes";section.className="omv-section";
-    section.innerHTML='<div class="omv-head"><div><h2>AI Movie Studio</h2><p>Choose exactly how you want to create or transform your video.</p></div><span class="omv-badge">5 creation modes</span></div><div class="omv-grid">'+
+    section.innerHTML='<div class="omv-head"><div><h2>OBITREND FILM STUDIO</h2><p>Create realistic video, transform footage, animate images, bridge frames, or build talking characters.</p></div><span class="omv-badge">5 film creation modes</span></div><div class="omv-grid">'+
       modes.map(m=>'<button class="omv-card" type="button" data-mode="'+m[0]+'"><span class="omv-icon">'+m[1]+'</span><b>'+m[2]+'</b><small>'+m[3]+'</small></button>').join("")+
       '</div><div id="omvWork" class="omv-work"></div>';
     anchor.parentNode.insertBefore(section,anchor.nextSibling);
@@ -44,7 +44,7 @@
     w.classList.add("open");
     w.innerHTML=`
       <h3>📸 Realistic Image-to-Video</h3>
-      <p>Animate one image while keeping the subject, clothing, face, environment and visual identity as stable as the provider allows.</p>
+      <p>Animate one image into realistic live-action video while preserving the subject, face, clothing, objects, environment and visual identity as faithfully as the provider allows.</p>
       <div class="omv-controls">
         <div class="omv-field full"><label>Starting image</label><input id="omvI2VFile" class="omv-file" type="file" accept="image/jpeg,image/png,image/webp"><img id="omvI2VPreview" class="omv-preview" alt="Selected image preview"></div>
         <div class="omv-field full"><label>Motion prompt</label><textarea id="omvI2VPrompt" rows="4" placeholder="Example: The model slowly walks toward the camera. Natural cloth movement, realistic hair movement, subtle breathing, physically accurate shadows, smooth cinematic tracking camera."></textarea></div>
