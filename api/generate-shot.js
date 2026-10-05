@@ -67,24 +67,6 @@ module.exports=async(req,res)=>{
   }catch(e){
     return json(res,503,{error:"Secure credit authorization is temporarily unavailable. Please try again."});
   }
-  if(req.method==="POST" && process.env.KLING_GENERATION_ENABLED==="false"){
-    try{
-      await fetch(supabaseUrl+"/functions/v1/movie-credit",{
-        method:"POST",
-        headers:{
-          "content-type":"application/json",
-          "apikey":publishable,
-          "Authorization":auth
-        },
-        body:JSON.stringify({action:"release",token:String(reservation)})
-      });
-    }catch(_){}
-    return json(res,503,{error:"Movie generation is temporarily paused while the video provider API credits are replenished. Your OBITREND movie credit was restored. Please try again later.",reservationReleased:true});
-  }
-  if(!process.env.KLING_API_KEY){
-    return json(res,500,{error:"Kling video generation is not configured yet. Add KLING_API_KEY in Vercel before enabling movie generation."});
-  }
-
   if(req.method==="GET"){
     const rawId=String(req.query&&req.query.taskId||"");
     if(!rawId)return json(res,400,{error:"taskId is required."});
@@ -185,6 +167,15 @@ module.exports=async(req,res)=>{
       const insufficient=code==="insufficient_credits"||/credit|balance|quota/i.test(String(e?.message||""));
       return json(res,502,{error:insufficient?"Flixly could not start this shot because its provider credit balance is unavailable. Your OBITREND movie credit was restored. Please try again later.":"Flixly could not start this shot. Your OBITREND movie credit was restored. Please try again.",reservationReleased:true,provider:"flixly"});
     }
+  }
+
+  if(process.env.KLING_GENERATION_ENABLED==="false"){
+    await releaseReservation(supabaseUrl,publishable,auth,reservation);
+    return json(res,503,{error:"Movie generation is temporarily paused while the Kling provider API credits are replenished. Your OBITREND movie credit was restored. Please try again later.",reservationReleased:true});
+  }
+  if(!process.env.KLING_API_KEY){
+    await releaseReservation(supabaseUrl,publishable,auth,reservation);
+    return json(res,500,{error:"Kling video generation is not configured yet. Add KLING_API_KEY in Vercel before enabling movie generation.",reservationReleased:true});
   }
 
   try{
