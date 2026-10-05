@@ -331,7 +331,7 @@ async function generateShot(){
     const currentIndex=assemblyState.queue.findIndex(q=>q.si===state.sceneIndex&&q.hi===state.shotIndex);
     const previousItem=currentIndex>0?assemblyState.queue[currentIndex-1]:null;
     const continuationVideoUrl=previousItem?.url||"";
-    const r=await fetch("/api/generate-shot",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token,"x-movie-reservation":reservation},body:JSON.stringify({blueprint:state.blueprint,sceneIndex:state.sceneIndex,shotIndex:state.shotIndex,ratio:$("ratio").value,duration:shotDuration,continuationVideoUrl,reservationToken:reservation})});
+    const r=await fetch("/api/generate-shot",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token,"x-movie-reservation":reservation,"x-movie-provider":(window.obitrendMovieProvider==="flixly"?"flixly":"kling")},body:JSON.stringify({blueprint:state.blueprint,sceneIndex:state.sceneIndex,shotIndex:state.shotIndex,ratio:$("ratio").value,duration:shotDuration,continuationVideoUrl,reservationToken:reservation,provider:(window.obitrendMovieProvider==="flixly"?"flixly":"kling")})});
     const d=await r.json().catch(()=>({}));
     if(!r.ok){
       const e=new Error(d.error||"Shot generation failed.");
@@ -692,8 +692,8 @@ async function generateAssemblyItem(item){
     const continuationVideoUrl=previousItem?.url||"";
     const r=await fetch("/api/generate-shot",{
       method:"POST",
-      headers:{"content-type":"application/json","Authorization":"Bearer "+token,"x-movie-reservation":reservation},
-      body:JSON.stringify({blueprint:state.blueprint,sceneIndex:item.si,shotIndex:item.hi,ratio:$("ratio").value,duration:shotDuration,continuationVideoUrl,reservationToken:reservation,productionId:localStorage.getItem("obitrend_movie_active_production_id")||""})
+      headers:{"content-type":"application/json","Authorization":"Bearer "+token,"x-movie-reservation":reservation,"x-movie-provider":(window.obitrendMovieProvider==="flixly"?"flixly":"kling")},
+      body:JSON.stringify({blueprint:state.blueprint,sceneIndex:item.si,shotIndex:item.hi,ratio:$("ratio").value,duration:shotDuration,continuationVideoUrl,reservationToken:reservation,productionId:localStorage.getItem("obitrend_movie_active_production_id")||"",provider:(window.obitrendMovieProvider==="flixly"?"flixly":"kling")})
     });
     const d=await r.json().catch(()=>({}));
     if(!r.ok){
@@ -709,7 +709,7 @@ async function generateAssemblyItem(item){
     if(!d.taskId)throw new Error("The video provider did not return a task.");
     const activeProduction=localStorage.getItem("obitrend_movie_active_production_id")||"";
     if(activeProduction){
-      const providerTask=String(d.taskId).replace(/^flixly:/,"");
+      const providerTask=String(d.taskId);
       await bindMovieProviderTask(activeProduction,providerTask,reservation);
     }
     if(window.movieBackgroundGeneration)return d.videoUrl||null;
