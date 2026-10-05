@@ -29,7 +29,7 @@ body{min-height:100vh}
 .cast-grid,.shot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;padding-top:14px}.cast-card,.shot-card{background:#070a10;border:1px solid rgba(255,255,255,.08);border-radius:15px;padding:13px}.cast-card b,.shot-card b{display:block}.cast-card small,.shot-card small{display:block;color:#8d95a4;line-height:1.5;margin-top:5px}.ref-pill,.shot-pill{display:inline-block;margin-top:9px;padding:5px 8px;border-radius:999px;background:rgba(230,185,94,.09);color:#d9b665;font-size:10px}
 .shot-card.ready{border-color:rgba(109,206,159,.35)}.shot-card.generating{border-color:rgba(230,185,94,.5)}.shot-card.failed{border-color:rgba(255,100,100,.4)}
 .final-wrap{padding-top:15px}.final-wrap video{width:100%;max-height:560px;background:#000;border-radius:16px}.final-actions{display:flex;gap:10px;margin-top:12px}.final-actions a,.final-actions button{flex:1;text-align:center;padding:13px;border-radius:13px;border:1px solid rgba(255,255,255,.12);background:#111722;color:#f7f7f8;text-decoration:none;cursor:pointer}.final-actions a.primary{background:#e6b95e;color:#111;border-color:#e6b95e;font-weight:800}
-.engine-hidden{display:none!important}
+.exact-pipeline{gap:10px}.pipeline-branch{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:stretch}.pipeline-connector{text-align:center;color:#e6b95e;font-size:24px;line-height:1;padding:2px 0}.exact-pipeline .stage{width:100%}.exact-pipeline .stage-body{display:none!important}.exact-pipeline .stage.active{border-color:rgba(230,185,94,.65);box-shadow:0 0 0 1px rgba(230,185,94,.08),0 12px 34px rgba(0,0,0,.16)}.exact-pipeline .stage.done .stage-num{background:#4f9c79;color:#fff}.exact-pipeline .stage.error{border-color:rgba(255,100,100,.55)}.exact-pipeline .stage.error .stage-state{color:#ff8e8e}@media(max-width:600px){.pipeline-branch{grid-template-columns:1fr}.pipeline-connector{font-size:20px}}.engine-hidden{display:none!important}
 /* The new movie pipeline is the complete visible app. Hide every legacy dashboard/navigation control
    while keeping the hidden production engine available to the pipeline. */
 #menuBtn,#androidMenuBtn,.android-bottom-nav,.android-header,.android-topbar,.android-drawer,#drawerOverlay,
@@ -119,12 +119,27 @@ body{overflow-x:hidden}
     <div id="pipelineStatus" class="pipeline-status"></div>
   </section>
 
-  <section class="pipeline-flow" aria-label="Movie production pipeline">
-    <article class="stage" id="stagePlanner"><div class="stage-head"><div class="stage-num">1</div><div class="stage-title"><b>AI STORY PLANNER</b><span>Turn your prompt into the complete movie blueprint</span></div><div class="stage-state">Waiting</div></div><div class="stage-body"><div id="plannerSummary"></div></div></article>
-    <article class="stage" id="stageCast"><div class="stage-head"><div class="stage-num">2</div><div class="stage-title"><b>CAST</b><span>Lock every character for the whole movie</span></div><div class="stage-state">Waiting</div></div><div class="stage-body"><div id="castGrid" class="cast-grid"></div></div></article>
-    <article class="stage" id="stageShots"><div class="stage-head"><div class="stage-num">3</div><div class="stage-title"><b>SHOT PLAN</b><span>One continuation-aware production segment per shot</span></div><div class="stage-state">Waiting</div></div><div class="stage-body"><div id="shotGrid" class="shot-grid"></div></div></article>
-    <article class="stage" id="stageVideo"><div class="stage-head"><div class="stage-num">4</div><div class="stage-title"><b>VIDEO GENERATION</b><span>Shot 1 starts the world · every next shot continues from the previous video</span></div><div class="stage-state">Waiting</div></div><div class="stage-body"><div id="videoGrid" class="shot-grid"></div></div></article>
-    <article class="stage" id="stageFinal"><div class="stage-head"><div class="stage-num">5</div><div class="stage-title"><b>FINAL CUT</b><span>Join the completed shots into one movie MP4</span></div><div class="stage-state">Waiting</div></div><div class="stage-body"><div id="finalCut" class="final-wrap"><div id="finalMessage" class="pipeline-status">Waiting for completed shots.</div></div></div></article>
+  <section class="pipeline-flow exact-pipeline" aria-label="OBITREND movie generation pipeline">
+    <div class="pipeline-branch">
+      <article class="stage" id="stageInputs"><div class="stage-head"><div class="stage-num">1</div><div class="stage-title"><b>INPUTS</b><span>Prompt · Image · Story</span></div><div class="stage-state">Waiting</div></div></article>
+      <article class="stage" id="stageSettings"><div class="stage-head"><div class="stage-num">2</div><div class="stage-title"><b>SETTINGS</b><span>Duration · Provider · Credits</span></div><div class="stage-state">Waiting</div></div></article>
+    </div>
+    <div class="pipeline-connector">↓</div>
+    <article class="stage" id="stageBackend"><div class="stage-head"><div class="stage-num">3</div><div class="stage-title"><b>BACKEND API</b><span>Validate the request and create the movie production job</span></div><div class="stage-state">Waiting</div></div></article>
+    <div class="pipeline-connector">↓</div>
+    <article class="stage" id="stageCredit"><div class="stage-head"><div class="stage-num">4</div><div class="stage-title"><b>CREDIT RESERVATION</b><span>Securely reserve the user's OBITREND movie credit before generation</span></div><div class="stage-state">Waiting</div></div></article>
+    <div class="pipeline-connector">↓</div>
+    <article class="stage" id="stageProvider"><div class="stage-head"><div class="stage-num">5</div><div class="stage-title"><b>KLING PROVIDER</b><span>Send the validated shot request to the selected video engine</span></div><div class="stage-state">Waiting</div></div></article>
+    <div class="pipeline-connector">↓</div>
+    <article class="stage" id="stageShot"><div class="stage-head"><div class="stage-num">6</div><div class="stage-title"><b>SHOT GENERATION</b><span>Generate each shot in story order with continuation context</span></div><div class="stage-state">Waiting</div></div></article>
+    <div class="pipeline-connector">↓</div>
+    <article class="stage" id="stageJob"><div class="stage-head"><div class="stage-num">7</div><div class="stage-title"><b>STATUS / JOB</b><span>Track the provider task until it succeeds or fails</span></div><div class="stage-state">Waiting</div></div></article>
+    <div class="pipeline-connector">↓</div>
+    <article class="stage" id="stageResult"><div class="stage-head"><div class="stage-num">8</div><div class="stage-title"><b>RESULT</b><span>Receive the completed video URL for the generated shot</span></div><div class="stage-state">Waiting</div></div></article>
+    <div class="pipeline-connector">↓</div>
+    <article class="stage" id="stageStorage"><div class="stage-head"><div class="stage-num">9</div><div class="stage-title"><b>STORAGE</b><span>Persist each completed movie segment in the production record</span></div><div class="stage-state">Waiting</div></div></article>
+    <div class="pipeline-connector">↓</div>
+    <article class="stage" id="stageFinal"><div class="stage-head"><div class="stage-num">10</div><div class="stage-title"><b>FINAL MOVIE</b><span>Assemble the saved shots into one complete MP4</span></div><div class="stage-state">Waiting</div><div class="stage-body"><div id="finalCut" class="final-wrap"><div id="finalMessage" class="pipeline-status">Waiting for completed shots.</div></div></div></article>
   </section>
 </main>
 
@@ -158,27 +173,28 @@ window.fetch=async function(input,init={}){
 let selectedSeconds=60;
 let blueprint=null;
 let finalObjectUrl="";
-const stageIds=["stagePlanner","stageCast","stageShots","stageVideo","stageFinal"];
+const stageIds=["stageInputs","stageSettings","stageBackend","stageCredit","stageProvider","stageShot","stageJob","stageResult","stageStorage","stageFinal"];
+const stageIndex=Object.fromEntries(stageIds.map((id,i)=>[id,i]));
 function setStage(index,state,message){
   stageIds.forEach((id,i)=>{
     const el=$(id); if(!el)return;
-    el.classList.toggle("active",i===index&&state!=="done");
-    el.classList.toggle("done",i<index||state==="done"&&i===index);
+    el.classList.remove("active","done","error");
+    if(state==="error"&&i===index)el.classList.add("error");
+    else if(i<index||i===index&&state==="done")el.classList.add("done");
+    else if(i===index)el.classList.add("active");
     const st=el.querySelector(".stage-state");
     if(st)st.textContent=i<index?"Complete":i===index?(message||state||"Working"):"Waiting";
   });
 }
+function setPipelineStage(name,state="active",message="Working"){
+  const i=typeof name==="number"?name:stageIndex[name];
+  if(Number.isInteger(i))setStage(i,state,message);
+}
+window.obitrendPipelineStage=setPipelineStage;
 function setStatus(msg,error=false){$("pipelineStatus").textContent=msg||"";$("pipelineStatus").className="pipeline-status"+(error?" error":"")}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
-function renderBlueprint(b){
-  blueprint=b;
-  $("plannerSummary").innerHTML="<div class='cast-card'><b>"+esc(b.title||"Untitled Movie")+"</b><small>"+esc(b.logline||"")+"</small><span class='ref-pill'>"+esc((b.genre||"Cinematic"))+" · "+((b.scenes||[]).length)+" scenes</span></div>";
-  $("castGrid").innerHTML=(b.characters||[]).map((c,i)=>"<div class='cast-card'><b>Character "+(i+1)+": "+esc(c.name||"Character")+"</b><small>"+esc(c.role||"")+"<br>"+esc(c.appearance||"")+"<br>Wardrobe: "+esc(c.wardrobe||"")+"</small><span class='ref-pill'>Character reference "+(i+1)+" · locked</span></div>").join("");
-  const shots=(b.scenes||[]).flatMap((s,si)=>(s.shots||[]).map((sh,hi)=>({s,sh,si,hi})));
-  $("shotGrid").innerHTML=shots.map((x,i)=>"<div class='shot-card' id='planShot"+i+"'><b>Shot "+(i+1)+" · Scene "+(x.si+1)+"</b><small>"+esc(x.s.heading||"")+"<br>"+esc(x.sh.framing||"")+" · "+esc(x.sh.movement||"")+" · "+esc(x.sh.continuity||"")+"</small><span class='shot-pill'>30-second production segment</span></div>").join("");
-  $("videoGrid").innerHTML=shots.map((x,i)=>"<div class='shot-card' id='videoShot"+i+"'><b>Shot "+(i+1)+"</b><small id='videoShotText"+i+"'>Waiting</small><span class='shot-pill'>"+(i===0?"Character references":"Previous shot final video + character references")+"</span></div>").join("");
-}
+function renderBlueprint(b){blueprint=b;}
 async function waitForEngine(){
   const start=Date.now();
   while(Date.now()-start<15000){
@@ -204,13 +220,16 @@ async function waitForAssembly(){
   const total=expectedShots();
   for(let tick=0;tick<720;tick++){
     const urls=getAssemblyUrls();
-    urls.forEach((url,i)=>{if(url){$("videoShot"+i)?.classList.add("ready");$("videoShotText"+i).textContent="Ready";}});
     const done=urls.filter(Boolean).length;
-    for(let i=0;i<total;i++)if(!urls[i])$("videoShotText"+i).textContent=i===done?"Generating…":"Waiting";
-    setStage(3,done===total?"done":"active",done+"/"+total+" shots");
+    setPipelineStage("stageShot",done===total?"done":"active",done+"/"+total+" shots");
+    if(done>=total){
+      setPipelineStage("stageJob","done","All jobs complete");
+      setPipelineStage("stageResult","done","All shot results received");
+      setPipelineStage("stageStorage","done","All shots saved");
+      return urls;
+    }
     const source=($("assemblyStatus")?.textContent||"").trim();
     if(source)setStatus(source);
-    if(done>=total)return urls;
     if(/credit|failed|restored|could not|stopped/i.test(source)&&done<total)throw new Error(source);
     await sleep(2000);
   }
@@ -223,7 +242,7 @@ async function loadFFmpeg(){
   return ffmpeg;
 }
 async function makeFinalCut(urls){
-  setStage(4,"active","Building one MP4");
+  setPipelineStage("stageFinal","active","Building one MP4");
   $("finalMessage").textContent="Loading the browser video editor…";
   const ffmpeg=await loadFFmpeg();
   for(let i=0;i<urls.length;i++){
@@ -245,7 +264,7 @@ async function makeFinalCut(urls){
   finalObjectUrl=URL.createObjectURL(blob);
   $("finalCut").innerHTML="<video controls playsinline src='"+finalObjectUrl+"'></video><div class='final-actions'><a class='primary' id='downloadFinal' href='"+finalObjectUrl+"' download='obitrend-movie.mp4'>Download One Movie MP4</a><button id='restartMovie' type='button'>Create Another Movie</button></div>";
   $("restartMovie").onclick=()=>location.reload();
-  setStage(4,"done","One movie MP4 ready");
+  setPipelineStage("stageFinal","done","One movie MP4 ready");
   setStatus("Complete — your chained shots are now one movie MP4.");
 }
 async function start(){
@@ -255,35 +274,49 @@ async function start(){
   $("pipelineGenerate").disabled=true;
   try{
     setStatus("Starting your complete movie pipeline…");
+    setPipelineStage("stageInputs","done","Inputs received");
+    setPipelineStage("stageSettings","done","Settings locked");
     await waitForEngine();
     await window.refreshMovieEntitlement();
     if(window.getMovieCredits()<needed)throw new Error("You need "+needed+" movie credits for this "+selectedSeconds+"-second movie.");
+
     localStorage.removeItem("obitrend_movie_assembly");
     $("moviePrompt").value=prompt;
     $("length").value=String(selectedSeconds/60);
     $("genre").value="Drama";$("visualStyle").value="Cinematic realism";$("ratio").value="16:9";
-    setStage(0,"active","Planning");
+
+    setPipelineStage("stageBackend","active","Validating request");
     $("buildBtn").click();
     const b=await waitForBlueprint();
     renderBlueprint(b);
-    setStage(0,"done","Blueprint ready");
-    setStage(1,"active","Cast locked");
-    setStage(1,"done","Cast locked");
-    setStage(2,"done","Shot plan ready");
-    setStage(3,"active","Starting shots");
-    setStatus("Cast locked. Starting Shot 1, then each shot will continue from the previous final video.");
+    setPipelineStage("stageBackend","done","Production job created");
+
+    setPipelineStage("stageCredit","active","Reserving credit");
+    setStatus("Credit reservation will occur immediately before the first shot is sent to the provider.");
+    const existing=localStorage.getItem("obitrend_movie_active_production_id")||"";
+    if(!existing){
+      const id=await createMovieProduction(b,expectedShots());
+      localStorage.setItem("obitrend_movie_active_production_id",id);
+    }
+
+    setPipelineStage("stageProvider","active","Preparing Kling");
+    setPipelineStage("stageShot","active","Waiting for Shot 1");
     $("generateFullMovieBtn").click();
     if(window.movieBackgroundGeneration){
-      setStatus("Movie generation has started. You can leave the app — it will continue in the background and notify you when the movie is ready.");
+      setPipelineStage("stageProvider","done","Provider job accepted");
+      setPipelineStage("stageJob","active","Processing in background");
+      setStatus("Movie generation has started. The provider will continue processing the production.");
       return;
     }
     const urls=await waitForAssembly();
-    setStatus("All shots generated. Creating the final cut…");
+    setStatus("All shots generated. Creating the final movie…");
     await makeFinalCut(urls);
   }catch(e){
-    setStatus(e?.message||"Movie creation failed.",true);
-    const source=($("assemblyStatus")?.textContent||"").trim();
-    if(source)setStatus(source,true);
+    const msg=e?.message||"Movie creation failed.";
+    const active=[...document.querySelectorAll(".exact-pipeline .stage.active")].pop();
+    const activeIndex=active?stageIds.indexOf(active.id):-1;
+    if(activeIndex>=0)setStage(activeIndex,"error",msg);
+    setStatus(msg,true);
   }finally{$("pipelineGenerate").disabled=false}
 }
 window.obitrendMovieProvider="kling";
@@ -296,7 +329,7 @@ document.querySelectorAll(".provider-btn").forEach(btn=>btn.addEventListener("cl
 }));
 document.querySelectorAll(".duration-btn").forEach(btn=>btn.addEventListener("click",()=>{selectedSeconds=Number(btn.dataset.seconds)||60;document.querySelectorAll(".duration-btn").forEach(x=>x.classList.toggle("active",x===btn));}));
 $("pipelineGenerate").addEventListener("click",start);
-setStage(0,"idle","Waiting");
+setPipelineStage("stageInputs","active","Waiting for inputs");
 </script>
 
 <script type="module" src="/movie-auth.js?v=20261004-4"></script>
