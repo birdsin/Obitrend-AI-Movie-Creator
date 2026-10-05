@@ -47,6 +47,7 @@ async function generate({prompt,duration,ratio,sound=true,webhookUrl=""}){
   // Seedance 2.5 supports synchronized audio. Only send the flag when explicitly
   // configured; this keeps the adapter compatible with provider-side defaults.
   if(sound===false)body.sound=false;
+  if(String(webhookUrl||"").trim())body.webhook_url=String(webhookUrl).trim();
 
   const r=await request("/api/v1/generate",{method:"POST",body:JSON.stringify(body)});
   const d=await r.json().catch(()=>({}));
