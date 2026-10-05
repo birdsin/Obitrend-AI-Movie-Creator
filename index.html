@@ -108,7 +108,7 @@ function renderBlueprint(b){
 async function waitForEngine(){
   const start=Date.now();
   while(Date.now()-start<15000){
-    if(typeof window.refreshMovieEntitlement==="function"&&typeof window.getMovieCredits==="function"&&typeof window.runAssembly!=="undefined"&&$("buildBtn")&&$("generateFullMovieBtn"))return true;
+    if(typeof window.refreshMovieEntitlement==="function"&&typeof window.getMovieCredits==="function"&&$("buildBtn")&&$("generateFullMovieBtn"))return true;
     await sleep(100);
   }
   return typeof window.refreshMovieEntitlement==="function"&&$("buildBtn");
@@ -125,7 +125,7 @@ async function waitForBlueprint(){
   throw new Error("The AI story planner timed out. Please try again.");
 }
 function expectedShots(){return (blueprint?.scenes||[]).reduce((n,s)=>n+(s.shots||[]).length,0)}
-function getAssemblyUrls(){try{const x=JSON.parse(localStorage.getItem("obitrend_movie_assembly")||"{}");return expectedShots()?[...Array(expectedShots())].map((_,i)=>x[String(i>=0?((blueprint.scenes||[]).flatMap((s,si)=>(s.shots||[]).map((sh,hi)=>si+"-"+hi)))[i])]]||null):[]:[]}catch{return []}}
+function getAssemblyUrls(){try{const saved=JSON.parse(localStorage.getItem("obitrend_movie_assembly")||"{}");const keys=(blueprint?.scenes||[]).flatMap((s,si)=>(s.shots||[]).map((sh,hi)=>si+"-"+hi));return keys.map(k=>saved[k]||null)}catch{return []}}
 async function waitForAssembly(){
   const total=expectedShots();
   for(let tick=0;tick<720;tick++){
