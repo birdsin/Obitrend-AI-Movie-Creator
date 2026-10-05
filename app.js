@@ -350,6 +350,8 @@ async function generateShot(){
       throw new Error("The video provider did not return a task.");
     }
   }catch(e){
+    const activeProduction=localStorage.getItem("obitrend_movie_active_production_id")||"";
+    if(activeProduction){try{await setMovieProductionStatus(activeProduction,"failed")}catch(_){} }
     if(reservation&&!e?.creditReleased&&!e?.creditReleaseDeferred){
       try{await finishMovieCredit("release",reservation)}catch(_){}
     }
