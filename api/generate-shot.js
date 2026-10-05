@@ -27,10 +27,12 @@ module.exports=async(req,res)=>{
   if(!auth.startsWith("Bearer ")||!reservation){
     return json(res,401,{error:"Secure Movie Creator authentication and a valid credit reservation are required."});
   }
+  const supabaseUrl=process.env.SUPABASE_URL;
+  const publishable=process.env.SUPABASE_PUBLISHABLE_KEY;
+  if(!supabaseUrl||!publishable){
+    return json(res,500,{error:"Secure Movie Creator authorization is not configured."});
+  }
   try{
-    const supabaseUrl=process.env.SUPABASE_URL;
-    const publishable=process.env.SUPABASE_PUBLISHABLE_KEY;
-    if(!supabaseUrl||!publishable) return json(res,500,{error:"Secure Movie Creator authorization is not configured."});
     const gate=await fetch(supabaseUrl+"/functions/v1/movie-credit",{method:"POST",headers:{"content-type":"application/json","apikey":publishable,"Authorization":auth},body:JSON.stringify({action:"validate",token:String(reservation)})});
     const gd=await gate.json().catch(()=>({}));
     if(!gate.ok||!gd.valid) return json(res,402,{error:"Your movie credit reservation is invalid or expired. Please start generation again."});
