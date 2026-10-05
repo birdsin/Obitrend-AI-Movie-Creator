@@ -153,6 +153,7 @@
     generate.disabled=true;
     composer?.classList.add("pm-loading");
     try{
+      await waitForMovieEngine();
       await window.refreshMovieEntitlement();
       const credits=window.getMovieCredits();
       if(credits<=0){
@@ -225,6 +226,7 @@
     let production=resumeProduction||null;
 
     try{
+      await waitForMovieEngine();
       await window.refreshMovieEntitlement();
 
       const availableCredits=Math.max(0,Math.floor(window.getMovieCredits()));
