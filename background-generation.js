@@ -12,9 +12,10 @@
       await window.movieAuthReady;
       const user=window.movieUserId;
       if(!user)return false;
-      const {error}=await window.movieSupabase.from("push_subscriptions").upsert({
+      await window.movieSupabase.from("push_subscriptions").delete().eq("user_id",user).eq("endpoint",sub.endpoint);
+      const {error}=await window.movieSupabase.from("push_subscriptions").insert({
         user_id:user,endpoint:sub.endpoint,subscription:sub.toJSON(),updated_at:new Date().toISOString()
-      },{onConflict:"endpoint"});
+      });
       if(error)throw error;
       return true;
     }catch(e){console.warn("Movie notifications:",e);return false;}
