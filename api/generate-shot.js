@@ -164,8 +164,15 @@ module.exports=async(req,res)=>{
       console.error("Flixly start failed:",e?.message||e);
       await releaseReservation(supabaseUrl,publishable,auth,reservation);
       const code=String(e?.providerCode||"");
-      const insufficient=code==="insufficient_credits"||/credit|balance|quota/i.test(String(e?.message||""));
-      return json(res,502,{error:insufficient?"Flixly could not start this shot because its provider credit balance is unavailable. Your OBITREND movie credit was restored. Please try again later.":"Flixly could not start this shot. Your OBITREND movie credit was restored. Please try again.",reservationReleased:true,provider:"flixly"});
+      const message=String(e?.message||"").trim();
+      const insufficient=code==="insufficient_credits"||/credit|balance|quota/i.test(message);
+      const missingKey=/FLIXLY_API_KEY|not configured/i.test(message);
+      const safeMessage=missingKey
+        ?"Flixly Preview API key is not available to this deployment. Add FLIXLY_API_KEY to the Preview environment for this branch, then redeploy."
+        :insufficient
+          ?"Flixly provider credits are insufficient for this shot. Your OBITREND movie credit was restored."
+          :(message||"Flixly could not start this shot.");
+      return json(res,502,{error:safeMessage,provider:"flixly",providerCode:code||null,reservationReleased:true});
     }
   }
 
