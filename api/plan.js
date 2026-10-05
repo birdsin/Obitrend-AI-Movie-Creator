@@ -163,7 +163,8 @@ async function callOpenAI({ key, model, prompt, length, genre, style, ratio, cou
     "Visual style: " + style + "\n" +
     "Aspect ratio: " + ratio + "\n" +
     "Target length: " + length + " minutes.\n" +
-    (length === 1 ? "Create exactly 2 scenes and exactly 1 practical shot per scene for a one-minute movie, with each shot designed as a continuous 30-second production segment. " : "Create exactly " + count + " scenes and exactly 2 practical shots per scene. ") +
+    "Create exactly " + count + " scenes and exactly 1 practical shot per scene. " +
+    "Each shot must be designed as one continuous 30-second production segment so the final movie duration matches the selected length. " +
     "Keep dialogue concise. Make every camera direction filmable and visually specific.";
 
   const body = {
