@@ -80,7 +80,7 @@ module.exports=async(req,res)=>{
     }catch(_){}
     return json(res,503,{error:"Movie generation is temporarily paused while the video provider API credits are replenished. Your OBITREND movie credit was restored. Please try again later.",reservationReleased:true});
   }
-  if(MOVIE_VIDEO_PROVIDER==="flixly"){
+  if(String(body.provider||MOVIE_VIDEO_PROVIDER)==="flixly"){
     try{
       const x=body;
       const b=x.blueprint;
