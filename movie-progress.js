@@ -111,7 +111,7 @@
     setText("movieProgressPercent",percent+"%");
     const fill=document.getElementById("movieProgressFill");if(fill)fill.style.width=percent+"%";
     setText("movieProgressShots",completed+" / "+total);
-    setText("movieProgressProvider","Flixly · "+(provider==="processing"?"processing":provider));
+    setText("movieProgressProvider","Flixly · "+(status==="failed"?"failed":status==="completed"?"ready":(provider==="processing"?"processing":provider)));
     let message;
     if(status==="completed")message="All shots generated successfully. Your movie is ready for the next final-cut step.";
     else if(status==="failed")message=p?.last_error||"Movie generation failed. Your reserved credit was protected.";
