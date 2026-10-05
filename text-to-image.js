@@ -27,7 +27,7 @@
       '</style>'+ 
       '<div class="ti-head"><div class="ti-icon">✦</div><div><h2>Text to Image</h2><p class="ti-sub">Create a standalone image from a written prompt.</p></div></div>'+ 
       '<textarea id="textImagePrompt" maxlength="5000" placeholder="Describe the image you want... e.g. A cinematic Lagos fashion campaign at golden hour, luxury styling, realistic photography"></textarea>'+ 
-      '<div class="ti-controls"><select id="textImageModel"><option value="gpt-image-2-5-flare">GPT Image 2.5 Flare · Fast</option><option value="gpt-image-2-5-sunburst">GPT Image 2.5 Sunburst · Detail</option></select><select id="textImageFormat"><option value="PNG">PNG</option><option value="JPEG">JPEG</option><option value="WEBP">WebP</option></select></div>'+ 
+      '<div class="ti-controls"><select id="textImageModel"><option value="gpt-image-2-5-flare">GPT Image 2.5 Flare · Fast</option><option value="gpt-image-2-5-sunburst">GPT Image 2.5 Sunburst · Detail</option></select><div style="height:44px;display:flex;align-items:center;padding:0 12px;border:1px solid rgba(255,255,255,.12);border-radius:11px;background:#090e16;color:#929dad;font-size:12px">PNG output · model controlled</div></div>'+ 
       '<div class="ti-ratios">'+ratios.map((r,i)=>'<button type="button" class="ti-ratio'+(i===0?' active':'')+'" data-ratio="'+r+'">'+r+'</button>').join("")+'</div>'+ 
       '<button id="textImageGenerate" class="ti-generate" type="button">Generate Image</button>'+ 
       '<div id="textImageStatus" class="ti-status"></div>'+ 
@@ -54,7 +54,7 @@
       if(prompt.length<2){status("Enter a prompt first.");document.getElementById("textImagePrompt").focus();return;}
       btn.disabled=true;status("Starting image generation…");
       try{
-        const r=await fetch("/api/generate-image",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt,model:document.getElementById("textImageModel").value,aspect_ratio:ratio,format:document.getElementById("textImageFormat").value})});
+        const r=await fetch("/api/generate-image",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt,model:document.getElementById("textImageModel").value,aspect_ratio:ratio})});
         const d=await r.json().catch(()=>({}));
         if(!r.ok)throw new Error(d.error||"Flixly could not start the image.");
         let url=d.imageUrl;
