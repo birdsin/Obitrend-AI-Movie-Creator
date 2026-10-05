@@ -70,7 +70,15 @@
     if(enginePrompt)enginePrompt.value=prompt.value.trim();
     const values={genre:"Drama",visualStyle:"Cinematic realism",ratio:"16:9"};
     Object.entries(values).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v});
-    return applyCreditDuration(credits);
+    // IMPORTANT: never overwrite the user's selected duration with a
+    // credit-based 30-second default. The duration card is authoritative.
+    const length=q("#length");
+    if(length && !String(length.value||"").trim()) length.value="0.25";
+    return {
+      credits:Math.max(0,Math.floor(Number(credits)||0)),
+      seconds:Math.max(3,Math.min(15,Math.round(Number(length?.value||0.25)*60))),
+      minutes:Number(length?.value||0.25)
+    };
   }
 
   function showGenerationCard(stage="Planning",progress=8,message="Preparing your movie…"){
@@ -364,9 +372,10 @@
         status.className="pm-status";
         const segmentProgress=Math.max(40,Math.min(92,Math.round((i/Math.max(1,targetCount))*52)+40));
         showGenerationCard("Generating",segmentProgress,"Generating movie segment "+(i+1)+" of "+targetCount+"…");
-        const totalSeconds=targetCount*30;
+        const selectedSeconds=Math.max(3,Math.min(15,Math.round(Number(document.getElementById("length")?.value||0.25)*60)));
+        const totalSeconds=targetCount*selectedSeconds;
         const durationLabel=totalSeconds<60?totalSeconds+"-second":(totalSeconds/60)+"-minute";
-        status.textContent="Producing your "+durationLabel+" movie — 30-second segment "+(i+1)+" of "+targetCount+"…";
+        status.textContent="Producing your "+durationLabel+" movie — "+selectedSeconds+"-second segment "+(i+1)+" of "+targetCount+"…";
 
         try{
           if(typeof window.openShot!=="function"||typeof window.generateShot!=="function"){
@@ -396,7 +405,8 @@
           if(i<targetCount-1 && window.getMovieCredits()<=0){
             await window.setMovieProductionStatus(productionId,"paused").catch(()=>{});
             status.className="pm-status";
-            status.textContent="Movie paused after "+((i+1)*30)+" seconds. Your credits are finished. Purchase more credits to continue from the next 30-second segment.";
+            const selectedSeconds=Math.max(3,Math.min(15,Math.round(Number(document.getElementById("length")?.value||0.25)*60)));
+            status.textContent="Movie paused after "+((i+1)*selectedSeconds)+" seconds. Your credits are finished. Purchase more credits to continue from the next "+selectedSeconds+"-second segment.";
             loadRecent();
             return;
           }
@@ -425,7 +435,8 @@
 
       const remaining=window.getMovieCredits();
       status.className="pm-status";
-      const completedSeconds=targetCount*30;
+      const selectedSeconds=Math.max(3,Math.min(15,Math.round(Number(document.getElementById("length")?.value||0.25)*60)));
+      const completedSeconds=targetCount*selectedSeconds;
       const completedLabel=completedSeconds<60?completedSeconds+" seconds":(completedSeconds/60)+" minute"+(completedSeconds/60===1?"":"s");
       status.textContent="Your "+completedLabel+" movie is complete. "+targetCount+" x 30-second segments were generated using exactly "+targetCount+" movie credit"+(targetCount===1?"":"s")+".";
       hideGenerationCard();
