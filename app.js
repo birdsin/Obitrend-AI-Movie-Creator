@@ -353,7 +353,11 @@ async function generateShot(){
     if(reservation&&!e?.creditReleased&&!e?.creditReleaseDeferred){
       try{await finishMovieCredit("release",reservation)}catch(_){}
     }
-    status("shotStatus",e.message||"Shot generation failed.",true);
+    // A failed generation must never leave the previous error card on screen.
+    // Give the release operation a moment to finish, then reload the dashboard
+    // into its clean state so the user can start again without a stale error.
+    try{sessionStorage.setItem("obitrend_movie_failed_refresh","1")}catch(_){}
+    window.setTimeout(()=>window.location.reload(),700);
   }finally{b.disabled=false}
 }
 async function pollTask(id,reservation){
