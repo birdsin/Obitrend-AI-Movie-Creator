@@ -113,7 +113,7 @@ async function reserveMovieCredit(){
   for(let attempt=0;attempt<2;attempt++){
     const r=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-credit",{
       method:"POST",
-      headers:{"content-type":"application/json","Authorization:"Bearer "+token},
+      headers:{"content-type":"application/json","Authorization":"Bearer "+token},
       body:JSON.stringify({action:"reserve"})
     });
     const d=await r.json().catch(()=>({}));
@@ -128,7 +128,7 @@ async function reserveMovieCredit(){
 
     const vr=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-credit",{
       method:"POST",
-      headers:{"content-type":"application/json","Authorization:"Bearer "+token},
+      headers:{"content-type":"application/json","Authorization":"Bearer "+token},
       body:JSON.stringify({action:"validate",token:reservationToken})
     });
     const vd=await vr.json().catch(()=>({}));
@@ -140,7 +140,7 @@ async function reserveMovieCredit(){
     try{
       await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-credit",{
         method:"POST",
-        headers:{"content-type":"application/json","Authorization:"Bearer "+token},
+        headers:{"content-type":"application/json","Authorization":"Bearer "+token},
         body:JSON.stringify({action:"release",token:reservationToken})
       });
     }catch(_){}
