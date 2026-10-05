@@ -345,8 +345,8 @@
         applyMovieFormatLength(format);
         status.textContent="Storyboard selected — 4 cinematic segments will be generated in story order.";
       }else{
-        const total=Number(seconds)||30;
-        const segment=total<=30?total:30;
+        const total=Number(seconds)||15;
+        const segment=15;
         const segments=Math.ceil(total/segment);
         format=setMovieFormatSelection(total,segment,segments,total+"-second format","duration");
         applyMovieFormatLength(format);
