@@ -752,12 +752,15 @@ async function runAssembly(full){
        const id=await createMovieProduction(state.blueprint,assemblyState.queue.length);
        localStorage.setItem("obitrend_movie_active_production_id",id);
      }
-     window.movieBackgroundGeneration=true;
+     const backgroundCapable=window.obitrendMovieProvider==="flixly";
+     window.movieBackgroundGeneration=backgroundCapable;
      $("generateFullMovieBtn").disabled=true;
      $("generateNextShotBtn").disabled=true;
-     $("assemblyStatus").textContent="Movie generation started. You can leave the app — generation will continue in the background.";
+     $("assemblyStatus").textContent=backgroundCapable
+       ?"Movie generation started. You can leave the app — Flixly will continue the generation in the background."
+       :"Kling generation started. Keep the app open until the shot finishes.";
      await generateAssemblyItem(items[0]);
-     $("assemblyStatus").textContent="Movie generation is continuing in the background. You can safely leave the app.";
+     if(backgroundCapable)$("assemblyStatus").textContent="Movie generation is continuing in the background. You can safely leave the app.";
    }catch(e){
      const message=e?.message||"Could not start background movie generation.";
      $("assemblyStatus").textContent=message;
