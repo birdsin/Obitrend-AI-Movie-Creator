@@ -263,93 +263,37 @@
   window.addEventListener("beforeunload",()=>observers.forEach(o=>o?.disconnect()));
 })();
 
-/* Premium option interactions — UI state only; generation backend remains unchanged. */
+/* Meaningful conversion interactions — UI only; backend workflow remains unchanged. */
 (()=>{
   const getPrompt=()=>document.getElementById("creativePrompt");
+  const composer=document.querySelector(".pm-composer");
+  const status=document.getElementById("pmStatus");
   const refresh=()=>window.lucide?.createIcons?.();
-  const appendPrompt=(prefix)=>{
-    const p=getPrompt(); if(!p)return;
-    const existing=p.value.trim();
-    p.value=prefix+(existing?" "+existing:"");
+
+  function useCasePrompt(value){
+    const p=getPrompt();
+    if(!p)return;
+    p.value=String(value||"").trim();
     p.dispatchEvent(new Event("input",{bubbles:true}));
-    p.focus();
-  };
+    composer?.scrollIntoView({behavior:"smooth",block:"center"});
+    composer?.classList.remove("pm-usecase-glow");
+    void composer?.offsetWidth;
+    composer?.classList.add("pm-usecase-glow");
+    if(status){
+      status.className="pm-status";
+      status.textContent="Use case loaded. Add your details, then generate your movie.";
+    }
+    window.setTimeout(()=>p.focus(),350);
+    window.setTimeout(()=>composer?.classList.remove("pm-usecase-glow"),1600);
+  }
 
-  document.querySelectorAll(".pm-genre-card").forEach(card=>{
-    card.addEventListener("click",()=>{
-      document.querySelectorAll(".pm-genre-card").forEach(x=>x.classList.remove("active"));
-      card.classList.add("active");
-      appendPrompt(card.dataset.genrePrompt||"");
-    });
+  document.querySelectorAll(".use-card").forEach(card=>{
+    card.addEventListener("click",()=>useCasePrompt(card.dataset.prompt||""));
   });
 
-  document.querySelectorAll(".pm-style-card").forEach(card=>{
-    card.addEventListener("click",()=>{
-      document.querySelectorAll(".pm-style-card").forEach(x=>x.classList.remove("active"));
-      card.classList.add("active");
-      const style=card.dataset.style||"Realistic Cinematic";
-      appendPrompt("Visual style: "+style+".");
-    });
-  });
-
-  document.querySelectorAll(".pm-duration-card").forEach(card=>{
-    card.addEventListener("click",()=>{
-      document.querySelectorAll(".pm-duration-card").forEach(x=>x.classList.remove("active"));
-      card.classList.add("active");
-      const value=String(card.dataset.duration||"15");
-      const note=document.getElementById("pmFormatNote");
-      const hint=document.getElementById("pmDurationHint");
-      const label=value==="15"?"15-second format selected":value==="5"?"5-second format selected":value==="30"?"30-second format selected":"Auto format selected";
-      if(note)note.textContent=label;
-      if(hint)hint.textContent=label.replace(" format","")+(value==="15"?"": "");
-      /* Only the durations already supported by the existing engine are forwarded. */
-      if(["5","15","30"].includes(value)){
-        const length=document.getElementById("length");
-        if(length)length.value=value;
-      }
-    });
-  });
-
-  const modeCards=[...document.querySelectorAll(".pm-mode-card")];
-  const imageInput=document.getElementById("pmImageInput");
-  const imagePreview=document.getElementById("pmImagePreview");
-  const imagePreviewImg=imagePreview?.querySelector("img");
-  const removeImage=document.getElementById("pmImageRemove");
-
-  modeCards.forEach(card=>{
-    card.addEventListener("click",()=>{
-      modeCards.forEach(x=>x.classList.remove("active"));
-      card.classList.add("active");
-      if(card.dataset.createMode==="image") imageInput?.click();
-      else getPrompt()?.focus();
-    });
-  });
-
-  imageInput?.addEventListener("change",()=>{
-    const file=imageInput.files?.[0];
-    if(!file)return;
-    if(!file.type.startsWith("image/"))return;
-    const reader=new FileReader();
-    reader.onload=()=>{
-      if(imagePreviewImg)imagePreviewImg.src=String(reader.result||"");
-      if(imagePreview)imagePreview.hidden=false;
-      const imageMode=document.querySelector('.pm-mode-card[data-create-mode="image"]');
-      modeCards.forEach(x=>x.classList.remove("active"));
-      imageMode?.classList.add("active");
-      const p=getPrompt();
-      if(p && !p.value.trim())p.value="Create a cinematic movie inspired by this visual reference. Keep the characters and visual identity consistent.";
-      p?.dispatchEvent(new Event("input",{bubbles:true}));
-      refresh();
-    };
-    reader.readAsDataURL(file);
-  });
-
-  removeImage?.addEventListener("click",()=>{
-    if(imageInput)imageInput.value="";
-    if(imagePreviewImg)imagePreviewImg.removeAttribute("src");
-    if(imagePreview)imagePreview.hidden=true;
-    document.querySelectorAll(".pm-mode-card").forEach(x=>x.classList.remove("active"));
-    document.querySelector('.pm-mode-card[data-create-mode="text"]')?.classList.add("active");
+  const seeAll=document.getElementById("pmSeeAllMovies");
+  seeAll?.addEventListener("click",()=>{
+    document.querySelector(".real-movies")?.scrollIntoView({behavior:"smooth",block:"start"});
   });
 
   refresh();
