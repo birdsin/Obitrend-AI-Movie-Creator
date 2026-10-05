@@ -37,9 +37,60 @@ body{min-height:100vh}
 [data-android-action],.android-projects,.android-home,.android-dashboard{display:none!important}
 body{overflow-x:hidden}
 @media(max-width:600px){.pipeline-shell{padding:12px 12px 36px}.pipeline-hero{padding-top:30px}.pipeline-input{padding:13px}.pipeline-input textarea{min-height:135px}.pipeline-lock{display:none}}
+
+/* EXACT OBITREND movie-dashboard navigation layer — navigation only. */
+.movie-nav-top{position:sticky;top:0;z-index:100;background:rgba(5,7,11,.94);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.08);height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;margin:0 -18px 18px}
+.movie-nav-left,.movie-nav-right{display:flex;align-items:center;gap:10px}
+.movie-nav-btn{width:42px;height:42px;border:1px solid rgba(255,255,255,.1);border-radius:13px;background:#0d121b;color:#f7f7f8;display:grid;place-items:center;font-size:22px;cursor:pointer}
+.movie-nav-btn:active{transform:scale(.96)}
+.movie-nav-brand{display:flex;align-items:center;gap:10px}.movie-nav-brand-mark{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(145deg,#e6b95e,#8d6925);color:#0a0b0f;font-size:19px}.movie-nav-brand b{display:block;font-size:13px;letter-spacing:.2em}.movie-nav-brand span{display:block;color:#858e9f;font-size:8px;letter-spacing:.24em;margin-top:2px}
+.movie-nav-credit{color:#e6b95e;font-size:11px;font-weight:800;border:1px solid rgba(230,185,94,.25);border-radius:999px;padding:9px 11px;background:#10151e}
+.movie-nav-avatar{width:40px;height:40px;border-radius:50%;border:1px solid rgba(230,185,94,.35);background:#111722;color:#e6b95e;font-weight:900;cursor:pointer}
+.movie-drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:110;opacity:0;pointer-events:none;transition:opacity .2s}
+.movie-drawer-overlay.open{opacity:1;pointer-events:auto}
+.movie-drawer{position:fixed;left:0;top:0;bottom:0;width:min(320px,88vw);background:#090d14;border-right:1px solid rgba(230,185,94,.18);z-index:120;transform:translateX(-105%);transition:transform .24s ease;box-shadow:20px 0 60px rgba(0,0,0,.45);padding:18px 14px}
+.movie-drawer.open{transform:translateX(0)}
+.movie-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:8px 8px 18px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:10px}.movie-drawer-head strong{letter-spacing:.18em;color:#f7f7f8}.movie-drawer-close{width:40px;height:40px;border:0;background:transparent;color:#fff;font-size:30px;cursor:pointer}
+.movie-drawer-nav{display:grid;gap:6px}.movie-drawer-nav button{width:100%;display:flex;align-items:center;gap:13px;padding:14px 13px;border:1px solid transparent;border-radius:13px;background:transparent;color:#cbd1db;text-align:left;font:inherit;cursor:pointer}.movie-drawer-nav button:hover,.movie-drawer-nav button:focus-visible{background:#111722;border-color:rgba(230,185,94,.2);color:#f4d477}.movie-drawer-icon{width:25px;text-align:center;color:#e6b95e;font-size:17px}.movie-drawer-nav button.active{background:rgba(230,185,94,.09);color:#f4d477;border-color:rgba(230,185,94,.22)}
+.movie-menu-workspace{position:fixed;inset:0;z-index:105;background:#05070b;overflow:auto;padding:18px}.movie-menu-workspace.hidden{display:none}.movie-menu-workspace-head{max-width:980px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:10px 0 18px;border-bottom:1px solid rgba(230,185,94,.18)}.movie-menu-workspace-head h2{margin:0;font-size:24px}.movie-menu-workspace-head p{margin:5px 0 0;color:#8f98a8;font-size:12px}.movie-menu-workspace-back{width:42px;height:42px;border-radius:13px;border:1px solid rgba(255,255,255,.1);background:#10151e;color:#fff;font-size:22px}.movie-menu-workspace-body{max-width:980px;margin:18px auto;display:grid;gap:10px}.movie-menu-workspace-body .menu-card,.movie-menu-workspace-body .credit-box,.movie-menu-workspace-body .settings-live-grid{background:#0b0f17;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px}.movie-menu-workspace-body .menu-card{display:flex;justify-content:space-between;align-items:center;gap:12px}.movie-menu-workspace-body .menu-card h3{margin:0 0 5px}.movie-menu-workspace-body .menu-card p{margin:0;color:#8f98a8;font-size:12px}.movie-menu-workspace-body .menu-action{border:1px solid rgba(230,185,94,.28);background:#121821;color:#e6b95e;border-radius:10px;padding:10px 13px;font-weight:700}.movie-menu-workspace-body .credit-box strong{display:block;color:#e6b95e;font-size:25px}.movie-menu-workspace-body .credit-box span,.movie-menu-workspace-body .status{display:block;color:#8f98a8;font-size:12px;margin-top:6px}.movie-menu-workspace-body .settings-list{display:grid;gap:10px;margin-top:10px}.movie-menu-workspace-body .setting-row{display:flex;justify-content:space-between;align-items:center;padding:14px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:#0b0f17}.movie-menu-workspace-body .outline-btn,.movie-menu-workspace-body .logout-btn{border:1px solid rgba(255,255,255,.1);background:#111722;color:#f7f7f8;border-radius:11px;padding:12px}.movie-menu-workspace-body .logout-btn{color:#ff9b9b}
+@media(max-width:600px){.movie-nav-top{margin:0 -12px 12px;height:60px}.movie-nav-brand span{display:none}.movie-nav-credit{padding:8px 9px}.movie-menu-workspace{padding:12px}}
+
 </style>
 </head>
 <body>
+
+<div id="movieDrawerOverlay" class="movie-drawer-overlay" aria-hidden="true"></div>
+<aside id="movieDrawer" class="movie-drawer" aria-label="OBITREND navigation" aria-hidden="true">
+  <div class="movie-drawer-head"><strong>OBITREND</strong><button id="movieDrawerClose" class="movie-drawer-close" type="button" aria-label="Close menu">×</button></div>
+  <nav class="movie-drawer-nav">
+    <button type="button" data-movie-nav="home" class="active"><span class="movie-drawer-icon">⌂</span><span>Home</span></button>
+    <button type="button" data-movie-nav="create"><span class="movie-drawer-icon">＋</span><span>Create Movie</span></button>
+    <button type="button" data-movie-nav="movies"><span class="movie-drawer-icon">▣</span><span>My Movies</span></button>
+    <button type="button" data-movie-nav="pro"><span class="movie-drawer-icon">♛</span><span>Pro Plans</span></button>
+    <button type="button" data-movie-nav="settings"><span class="movie-drawer-icon">⚙</span><span>Settings</span></button>
+    <button type="button" data-movie-nav="help"><span class="movie-drawer-icon">?</span><span>Help &amp; Support</span></button>
+  </nav>
+</aside>
+
+<header class="movie-nav-top">
+  <div class="movie-nav-left">
+    <button id="movieMenuBtn" class="movie-nav-btn" type="button" aria-label="Open menu">☰</button>
+    <div class="movie-nav-brand"><span class="movie-nav-brand-mark">♛</span><div><b>OBITREND</b><span>AI MOVIE CREATOR</span></div></div>
+  </div>
+  <div class="movie-nav-right">
+    <button id="movieCreditBtn" class="movie-nav-credit" type="button">AI CREATOR</button>
+    <button id="movieProfileBtn" class="movie-nav-avatar" type="button" aria-label="Account">P</button>
+  </div>
+</header>
+
+<section id="menuWorkspace" class="movie-menu-workspace hidden" aria-hidden="true">
+  <div class="movie-menu-workspace-head">
+    <div><h2 id="menuWorkspaceTitle">OBITREND</h2><p id="menuWorkspaceSubtitle"></p></div>
+    <button id="menuWorkspaceBack" class="movie-menu-workspace-back" type="button" aria-label="Back">←</button>
+  </div>
+  <div id="menuWorkspaceBody" class="movie-menu-workspace-body"></div>
+</section>
+
 <main class="pipeline-shell" id="moviePipeline">
   <header class="pipeline-top">
     <div class="pipeline-brand"><div class="pipeline-brand-mark">♛</div><div><b>OBITREND</b><span>AI MOVIE CREATOR</span></div></div>
@@ -222,5 +273,36 @@ setStage(0,"idle","Waiting");
 <script type="module" src="/movie-auth.js?v=20261004-4"></script>
 <script src="/app.js?v=20261005-8"></script>
 <script src="/mobile-pro-fix.js?v=20260927-1"></script>
+
+<script>
+(function(){
+  const drawer=document.getElementById("movieDrawer");
+  const overlay=document.getElementById("movieDrawerOverlay");
+  const menuBtn=document.getElementById("movieMenuBtn");
+  const closeBtn=document.getElementById("movieDrawerClose");
+  const workspace=document.getElementById("menuWorkspace");
+  const closeWorkspace=document.getElementById("menuWorkspaceBack");
+  function close(){drawer?.classList.remove("open");overlay?.classList.remove("open");drawer?.setAttribute("aria-hidden","true");overlay?.setAttribute("aria-hidden","true");}
+  function open(){drawer?.classList.add("open");overlay?.classList.add("open");drawer?.setAttribute("aria-hidden","false");overlay?.setAttribute("aria-hidden","false");}
+  function wsBack(){workspace?.classList.add("hidden");workspace?.setAttribute("aria-hidden","true");}
+  menuBtn?.addEventListener("click",open);
+  closeBtn?.addEventListener("click",close);
+  overlay?.addEventListener("click",close);
+  closeWorkspace?.addEventListener("click",wsBack);
+  document.getElementById("movieCreditBtn")?.addEventListener("click",()=>{if(typeof openMenu==="function")openMenu("pro");});
+  document.getElementById("movieProfileBtn")?.addEventListener("click",()=>{if(typeof openMenu==="function")openMenu("settings");});
+  document.querySelectorAll("[data-movie-nav]").forEach(btn=>btn.addEventListener("click",()=>{
+    const action=btn.dataset.movieNav; close();
+    document.querySelectorAll("[data-movie-nav]").forEach(x=>x.classList.toggle("active",x===btn));
+    if(action==="home"){wsBack();window.scrollTo({top:0,behavior:"smooth"});return;}
+    if(action==="create"){wsBack();document.getElementById("moviePipeline")?.scrollIntoView({behavior:"smooth",block:"start"});document.getElementById("pipelinePrompt")?.focus();return;}
+    if(action==="movies"){if(typeof openMenu==="function")openMenu("creations");return;}
+    if(action==="pro"){if(typeof openMenu==="function")openMenu("pro");return;}
+    if(action==="settings"){if(typeof openMenu==="function")openMenu("settings");return;}
+    if(action==="help"){if(typeof openMenu==="function")openMenu("help");return;}
+  }));
+})();
+</script>
+
 </body>
 </html>
