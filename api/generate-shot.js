@@ -47,6 +47,18 @@ async function releaseReservation(supabaseUrl,publishable,auth,reservation){
     });
   }catch(_){}
 }
+async function failProduction(supabaseUrl,publishable,auth,productionId,message){
+  const id=String(productionId||"").trim();
+  if(!id)return;
+  try{
+    await fetch(supabaseUrl+"/functions/v1/movie-credit",{
+      method:"POST",
+      headers:{"content-type":"application/json","apikey":publishable,"Authorization":auth},
+      body:JSON.stringify({action:"production_status_update",production_id:id,status:"failed",error:String(message||"Movie generation failed.")})
+    });
+  }catch(_){/* credit release remains independent */}
+}
+
 
 module.exports=async(req,res)=>{
   const auth=req.headers.authorization||"";
@@ -126,6 +138,7 @@ module.exports=async(req,res)=>{
 
   // Provider can be selected by the user without changing the existing dashboard workflow.
   // The server-side environment remains the fallback/default.
+  const productionId=String(body?.productionId||"").trim();
   const requestedProvider=String(req.headers["x-movie-provider"]||body.provider||ENV_MOVIE_VIDEO_PROVIDER).trim().toLowerCase();
   const MOVIE_VIDEO_PROVIDER=requestedProvider==="flixly"?"flixly":"kling";
   if(MOVIE_VIDEO_PROVIDER==="flixly"){
@@ -290,10 +303,12 @@ module.exports=async(req,res)=>{
       await releaseReservation(supabaseUrl,publishable,auth,reservation);
       const providerMessage=String(d?.message||d?.error||"");
       const insufficient=/credit|balance|quota|resource/i.test(providerMessage);
+      const safeMessage=insufficient
+        ?"Kling could not start this shot because the Kling API resource balance is unavailable. Your OBITREND movie credit was restored. Please try again later."
+        :"Kling could not start this shot. Your OBITREND movie credit was restored. Please try again.";
+      await failProduction(supabaseUrl,publishable,auth,productionId,safeMessage);
       return json(res,502,{
-        error:insufficient
-          ?"Kling could not start this shot because the Kling API resource balance is unavailable. Your OBITREND movie credit was restored. Please try again later."
-          :"Kling could not start this shot. Your OBITREND movie credit was restored. Please try again.",
+        error:safeMessage,
         reservationReleased:true
       });
     }
@@ -311,13 +326,16 @@ module.exports=async(req,res)=>{
           body:JSON.stringify({action:"release",token:String(reservation)})
         });
       }catch(_){}
-      return json(res,502,{error:"The video generator did not return a task. Your credit was restored. Please try again.",reservationReleased:true});
+      const msg="The video generator did not return a task. Your credit was restored. Please try again.";
+      await failProduction(supabaseUrl,publishable,auth,productionId,msg);
+      return json(res,502,{error:msg,reservationReleased:true});
     }
 
     const taskKind=imageDataUri?"image":"text";
     return json(res,200,{taskId:"kling:"+taskKind+":"+String(taskId),videoUrl:null});
   }catch(e){
     console.error("Shot generation error:",e);
+    await failProduction(supabaseUrl,publishable,auth,productionId,String(e?.message||"Shot generation failed. Your OBITREND movie credit was restored."));
     try{
       await fetch(supabaseUrl+"/functions/v1/movie-credit",{
         method:"POST",
