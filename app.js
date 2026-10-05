@@ -218,7 +218,7 @@ async function finishMovieCredit(action,token){
   try{await refreshMovieEntitlement()}catch(_){/* The credit operation already succeeded; never retry it automatically. */}
   return true;
 }
-function getMoviePlan(){return movieServerEntitlement?.plan_name||"Free"}
+// Public movie-client bridge must be available before any later UI bootstrap code runs.\n// Keep this immediately after the core movie-credit functions so a non-critical\n// navigation/UI exception cannot leave the prompt dashboard without its API.\nwindow.refreshMovieEntitlement=refreshMovieEntitlement;\nwindow.reserveMovieCredit=reserveMovieCredit;\nwindow.finishMovieCredit=finishMovieCredit;\nwindow.generateShot=generateShot;\nwindow.getMovieCredits=getMovieCredits;\nwindow.createMovieProduction=createMovieProduction;\nwindow.getMovieProduction=getMovieProduction;\nwindow.setMovieProductionStatus=setMovieProductionStatus;\nwindow.saveMovieProductionSegment=saveMovieProductionSegment;\nwindow.saveHistory=saveHistory;\n\nfunction getMoviePlan(){return movieServerEntitlement?.plan_name||"Free"}
 function getMoviePlanLabel(){
   const e=getMovieEntitlement();
   if(e.plan==="Free")return "Free";
