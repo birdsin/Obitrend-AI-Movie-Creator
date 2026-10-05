@@ -157,7 +157,8 @@ module.exports=async(req,res)=>{
         "Natural human motion, physically plausible camera movement, cinematic composition, professional live-action film quality.",
         "Aspect ratio "+ratio+". Duration "+duration+" seconds."
       ].join(" ");
-      const result=await flixly.generate({prompt,duration,ratio,sound:true});
+      const webhookUrl=String(process.env.SUPABASE_URL||"").trim()?String(process.env.SUPABASE_URL).replace(/\/$/,"")+"/functions/v1/movie-flixly-webhook":"";
+      const result=await flixly.generate({prompt,duration,ratio,sound:true,webhookUrl});
       if(result.videoUrl){
         return json(res,200,{taskId:null,videoUrl:result.videoUrl,provider:"flixly"});
       }
