@@ -4,7 +4,7 @@
   async function enableMovieNotifications(){
     try{
       if(!("serviceWorker" in navigator)||!("PushManager" in window)||!("Notification" in window)||!window.movieSupabase)return false;
-      const permission=Notification.permission==="granted"?permission:await Notification.requestPermission();
+      const permission=Notification.permission==="granted"?"granted":await Notification.requestPermission();
       if(permission!=="granted")return false;
       const reg=await navigator.serviceWorker.ready;
       let sub=await reg.pushManager.getSubscription();
