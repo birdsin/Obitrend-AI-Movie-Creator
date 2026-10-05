@@ -99,6 +99,8 @@
     let percent=Math.round((completed/total)*100);
     const status=String(p?.status||"generating").toLowerCase();
     const provider=String(p?.provider_status||"waiting").toLowerCase();
+    const selectedProvider=String(localStorage.getItem("obitrend_movie_provider")||"kling").toLowerCase();
+    const paused=status==="paused";
     if(status==="completed")percent=100;
     card.classList.toggle("done",status==="completed");
     card.classList.toggle("failed",status==="failed");
@@ -107,15 +109,18 @@
     setText("movieProgressSubtitle",
       status==="completed"?"Movie generation complete":
       status==="failed"?"Movie generation failed":
+      paused?"Movie paused — ready to continue":
       "Generation continues in the background");
     setText("movieProgressPercent",percent+"%");
     const fill=document.getElementById("movieProgressFill");if(fill)fill.style.width=percent+"%";
     setText("movieProgressShots",completed+" / "+total);
-    const taskProvider=String(p?.provider_task_id||"").toLowerCase().startsWith("kling:")?"Kling":"Flixly";
+    const taskId=String(p?.provider_task_id||"").toLowerCase();
+    const taskProvider=taskId.startsWith("kling:")?"Kling":taskId.startsWith("flixly:")?"Flixly":(selectedProvider==="flixly"?"Flixly":"Kling");
     setText("movieProgressProvider",taskProvider+" · "+(status==="failed"?"failed":status==="completed"?"ready":(provider==="processing"?"processing":provider)));
     let message;
     if(status==="completed")message="All shots generated successfully. Your movie is ready for the next final-cut step.";
     else if(status==="failed")message=p?.last_error||"Movie generation failed. Your reserved credit was protected.";
+    else if(paused)message="Your movie is paused. Start generation again to continue safely.";
     else if(provider==="processing")message="Shot "+Math.min(total,completed+1)+" of "+total+" is currently generating.";
     else message="Your movie is queued and will continue automatically.";
     setText("movieProgressStatus",message);
