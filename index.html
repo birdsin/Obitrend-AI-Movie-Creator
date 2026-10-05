@@ -4,180 +4,216 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#05070b">
-<meta name="description" content="OBITREND AI Movie Creator — turn one idea into a cinematic movie blueprint automatically.">
+<meta name="description" content="OBITREND AI Movie Creator">
 <title>OBITREND AI Movie Creator</title>
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="stylesheet" href="/styles.css?v=20261004-2">
-<link rel="stylesheet" href="/dashboard-enhancements.css">
-<link rel="stylesheet" href="/prompt-movie-dashboard.css?v=20261004-2">
+<link rel="stylesheet" href="/styles.css?v=20261005-1">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;background:#05070b;color:#f7f7f8;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{min-height:100vh}
+.pipeline-shell{min-height:100vh;max-width:980px;margin:0 auto;padding:18px 18px 50px}
+.pipeline-top{display:flex;align-items:center;justify-content:space-between;padding:10px 0 24px;border-bottom:1px solid rgba(230,185,94,.18)}
+.pipeline-brand{display:flex;align-items:center;gap:12px}.pipeline-brand-mark{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(145deg,#e6b95e,#8d6925);color:#0a0b0f;font-size:22px}.pipeline-brand b{display:block;letter-spacing:.24em;font-size:15px}.pipeline-brand span{display:block;color:#8e96a6;font-size:10px;letter-spacing:.28em;margin-top:4px}
+.pipeline-lock{font-size:11px;color:#9aa2b2;border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:8px 11px}
+.pipeline-hero{padding:42px 0 26px}.pipeline-kicker{color:#e6b95e;letter-spacing:.28em;text-transform:uppercase;font-size:11px;font-weight:700}.pipeline-hero h1{font-size:clamp(34px,6vw,62px);line-height:.98;margin:14px 0 14px;letter-spacing:-.045em}.pipeline-hero h1 em{font-style:normal;color:#e6b95e}.pipeline-hero p{max-width:680px;color:#9aa2b2;font-size:16px;line-height:1.7;margin:0}
+.pipeline-input{background:#0c1018;border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:18px;box-shadow:0 20px 70px rgba(0,0,0,.28)}
+.pipeline-input textarea{width:100%;min-height:150px;resize:vertical;background:#070a10;color:#f7f7f8;border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:18px;font:inherit;font-size:16px;line-height:1.65;outline:none}.pipeline-input textarea:focus{border-color:#e6b95e}
+.pipeline-controls{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:14px}.duration-btn{background:#090c12;color:#aeb5c2;border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:10px 14px;cursor:pointer}.duration-btn.active{color:#111;background:#e6b95e;border-color:#e6b95e}
+.pipeline-generate{margin-top:16px;width:100%;border:0;border-radius:16px;padding:16px;background:linear-gradient(100deg,#f3cc72,#e6b95e);color:#101116;font-weight:800;font-size:17px;cursor:pointer}.pipeline-generate:disabled{opacity:.55;cursor:not-allowed}
+.pipeline-status{min-height:24px;margin-top:12px;color:#9aa2b2;font-size:13px}.pipeline-status.error{color:#ff8e8e}
+.pipeline-flow{margin-top:28px;display:grid;gap:12px}
+.stage{background:#0b0f17;border:1px solid rgba(255,255,255,.1);border-radius:20px;overflow:hidden;transition:.25s}.stage.active{border-color:rgba(230,185,94,.65);box-shadow:0 0 0 1px rgba(230,185,94,.08)}.stage.done{border-color:rgba(109,206,159,.32)}
+.stage-head{display:flex;align-items:center;gap:13px;padding:17px 18px}.stage-num{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:#151b27;color:#8e96a6;font-weight:800}.stage.active .stage-num{background:#e6b95e;color:#111}.stage.done .stage-num{background:#4f9c79;color:#fff}.stage-title{flex:1}.stage-title b{display:block;font-size:15px}.stage-title span{display:block;color:#7f8796;font-size:12px;margin-top:3px}.stage-state{font-size:11px;color:#747d8d}.stage.active .stage-state{color:#e6b95e}.stage.done .stage-state{color:#74cfa3}
+.stage-body{display:none;padding:0 18px 18px;border-top:1px solid rgba(255,255,255,.07)}.stage.open .stage-body,.stage.active .stage-body,.stage.done .stage-body{display:block}
+.cast-grid,.shot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;padding-top:14px}.cast-card,.shot-card{background:#070a10;border:1px solid rgba(255,255,255,.08);border-radius:15px;padding:13px}.cast-card b,.shot-card b{display:block}.cast-card small,.shot-card small{display:block;color:#8d95a4;line-height:1.5;margin-top:5px}.ref-pill,.shot-pill{display:inline-block;margin-top:9px;padding:5px 8px;border-radius:999px;background:rgba(230,185,94,.09);color:#d9b665;font-size:10px}
+.shot-card.ready{border-color:rgba(109,206,159,.35)}.shot-card.generating{border-color:rgba(230,185,94,.5)}.shot-card.failed{border-color:rgba(255,100,100,.4)}
+.final-wrap{padding-top:15px}.final-wrap video{width:100%;max-height:560px;background:#000;border-radius:16px}.final-actions{display:flex;gap:10px;margin-top:12px}.final-actions a,.final-actions button{flex:1;text-align:center;padding:13px;border-radius:13px;border:1px solid rgba(255,255,255,.12);background:#111722;color:#f7f7f8;text-decoration:none;cursor:pointer}.final-actions a.primary{background:#e6b95e;color:#111;border-color:#e6b95e;font-weight:800}
+.engine-hidden{display:none!important}
+@media(max-width:600px){.pipeline-shell{padding:12px 12px 36px}.pipeline-hero{padding-top:30px}.pipeline-input{padding:13px}.pipeline-input textarea{min-height:135px}.pipeline-lock{display:none}}
+</style>
 </head>
 <body>
-<div id="obitrendStartup" class="pm-startup" aria-label="OBITREND starting">
-  <div class="pm-startup-inner">
-    <div class="pm-startup-logo">♛</div>
-    <div class="pm-startup-name">OBITREND</div>
-    <div class="pm-startup-sub">AI MOVIE CREATOR</div>
-    <div class="pm-loader"><i></i></div>
-  </div>
-</div>
-
-<div id="drawerOverlay" class="drawer-overlay" aria-hidden="true"></div>
-<aside id="androidDrawer" class="android-drawer" aria-label="OBITREND navigation" aria-hidden="true">
-  <div class="android-drawer-head">
-    <b>OBITREND</b>
-    <button type="button" id="androidDrawerClose" aria-label="Close menu">×</button>
-  </div>
-  <nav class="android-drawer-nav">
-    <button class="nav-item" type="button" data-nav="home"><span class="drawer-icon"><i data-lucide="house"></i></span><span>Home</span></button>
-    <button class="nav-item" type="button" data-nav="create"><span class="drawer-icon"><i data-lucide="film"></i></span><span>Create Movie</span></button>
-    <button class="nav-item" type="button" data-nav="my-movies"><span class="drawer-icon"><i data-lucide="clapperboard"></i></span><span>My Movies</span></button>
-    <button class="nav-item" type="button" data-nav="pro"><span class="drawer-icon"><i data-lucide="crown"></i></span><span>Pro Plans</span></button>
-    <button class="nav-item" type="button" data-nav="settings"><span class="drawer-icon"><i data-lucide="settings"></i></span><span>Settings</span></button>
-  </nav>
-</aside>
-<section id="menuWorkspace" class="menu-workspace nav-workspace hidden" aria-hidden="true" data-page="workspace">
-  <div class="menu-workspace-head">
-    <div>
-      <h2 id="menuWorkspaceTitle">OBITREND</h2>
-      <p id="menuWorkspaceSubtitle"></p>
-    </div>
-    <div class="menu-workspace-actions">
-      <button id="menuWorkspaceBack" type="button" aria-label="Back to menu">←</button>
-    </div>
-  </div>
-  <div id="menuWorkspaceBody" class="menu-workspace-body"></div>
-</section>
-
-<main class="pm-dashboard" id="promptDashboard" data-page="home">
-  <header class="pm-topbar">
-    <button class="pm-menu" id="pmMenuBtn" type="button" aria-label="Open menu"><i data-lucide="menu"></i></button>
-    <div class="pm-brand"><span class="pm-crown">♛</span><div><b>OBITREND</b><span>AI MOVIE CREATOR</span></div></div>
-    <div class="pm-top-actions">
-      <button class="pm-credit pm-nav-btn" id="pmCreatorBtn" type="button">AI CREATOR</button>
-      <button class="pm-avatar pm-nav-btn" id="pmProfileBtn" type="button" aria-label="Profile">P</button>
-    </div>
+<main class="pipeline-shell" id="moviePipeline">
+  <header class="pipeline-top">
+    <div class="pipeline-brand"><div class="pipeline-brand-mark">♛</div><div><b>OBITREND</b><span>AI MOVIE CREATOR</span></div></div>
+    <div class="pipeline-lock">PREVIEW · FLIXLY</div>
   </header>
 
-  <section class="pm-hero">
-    <div>
-      <div class="pm-kicker">One prompt. Complete movie direction.</div>
-      <h1>Bring your story to life with <em>AI.</em></h1>
-      <p>Write what you want to see. OBITREND automatically turns your idea into the story, characters, scenes, cinematic camera direction, lighting, sound and visual continuity.</p>
-    </div>
-    <div class="pm-cinema">
-      <div class="pm-cinema-grid"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-      <button class="pm-cinema-lens pm-engine-action" id="pmEngineCamera" type="button" aria-label="Start with a movie prompt"><i data-lucide="camera"></i><span></span></button>
-      <button class="pm-floating-icon pm-fi-one pm-engine-action" id="pmEngineFilm" type="button" aria-label="Generate a movie"><i data-lucide="film"></i></button>
-      <button class="pm-floating-icon pm-fi-two pm-engine-action" id="pmEngineClapper" type="button" aria-label="Open recent movies"><i data-lucide="clapperboard"></i></button>
-      <button class="pm-floating-icon pm-fi-three pm-engine-action" id="pmEngineVideo" type="button" aria-label="Generate video shots"><i data-lucide="video"></i></button>
-      <div class="pm-cinema-copy"><strong>OBITREND CINEMATIC ENGINE</strong><span>Story · Cast · Scenes · Camera · Lighting · Sound · Continuity</span></div>
-    </div>
+  <section class="pipeline-hero">
+    <div class="pipeline-kicker">One prompt → one continuous movie</div>
+    <h1>Your story.<br><em>One complete movie.</em></h1>
+    <p>OBITREND plans the cast and shots, chains every shot from the previous final video, then creates one final MP4.</p>
   </section>
 
-  <section class="pm-composer" aria-labelledby="promptTitle">
-    <div class="pm-composer-head">
-      <div><h2 id="promptTitle">What movie do you want to make?</h2><p>No forms. No complicated settings. Just describe your movie.</p></div>
-      <div class="pm-auto">✦ EVERYTHING AUTOMATIC</div>
+  <section class="pipeline-input">
+    <textarea id="pipelinePrompt" maxlength="8000" placeholder="Describe your movie..."></textarea>
+    <div class="pipeline-controls" aria-label="Movie duration">
+      <button class="duration-btn" data-seconds="30" type="button">30s · 1 credit</button>
+      <button class="duration-btn active" data-seconds="60" type="button">1 min · 2 credits</button>
+      <button class="duration-btn" data-seconds="120" type="button">2 min · 4 credits</button>
+      <button class="duration-btn" data-seconds="180" type="button">3 min · 6 credits</button>
+      <button class="duration-btn" data-seconds="240" type="button">4 min · 8 credits</button>
     </div>
-    <div class="pm-prompt-wrap">
-      <textarea id="pmPrompt" class="pm-prompt" maxlength="8000" placeholder="Example: A young man returns to Lagos after many years and discovers that his family business is in danger. Make it emotional, cinematic and realistic..."></textarea>
-    </div>
-    <div class="pm-composer-foot">
-      <button id="pmGenerate" class="pm-generate" type="button"><i data-lucide="sparkles"></i> Generate My Movie</button>
-      <span class="pm-shortcut">Ctrl / ⌘ + Enter</span>
-    </div>
-    <div id="pmStatus" class="pm-status" aria-live="polite"></div>
-    <div class="pm-examples" aria-label="Example prompts">
-      <button class="pm-example" type="button" data-prompt="A powerful African family drama about a young woman returning home to save her father's struggling hotel business. Cinematic realism, emotional and inspiring.">African family drama</button>
-      <button class="pm-example" type="button" data-prompt="A thrilling Lagos crime story about an honest detective who discovers a conspiracy inside the city. Dark, realistic and cinematic.">Lagos crime thriller</button>
-      <button class="pm-example" type="button" data-prompt="A beautiful romantic story between two strangers who meet during a rainy evening in Abuja and slowly fall in love. Warm cinematic realism.">Romantic story</button>
-    </div>
+    <button id="pipelineGenerate" class="pipeline-generate" type="button">Create Complete Movie</button>
+    <div id="pipelineStatus" class="pipeline-status"></div>
   </section>
 
-  <section class="pm-movie-cards" aria-label="Movie creation cards">
-    <button class="pm-movie-card pm-card-text" type="button" data-movie-card="text">
-      <span class="pm-card-icon"><i data-lucide="clapperboard"></i></span>
-      <span class="pm-card-copy"><b>Text-to-Movie</b><small>User types story → AI makes movie</small><em>Example: “Nollywood love story in Lagos traffic”</em></span>
-    </button>
-    <button class="pm-movie-card pm-card-image" type="button" data-movie-card="image">
-      <span class="pm-card-icon"><i data-lucide="image-up"></i></span>
-      <span class="pm-card-copy"><b>Image-to-Movie</b><small>Upload 1 photo → animate it into a scene</small><em>Perfect for fashion: upload clothing → model wearing it walking</em></span>
-    </button>
-    <div class="pm-movie-card pm-card-group">
-      <div class="pm-card-heading"><span class="pm-card-icon"><i data-lucide="sparkles"></i></span><b>Genre Quick Cards</b><small>Tap a genre → prompt auto-fills</small></div>
-      <div class="pm-choice-row" data-choice-group="genre">
-        <button type="button" data-choice="Action">💥 Action</button>
-        <button type="button" data-choice="Love">❤️ Love</button>
-        <button type="button" data-choice="Horror">👻 Horror</button>
-        <button type="button" data-choice="Nollywood Drama">🎭 Nollywood Drama</button>
-        <button type="button" data-choice="Comedy">😂 Comedy</button>
-        <button type="button" data-choice="Sci-Fi">🚀 Sci-Fi</button>
-      </div>
-    </div>
-    <div class="pm-movie-card pm-card-group">
-      <div class="pm-card-heading"><span class="pm-card-icon"><i data-lucide="palette"></i></span><b>Style Cards</b><small>Choose a visual style with a preview</small></div>
-      <div class="pm-style-grid" data-choice-group="style">
-        <button type="button" data-choice="Realistic Cinematic"><span class="pm-style-thumb pm-style-realistic"></span><b>Realistic Cinematic</b></button>
-        <button type="button" data-choice="Anime"><span class="pm-style-thumb pm-style-anime"></span><b>Anime</b></button>
-        <button type="button" data-choice="3D Pixar"><span class="pm-style-thumb pm-style-pixar"></span><b>3D Pixar</b></button>
-        <button type="button" data-choice="Vintage Nollywood"><span class="pm-style-thumb pm-style-vintage"></span><b>Vintage Nollywood</b></button>
-        <button type="button" data-choice="Dubai Luxury"><span class="pm-style-thumb pm-style-dubai"></span><b>Dubai Luxury</b></button>
-      </div>
-    </div>
-    <div class="pm-movie-card pm-card-group">
-      <div class="pm-card-heading"><span class="pm-card-icon"><i data-lucide="timer"></i></span><b>Duration / Format Cards</b><small>Choose the movie format before generating</small></div>
-      <div class="pm-duration-grid" data-choice-group="duration">
-        <button type="button" data-duration="15">Short 15s<span>TikTok / Reels</span></button>
-        <button type="button" data-duration="60">Trailer 60s<span>Cinematic trailer</span></button>
-        <button type="button" data-duration="180">Full Movie 3min<span>Long-form movie</span></button>
-        <button type="button" data-duration="storyboard">Storyboard<span>4 scenes</span></button>
-      </div>
-    </div>
-  </section>
-  <input id="pmImageInput" type="file" accept="image/*" hidden>
-
-  <section class="pm-recent" data-page="my-movies">
-    <div class="pm-section-title"><h2>Recent Movies</h2><span>Your latest creations</span></div>
-    <div class="pm-projects" id="pmProjects"><div class="pm-empty">No movies yet</div></div>
-  </section>
-
-  <section id="pmResult" class="pm-engine" aria-hidden="true">
-    <h2 id="pmResultTitle">Your movie</h2>
+  <section class="pipeline-flow" aria-label="Movie production pipeline">
+    <article class="stage" id="stagePlanner"><div class="stage-head"><div class="stage-num">1</div><div class="stage-title"><b>AI STORY PLANNER</b><span>Turn your prompt into the complete movie blueprint</span></div><div class="stage-state">Waiting</div></div><div class="stage-body"><div id="plannerSummary"></div></div></article>
+    <article class="stage" id="stageCast"><div class="stage-head"><div class="stage-num">2</div><div class="stage-title"><b>CAST</b><span>Lock every character for the whole movie</span></div><div class="stage-state">Waiting</div></div><div class="stage-body"><div id="castGrid" class="cast-grid"></div></div></article>
+    <article class="stage" id="stageShots"><div class="stage-head"><div class="stage-num">3</div><div class="stage-title"><b>SHOT PLAN</b><span>One continuation-aware production segment per shot</span></div><div class="stage-state">Waiting</div></div><div class="stage-body"><div id="shotGrid" class="shot-grid"></div></div></article>
+    <article class="stage" id="stageVideo"><div class="stage-head"><div class="stage-num">4</div><div class="stage-title"><b>VIDEO GENERATION</b><span>Shot 1 starts the world · every next shot continues from the previous video</span></div><div class="stage-state">Waiting</div></div><div class="stage-body"><div id="videoGrid" class="shot-grid"></div></div></article>
+    <article class="stage" id="stageFinal"><div class="stage-head"><div class="stage-num">5</div><div class="stage-title"><b>FINAL CUT</b><span>Join the completed shots into one movie MP4</span></div><div class="stage-state">Waiting</div></div><div class="stage-body"><div id="finalCut" class="final-wrap"><div id="finalMessage" class="pipeline-status">Waiting for completed shots.</div></div></div></article>
   </section>
 </main>
 
-<!-- Existing movie engine kept hidden so the new dashboard uses the same working backend workflow. -->
-<section class="pm-engine" aria-hidden="true">
-  <section id="createPanel" class="content-card create-panel" data-page="create">
-    <textarea id="moviePrompt"></textarea>
-    <select id="length">
-      <option value="0.5" selected>30 seconds · 1 credit</option>
-      <option value="1">1 minute · 2 credits</option>
-      <option value="2">2 minutes · 4 credits</option>
-      <option value="4">4 minutes · 8 credits</option>
-      <option value="5">5 minutes · 10 credits</option>
-      <option value="10">10 minutes · 20 credits</option>
-    </select>
-    <select id="genre"><option>Drama</option><option>Action</option><option>Comedy</option><option>Romance</option><option>Thriller</option><option>Sci-Fi</option><option>Fantasy</option></select>
-    <select id="visualStyle"><option>Cinematic realism</option><option>Luxury fashion film</option><option>Dark thriller</option><option>Warm romantic cinema</option><option>Epic blockbuster</option></select>
-    <select id="ratio"><option value="16:9" selected>16:9</option><option value="9:16">9:16</option><option value="1:1">1:1</option></select>
-    <button id="buildBtn" type="button">Build Movie Blueprint</button>
-    <div id="status" class="status"></div>
-  </section>
-  <div id="legacyMovieDashboard">
-    <div id="blueprintSection"><h2 id="movieTitle">Your Movie</h2><p id="movieLogline"></p><div id="movieMeta"></div></div>
-    <div id="characters"></div><span id="characterCount"></span>
-    <div id="scenes"></div><span id="sceneCount"></span>
-    <div id="movieAssembly"><div id="assemblyProgress">0%</div><div id="assemblyProgressBar"></div><div id="assemblyQueue"></div><button id="generateNextShotBtn" type="button">Next</button><button id="generateFullMovieBtn" type="button">Full</button><div id="assemblyStatus"></div></div>
-  </div>
-  <section id="shotStudio" class="shot-studio"><h2 id="shotTitle"></h2><p id="shotDescription"></p><div id="shotDetails"></div><div id="videoPlaceholder"></div><video id="shotVideo"></video><button id="generateShotBtn" type="button">Generate</button><div id="shotStatus"></div></section>
+<!-- The existing production engine remains hidden and untouched. It supplies auth, credit reservation,
+     blueprint planning, Flixly/Kling routing, polling, production persistence and shot generation. -->
+<section class="engine-hidden" aria-hidden="true">
+  <section id="createPanel"><textarea id="moviePrompt"></textarea><select id="length"><option value="0.5">30 seconds</option><option value="1">1 minute</option><option value="2">2 minutes</option><option value="3">3 minutes</option><option value="4">4 minutes</option></select><select id="genre"><option>Drama</option><option>Action</option><option>Comedy</option><option>Romance</option><option>Thriller</option><option>Sci-Fi</option><option>Fantasy</option></select><select id="visualStyle"><option>Cinematic realism</option><option>Luxury fashion film</option><option>Dark thriller</option><option>Warm romantic cinema</option><option>Epic blockbuster</option></select><select id="ratio"><option value="16:9">16:9</option><option value="9:16">9:16</option><option value="1:1">1:1</option></select><button id="buildBtn" type="button">Build</button><div id="status"></div></section>
+  <div id="legacyMovieDashboard"><div id="blueprintSection"><h2 id="movieTitle"></h2><p id="movieLogline"></p><div id="movieMeta"></div></div><div id="characters"></div><span id="characterCount"></span><div id="scenes"></div><span id="sceneCount"></span><div id="movieAssembly"><div id="assemblyProgress">0%</div><div id="assemblyProgressBar"></div><div id="assemblyQueue"></div><button id="generateNextShotBtn" type="button">Next</button><button id="generateFullMovieBtn" type="button">Full</button><div id="assemblyStatus"></div></div></div>
+  <section id="shotStudio"><h2 id="shotTitle"></h2><p id="shotDescription"></p><div id="shotDetails"></div><div id="videoPlaceholder"></div><video id="shotVideo"></video><button id="generateShotBtn" type="button">Generate</button><div id="shotStatus"></div></section>
 </section>
 
-<script src="https://unpkg.com/lucide@latest"></script>
-<script type="module" src="/movie-auth.js?v=20261004-4"></script>
-<script src="/app.js?v=20261005-7"></script>
+<script type="module">
+import { FFmpeg } from "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.15/dist/esm/index.js";
+import { fetchFile, toBlobURL } from "https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.2/dist/esm/index.js";
+
+const $=id=>document.getElementById(id);
+let selectedSeconds=60;
+let blueprint=null;
+let finalObjectUrl="";
+const stageIds=["stagePlanner","stageCast","stageShots","stageVideo","stageFinal"];
+function setStage(index,state,message){
+  stageIds.forEach((id,i)=>{
+    const el=$(id); if(!el)return;
+    el.classList.toggle("active",i===index&&state!=="done");
+    el.classList.toggle("done",i<index||state==="done"&&i===index);
+    const st=el.querySelector(".stage-state");
+    if(st)st.textContent=i<index?"Complete":i===index?(message||state||"Working"):"Waiting";
+  });
+}
+function setStatus(msg,error=false){$("pipelineStatus").textContent=msg||"";$("pipelineStatus").className="pipeline-status"+(error?" error":"")}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function renderBlueprint(b){
+  blueprint=b;
+  $("plannerSummary").innerHTML="<div class='cast-card'><b>"+esc(b.title||"Untitled Movie")+"</b><small>"+esc(b.logline||"")+"</small><span class='ref-pill'>"+esc((b.genre||"Cinematic"))+" · "+((b.scenes||[]).length)+" scenes</span></div>";
+  $("castGrid").innerHTML=(b.characters||[]).map((c,i)=>"<div class='cast-card'><b>Character "+(i+1)+": "+esc(c.name||"Character")+"</b><small>"+esc(c.role||"")+"<br>"+esc(c.appearance||"")+"<br>Wardrobe: "+esc(c.wardrobe||"")+"</small><span class='ref-pill'>Character reference "+(i+1)+" · locked</span></div>").join("");
+  const shots=(b.scenes||[]).flatMap((s,si)=>(s.shots||[]).map((sh,hi)=>({s,sh,si,hi})));
+  $("shotGrid").innerHTML=shots.map((x,i)=>"<div class='shot-card' id='planShot"+i+"'><b>Shot "+(i+1)+" · Scene "+(x.si+1)+"</b><small>"+esc(x.s.heading||"")+"<br>"+esc(x.sh.framing||"")+" · "+esc(x.sh.movement||"")+" · "+esc(x.sh.continuity||"")+"</small><span class='shot-pill'>30-second production segment</span></div>").join("");
+  $("videoGrid").innerHTML=shots.map((x,i)=>"<div class='shot-card' id='videoShot"+i+"'><b>Shot "+(i+1)+"</b><small id='videoShotText"+i+"'>Waiting</small><span class='shot-pill'>"+(i===0?"Character references":"Previous shot final video + character references")+"</span></div>").join("");
+}
+async function waitForEngine(){
+  const start=Date.now();
+  while(Date.now()-start<15000){
+    if(typeof window.refreshMovieEntitlement==="function"&&typeof window.getMovieCredits==="function"&&typeof window.runAssembly!=="undefined"&&$("buildBtn")&&$("generateFullMovieBtn"))return true;
+    await sleep(100);
+  }
+  return typeof window.refreshMovieEntitlement==="function"&&$("buildBtn");
+}
+async function waitForBlueprint(){
+  for(let i=0;i<300;i++){
+    const txt=($("status")?.textContent||"").trim();
+    if(/^Blueprint ready\.?$/i.test(txt)||localStorage.getItem("obitrend_movie_blueprint")){
+      try{const b=JSON.parse(localStorage.getItem("obitrend_movie_blueprint")||"null");if(b?.scenes?.length)return b}catch{}
+    }
+    if(/failed|error|unavailable/i.test(txt))throw new Error(txt);
+    await sleep(300);
+  }
+  throw new Error("The AI story planner timed out. Please try again.");
+}
+function expectedShots(){return (blueprint?.scenes||[]).reduce((n,s)=>n+(s.shots||[]).length,0)}
+function getAssemblyUrls(){try{const x=JSON.parse(localStorage.getItem("obitrend_movie_assembly")||"{}");return expectedShots()?[...Array(expectedShots())].map((_,i)=>x[String(i>=0?((blueprint.scenes||[]).flatMap((s,si)=>(s.shots||[]).map((sh,hi)=>si+"-"+hi)))[i])]]||null):[]:[]}catch{return []}}
+async function waitForAssembly(){
+  const total=expectedShots();
+  for(let tick=0;tick<720;tick++){
+    const urls=getAssemblyUrls();
+    urls.forEach((url,i)=>{if(url){$("videoShot"+i)?.classList.add("ready");$("videoShotText"+i).textContent="Ready";}});
+    const done=urls.filter(Boolean).length;
+    for(let i=0;i<total;i++)if(!urls[i])$("videoShotText"+i).textContent=i===done?"Generating…":"Waiting";
+    setStage(3,done===total?"done":"active",done+"/"+total+" shots");
+    const source=($("assemblyStatus")?.textContent||"").trim();
+    if(source)setStatus(source);
+    if(done>=total)return urls;
+    if(/credit|failed|restored|could not|stopped/i.test(source)&&done<total)throw new Error(source);
+    await sleep(2000);
+  }
+  throw new Error("Video generation is taking too long. Completed shots are saved and can be resumed.");
+}
+async function loadFFmpeg(){
+  const ffmpeg=new FFmpeg();
+  const base="https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.15/dist/esm";
+  await ffmpeg.load({coreURL:await toBlobURL(base+"/ffmpeg-core.js","text/javascript"),wasmURL:await toBlobURL(base+"/ffmpeg-core.wasm","application/wasm")});
+  return ffmpeg;
+}
+async function makeFinalCut(urls){
+  setStage(4,"active","Building one MP4");
+  $("finalMessage").textContent="Loading the browser video editor…";
+  const ffmpeg=await loadFFmpeg();
+  for(let i=0;i<urls.length;i++){
+    $("finalMessage").textContent="Preparing final cut · downloading shot "+(i+1)+" of "+urls.length+"…";
+    const data=await fetchFile(urls[i]);
+    await ffmpeg.writeFile("shot"+i+".mp4",data);
+  }
+  const list=urls.map((_,i)=>"file 'shot"+i+".mp4'").join("\n");
+  await ffmpeg.writeFile("list.txt",list);
+  $("finalMessage").textContent="Joining all shots into one MP4…";
+  try{
+    await ffmpeg.exec(["-f","concat","-safe","0","-i","list.txt","-c","copy","-movflags","+faststart","movie.mp4"]);
+  }catch{
+    await ffmpeg.exec(["-f","concat","-safe","0","-i","list.txt","-c:v","libx264","-preset","ultrafast","-c:a","aac","-movflags","+faststart","movie.mp4"]);
+  }
+  const data=await ffmpeg.readFile("movie.mp4");
+  const blob=new Blob([data.buffer],{type:"video/mp4"});
+  if(finalObjectUrl)URL.revokeObjectURL(finalObjectUrl);
+  finalObjectUrl=URL.createObjectURL(blob);
+  $("finalCut").innerHTML="<video controls playsinline src='"+finalObjectUrl+"'></video><div class='final-actions'><a class='primary' id='downloadFinal' href='"+finalObjectUrl+"' download='obitrend-movie.mp4'>Download One Movie MP4</a><button id='restartMovie' type='button'>Create Another Movie</button></div>";
+  $("restartMovie").onclick=()=>location.reload();
+  setStage(4,"done","One movie MP4 ready");
+  setStatus("Complete — your chained shots are now one movie MP4.");
+}
+async function start(){
+  const prompt=$("pipelinePrompt").value.trim();
+  if(!prompt){setStatus("Describe your movie first.",true);$("pipelinePrompt").focus();return}
+  const needed=Math.max(1,selectedSeconds/30);
+  $("pipelineGenerate").disabled=true;
+  try{
+    setStatus("Starting your complete movie pipeline…");
+    await waitForEngine();
+    await window.refreshMovieEntitlement();
+    if(window.getMovieCredits()<needed)throw new Error("You need "+needed+" movie credits for this "+selectedSeconds+"-second movie.");
+    localStorage.removeItem("obitrend_movie_assembly");
+    $("moviePrompt").value=prompt;
+    $("length").value=String(selectedSeconds/60);
+    $("genre").value="Drama";$("visualStyle").value="Cinematic realism";$("ratio").value="16:9";
+    setStage(0,"active","Planning");
+    $("buildBtn").click();
+    const b=await waitForBlueprint();
+    renderBlueprint(b);
+    setStage(0,"done","Blueprint ready");
+    setStage(1,"active","Cast locked");
+    setStage(1,"done","Cast locked");
+    setStage(2,"done","Shot plan ready");
+    setStage(3,"active","Starting shots");
+    setStatus("Cast locked. Starting Shot 1, then each shot will continue from the previous final video.");
+    $("generateFullMovieBtn").click();
+    const urls=await waitForAssembly();
+    setStatus("All shots generated. Creating the final cut…");
+    await makeFinalCut(urls);
+  }catch(e){
+    setStatus(e?.message||"Movie creation failed.",true);
+    const source=($("assemblyStatus")?.textContent||"").trim();
+    if(source)setStatus(source,true);
+  }finally{$("pipelineGenerate").disabled=false}
+}
+document.querySelectorAll(".duration-btn").forEach(btn=>btn.addEventListener("click",()=>{selectedSeconds=Number(btn.dataset.seconds)||60;document.querySelectorAll(".duration-btn").forEach(x=>x.classList.toggle("active",x===btn));}));
+$("pipelineGenerate").addEventListener("click",start);
+setStage(0,"idle","Waiting");
+</script>
+
+<script src="/app.js?v=20261005-8"></script>
 <script src="/mobile-pro-fix.js?v=20260927-1"></script>
-<script src="/dashboard-enhancements.js"></script>
-<script src="/prompt-movie-dashboard.js?v=20261005-3"></script>
 </body>
 </html>
