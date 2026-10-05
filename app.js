@@ -300,9 +300,9 @@ function renderBlueprint(b){
 }
 function openShot(si,hi){state.sceneIndex=si;state.shotIndex=hi;const s=state.blueprint.scenes[si],sh=s.shots[hi];$("shotStudio").classList.remove("hidden");$("shotTitle").textContent="Scene "+(si+1)+" · Shot "+(hi+1);$("shotDescription").textContent=s.heading||"";$("shotDetails").innerHTML=[["Camera",sh.camera],["Lens",sh.lens],["Framing",sh.framing],["Angle",sh.angle],["Movement",sh.movement],["Focus",sh.focus],["Lighting",sh.lighting],["Sound",sh.sound],["Continuity",sh.continuity]].filter(x=>x[1]).map(x=>"<div class=\"detail\"><b>"+esc(x[0])+"</b><span>"+esc(x[1])+"</span></div>").join("");$("shotVideo").classList.add("hidden");$("shotVideo").removeAttribute("src");$("videoPlaceholder").classList.remove("hidden");status("shotStatus","");$("shotStudio").scrollIntoView({behavior:"smooth",block:"start"})}
 $("generateShotBtn")?.addEventListener("click",generateShot);$("closeStudio")?.addEventListener("click",()=>{$("shotStudio")?.classList.add("hidden")});const legacyMenuBtn=$("menuBtn");if(legacyMenuBtn){legacyMenuBtn.onclick=()=>{const sidebar=$("sidebar");if(!sidebar)return;const opening=!sidebar.classList.contains("open");if(opening){sidebar.classList.add("open");$("menuWorkspace")?.classList.add("hidden");document.querySelectorAll(".nav-dropdown.open").forEach(x=>x.classList.remove("open"));document.querySelectorAll(".nav-chevron.open").forEach(x=>x.classList.remove("open"));legacyMenuBtn.setAttribute("aria-expanded","true")}else{sidebar.classList.remove("open");$("menuWorkspace")?.classList.add("hidden");document.querySelectorAll(".nav-dropdown.open").forEach(x=>x.classList.remove("open"));document.querySelectorAll(".nav-chevron.open").forEach(x=>x.classList.remove("open"));legacyMenuBtn.setAttribute("aria-expanded","false")}}}
-async function generateShot(segmentDuration=30,imageDataUri=""){
-  const requestedDuration=Number(window.__obitrendMovieDuration)||Number(segmentDuration)||30;
-  segmentDuration=Math.max(2,Math.min(30,Math.round(requestedDuration)));
+async function generateShot(segmentDuration=15,imageDataUri=""){
+  const requestedDuration=Number(window.__obitrendMovieDuration)||Number(segmentDuration)||15;
+  segmentDuration=Math.max(3,Math.min(15,Math.round(requestedDuration)));
   if(!state.blueprint)return;
   const b=$("generateShotBtn");b.disabled=true;
   let reservation=null;
@@ -312,7 +312,7 @@ async function generateShot(segmentDuration=30,imageDataUri=""){
     reservation=await reserveMovieCredit();
     const token=await window.getMovieAccessToken();
     status("shotStatus","Sending shot to the video generator…");
-    const r=await fetch("/api/generate-shot",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token,"x-movie-reservation":reservation},body:JSON.stringify({blueprint:state.blueprint,sceneIndex:state.sceneIndex,shotIndex:state.shotIndex,ratio:$("ratio").value,duration:Number(segmentDuration)||30,imageDataUri:String(imageDataUri||""),reservationToken:reservation})});
+    const r=await fetch("/api/generate-shot",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token,"x-movie-reservation":reservation},body:JSON.stringify({blueprint:state.blueprint,sceneIndex:state.sceneIndex,shotIndex:state.shotIndex,ratio:$("ratio").value,duration:Number(segmentDuration)||15,imageDataUri:String(imageDataUri||""),reservationToken:reservation})});
     const d=await r.json().catch(()=>({}));
     if(!r.ok){
       const e=new Error(d.error||"Shot generation failed.");
