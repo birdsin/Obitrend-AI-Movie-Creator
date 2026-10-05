@@ -4,7 +4,7 @@ function json(res,status,obj){res.status(status).setHeader("content-type","appli
 const KLING_BASE=(process.env.KLING_API_BASE_URL||"https://api-singapore.klingai.com").replace(/\/$/,"");
 const KLING_MODEL=process.env.KLING_MODEL_NAME||"kling-v3";
 const KLING_MAX_DURATION=Math.max(3,Math.min(30,Number(process.env.KLING_MAX_DURATION)||15));
-const MOVIE_VIDEO_PROVIDER=String(process.env.MOVIE_VIDEO_PROVIDER||"kling").trim().toLowerCase();
+const MOVIE_VIDEO_PROVIDER=String(process.env.MOVIE_VIDEO_PROVIDER||((process.env.VERCEL_GIT_COMMIT_REF==="flixly-movie-structure-preview")?"flixly":"kling")).trim().toLowerCase();
 const flixly=require("./flixly-provider");
 
 function klingRatio(r){
