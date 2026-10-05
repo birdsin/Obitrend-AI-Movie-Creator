@@ -35,7 +35,7 @@ async function request(path,options={}){
   });
 }
 
-async function generate({prompt,duration,ratio,sound=true}){
+async function generate({prompt,duration,ratio,sound=true,webhookUrl=""}){
   const seconds=Math.max(4,Math.min(MAX_DURATION,Math.round(Number(duration)||15)));
   const body={
     model:MODEL,
