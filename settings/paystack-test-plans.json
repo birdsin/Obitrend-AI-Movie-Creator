@@ -1,0 +1,55 @@
+{
+  "mode": "test",
+  "provider": "paystack",
+  "plans": {
+    "oneDay": {
+      "name": "1 Day Pro",
+      "amountNaira": 5000,
+      "credits": 1,
+      "durationDays": 1,
+      "interval": "daily",
+      "planCode": "PLN_8frh9cri2nink3x"
+    },
+    "twoDays": {
+      "name": "2 Day Pro",
+      "amountNaira": 10000,
+      "credits": 2,
+      "durationDays": 2,
+      "interval": "daily",
+      "planCode": "PLN_xk2rzytcm3arcmi"
+    },
+    "sixDays": {
+      "name": "6 Day Pro",
+      "amountNaira": 20000,
+      "credits": 4,
+      "durationDays": 6,
+      "interval": "daily",
+      "planCode": "PLN_96zgpr88tcgsu5ca"
+    },
+    "weekly": {
+      "name": "7 Day Pro",
+      "amountNaira": 40000,
+      "credits": 8,
+      "durationDays": 7,
+      "interval": "daily",
+      "planCode": "PLN_ahzsnckgnstryyа"
+    },
+    "fourteenDays": {
+      "name": "14 Day Pro",
+      "amountNaira": 50000,
+      "credits": 10,
+      "durationDays": 14,
+      "interval": "daily",
+      "planCode": "PLN_24d26hmmt8ob09n"
+    },
+    "monthly": {
+      "name": "1 Month Pro",
+      "amountNaira": 100000,
+      "credits": 20,
+      "durationDays": 30,
+      "interval": "monthly",
+      "planCode": "PLN_V62V77agmjqmpc8"
+    }
+  },
+  "_note": "Test-only reference mapping. Do not send planCode to transaction/initialize unless recurring subscriptions are intentionally enabled; Paystack plan codes create subscriptions."
+}
