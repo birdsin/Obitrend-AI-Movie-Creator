@@ -1046,3 +1046,9 @@ document.addEventListener("DOMContentLoaded",()=>{
   }
   document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeDrawer();closeWorkspace();}});
 })();
+
+// Public movie-client bridge for the prompt dashboard. Keep the existing workflow unchanged.
+window.refreshMovieEntitlement=refreshMovieEntitlement;
+window.reserveMovieCredit=reserveMovieCredit;
+window.finishMovieCredit=finishMovieCredit;
+window.generateShot=generateShot;
