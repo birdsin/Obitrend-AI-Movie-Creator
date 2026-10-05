@@ -201,6 +201,92 @@
 
   prompt?.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();generate?.click()}});
 
+  // New movie cards replace the old automatic feature cards.
+  document.querySelectorAll("[data-movie-card]").forEach(card=>{
+    card.addEventListener("click",()=>{
+      const type=card.dataset.movieCard;
+      if(type==="text"){
+        q(".pm-composer")?.scrollIntoView({behavior:"smooth",block:"center"});
+        window.setTimeout(()=>prompt?.focus(),250);
+        return;
+      }
+      if(type==="image"){
+        q("#pmImageInput")?.click();
+      }
+    });
+  });
+
+  q("#pmImageInput")?.addEventListener("change",()=>{
+    const file=q("#pmImageInput")?.files?.[0];
+    if(!file)return;
+    status.className="pm-status";
+    status.textContent="Image selected: "+file.name+". Add a movement or scene description above, then generate.";
+    q(".pm-composer")?.scrollIntoView({behavior:"smooth",block:"center"});
+    window.setTimeout(()=>prompt?.focus(),250);
+  });
+
+  document.querySelectorAll('[data-choice-group="genre"] button').forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const genre=btn.dataset.choice||"";
+      const presets={
+        "Action":"A high-energy action movie with cinematic stunts, realistic characters and intense pacing.",
+        "Love":"A beautiful romantic love story with emotional chemistry, cinematic realism and a memorable ending.",
+        "Horror":"A suspenseful horror movie with atmospheric locations, frightening discoveries and cinematic tension.",
+        "Nollywood Drama":"A powerful Nollywood drama with family conflict, emotional performances and realistic Nigerian locations.",
+        "Comedy":"A hilarious Nigerian comedy with funny misunderstandings, expressive characters and family-friendly humor.",
+        "Sci-Fi":"A cinematic science-fiction movie with futuristic technology, dramatic world-building and realistic visual effects."
+      };
+      if(prompt)prompt.value=presets[genre]||genre;
+      if(enginePrompt)enginePrompt.value=prompt?.value||"";
+      document.querySelectorAll('[data-choice-group="genre"] button').forEach(x=>x.classList.toggle("selected",x===btn));
+      q(".pm-prompt-wrap")?.classList.remove("pm-invalid");
+      q(".pm-composer")?.scrollIntoView({behavior:"smooth",block:"center"});
+    });
+  });
+
+  document.querySelectorAll('[data-choice-group="style"] button').forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const style=btn.dataset.choice||"";
+      const current=(prompt?.value||"").trim();
+      const cleaned=current.replace(/\s*(Visual style:|Style:)\s*[^.\n]*/ig,"").trim();
+      if(prompt)prompt.value=(cleaned?cleaned+" ":"")+"Visual style: "+style+".";
+      if(enginePrompt)enginePrompt.value=prompt?.value||"";
+      document.querySelectorAll('[data-choice-group="style"] button').forEach(x=>x.classList.toggle("selected",x===btn));
+      q(".pm-composer")?.scrollIntoView({behavior:"smooth",block:"center"});
+    });
+  });
+
+  document.querySelectorAll('[data-choice-group="duration"] button').forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const seconds=btn.dataset.duration||"";
+      document.querySelectorAll('[data-choice-group="duration"] button').forEach(x=>x.classList.toggle("selected",x===btn));
+      const length=q("#length");
+      if(seconds==="storyboard"){
+        if(length){
+          let option=[...length.options].find(o=>o.value==="2");
+          if(option)length.value=option.value;
+        }
+        status.textContent="Storyboard selected — OBITREND will use the 2-minute movie workflow and structure it as 4 scenes.";
+        return;
+      }
+      const mins=(Number(seconds)||30)/60;
+      if(length){
+        let option=[...length.options].find(o=>o.value===String(mins));
+        if(!option){
+          option=document.createElement("option");
+          option.value=String(mins);
+          option.textContent=seconds+" seconds";
+          option.dataset.cardDuration="true";
+          length.appendChild(option);
+        }
+        length.value=String(mins);
+      }
+      status.textContent=seconds+"-second format selected.";
+    });
+  });
+
+
+
   async function autoGenerateMovie(resumeProductionId=null,resumeProduction=null){
     let blueprint=null;
     try{blueprint=JSON.parse(localStorage.getItem("obitrend_movie_blueprint")||"null")}catch{}
