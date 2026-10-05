@@ -35,17 +35,8 @@
       });
     }catch{}
   }
-  function loadMovieModes(){
-    if(document.getElementById("obitrendMovieModesScript"))return;
-    const s=document.createElement("script");
-    s.id="obitrendMovieModesScript";
-    s.src="/movie-modes.js?v=20261005-1";
-    s.defer=true;
-    document.body.appendChild(s);
-  }
   function boot(){
     refreshProjects();
-    loadMovieModes();
     if(window.matchMedia("(display-mode: standalone)").matches)return;
     if(deferredPrompt)renderInstallCard();
   }
