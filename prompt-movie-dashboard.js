@@ -396,7 +396,7 @@
           if(i<targetCount-1 && window.getMovieCredits()<=0){
             await window.setMovieProductionStatus(productionId,"paused").catch(()=>{});
             status.className="pm-status";
-            status.textContent="Movie paused after "+((i+1)*15)+" seconds. Your credits are finished. Purchase more credits to continue from the next 30-second segment.";
+            status.textContent="Movie paused after "+((i+1)*15)+" seconds. Your credits are finished. Purchase more credits to continue from the next 15-second segment.";
             loadRecent();
             return;
           }
