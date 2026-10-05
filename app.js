@@ -99,6 +99,9 @@ async function refreshMovieEntitlement(){
   return movieServerEntitlement;
 }
 function getMovieCredits(){return Number(movieServerEntitlement?.credits||0)}
+// Expose the core entitlement bridge immediately after its definition.
+window.refreshMovieEntitlement=refreshMovieEntitlement;
+window.getMovieCredits=getMovieCredits;
 function setMovieCredits(){updateAndroidStats();return getMovieCredits()}
 async function reserveMovieCredit(){
   await window.movieAuthReady;
