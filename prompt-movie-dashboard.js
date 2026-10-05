@@ -134,8 +134,8 @@
     generate.disabled=true;
     composer?.classList.add("pm-loading");
     try{
-      await refreshMovieEntitlement();
-      const credits=getMovieCredits();
+      await window.refreshMovieEntitlement();
+      const credits=window.getMovieCredits();
       if(credits<=0){
         throw new Error("You have no movie credits. Choose a Pro plan to generate your movie.");
       }
@@ -206,9 +206,9 @@
     let production=resumeProduction||null;
 
     try{
-      await refreshMovieEntitlement();
+      await window.refreshMovieEntitlement();
 
-      const availableCredits=Math.max(0,Math.floor(getMovieCredits()));
+      const availableCredits=Math.max(0,Math.floor(window.getMovieCredits()));
       if(!productionId && availableCredits<=0){
         throw new Error("You have no movie credits. Choose a Pro plan to generate your movie.");
       }
@@ -218,10 +218,10 @@
         : Math.min(Math.max(1,availableCredits),20);
 
       if(!productionId){
-        productionId=await createMovieProduction(blueprint,requestedSegments);
-        production=await getMovieProduction(productionId);
+        productionId=await window.createMovieProduction(blueprint,requestedSegments);
+        production=await window.getMovieProduction(productionId);
       }else if(!production){
-        production=await getMovieProduction(productionId);
+        production=await window.getMovieProduction(productionId);
       }
 
       if(!production){
@@ -245,9 +245,9 @@
           continue;
         }
 
-        await refreshMovieEntitlement();
-        if(getMovieCredits()<=0){
-          await setMovieProductionStatus(productionId,"paused").catch(()=>{});
+        await window.refreshMovieEntitlement();
+        if(window.getMovieCredits()<=0){
+          await window.setMovieProductionStatus(productionId,"paused").catch(()=>{});
           status.className="pm-status";
           status.textContent="Movie paused — your movie credits are finished. Purchase more credits and OBITREND will continue this same movie from the next unfinished scene.";
           loadRecent();
@@ -266,9 +266,9 @@
             throw new Error("The cinematic generation engine is unavailable.");
           }
 
-          await setMovieProductionStatus(productionId,"generating").catch(()=>{});
+          await window.setMovieProductionStatus(productionId,"generating").catch(()=>{});
           window.openShot(item.si,item.hi);
-          await window.generateShot();
+          await window.window.generateShot();
 
           const shotStatus=(document.getElementById("shotStatus")?.textContent||"").trim();
           const video=document.getElementById("shotVideo");
@@ -284,17 +284,17 @@
           showGenerationCard("Enhancing",Math.max(55,Math.min(96,Math.round(((i+1)/Math.max(1,targetCount))*88))),"Enhancing segment "+(i+1)+" and preserving cinematic continuity…");
           try{localStorage.setItem("obitrend_auto_movie_videos",JSON.stringify(results))}catch(_){}
 
-          await refreshMovieEntitlement();
+          await window.refreshMovieEntitlement();
 
-          if(i<targetCount-1 && getMovieCredits()<=0){
-            await setMovieProductionStatus(productionId,"paused").catch(()=>{});
+          if(i<targetCount-1 && window.getMovieCredits()<=0){
+            await window.setMovieProductionStatus(productionId,"paused").catch(()=>{});
             status.className="pm-status";
             status.textContent="Movie paused after "+((i+1)*30)+" seconds. Your credits are finished. Purchase more credits to continue from the next 30-second segment.";
             loadRecent();
             return;
           }
         }catch(error){
-          await setMovieProductionStatus(productionId,"paused").catch(()=>{});
+          await window.setMovieProductionStatus(productionId,"paused").catch(()=>{});
           status.className="pm-status error";
           hideGenerationCard();
           status.textContent=error?.message||"Movie generation stopped. Your completed scenes are saved.";
@@ -303,12 +303,12 @@
       }
 
       showGenerationCard("Finalizing",98,"Finalizing your movie and saving the completed production…");
-      await setMovieProductionStatus(productionId,"completed").catch(()=>{});
-      await refreshMovieEntitlement();
+      await window.setMovieProductionStatus(productionId,"completed").catch(()=>{});
+      await window.refreshMovieEntitlement();
 
       if(results.length===targetCount && typeof saveHistory==="function"){
         try{
-          saveHistory(blueprint,results[0]?.url||"",null,results.map(v=>v.url));
+          window.saveHistory(blueprint,results[0]?.url||"",null,results.map(v=>v.url));
           loadRecent();
         }catch(_){}
       }
@@ -316,7 +316,7 @@
       try{localStorage.setItem("obitrend_auto_movie_videos",JSON.stringify(results))}catch(_){}
       localStorage.removeItem("obitrend_movie_active_production_id");
 
-      const remaining=getMovieCredits();
+      const remaining=window.getMovieCredits();
       status.className="pm-status";
       const completedSeconds=targetCount*30;
       const completedLabel=completedSeconds<60?completedSeconds+" seconds":(completedSeconds/60)+" minute"+(completedSeconds/60===1?"":"s");
@@ -336,7 +336,7 @@
   window.resumeMovieProduction=async function(productionId,production){
     if(!productionId)return false;
     try{
-      const saved=production||await getMovieProduction(productionId);
+      const saved=production||await window.getMovieProduction(productionId);
       if(!saved)return false;
       if(saved.status==="completed"||Number(saved.completed_segments)>=Number(saved.total_segments)){
         localStorage.removeItem("obitrend_movie_active_production_id");
