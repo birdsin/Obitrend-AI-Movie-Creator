@@ -101,6 +101,50 @@
     <div class="pm-auto-card"><div class="pm-feature-icon"><i data-lucide="layers"></i></div><div><b>CONTINUITY</b><span>AI keeps locations, characters and visual details consistent.</span></div></div>
   </section>
 
+  <section class="pm-movie-cards" aria-label="Movie creation cards">
+    <button class="pm-movie-card pm-card-text" type="button" data-movie-card="text">
+      <span class="pm-card-icon"><i data-lucide="clapperboard"></i></span>
+      <span class="pm-card-copy"><b>Text-to-Movie</b><small>User types story → AI makes movie</small><em>Example: “Nollywood love story in Lagos traffic”</em></span>
+    </button>
+    <button class="pm-movie-card pm-card-image" type="button" data-movie-card="image">
+      <span class="pm-card-icon"><i data-lucide="image-up"></i></span>
+      <span class="pm-card-copy"><b>Image-to-Movie</b><small>Upload 1 photo → animate it into a scene</small><em>Perfect for fashion: upload clothing → model wearing it walking</em></span>
+    </button>
+    <div class="pm-movie-card pm-card-group">
+      <div class="pm-card-heading"><span class="pm-card-icon"><i data-lucide="sparkles"></i></span><b>Genre Quick Cards</b><small>Tap a genre → prompt auto-fills</small></div>
+      <div class="pm-choice-row" data-choice-group="genre">
+        <button type="button" data-choice="Action">💥 Action</button>
+        <button type="button" data-choice="Love">❤️ Love</button>
+        <button type="button" data-choice="Horror">👻 Horror</button>
+        <button type="button" data-choice="Nollywood Drama">🎭 Nollywood Drama</button>
+        <button type="button" data-choice="Comedy">😂 Comedy</button>
+        <button type="button" data-choice="Sci-Fi">🚀 Sci-Fi</button>
+      </div>
+    </div>
+    <div class="pm-movie-card pm-card-group">
+      <div class="pm-card-heading"><span class="pm-card-icon"><i data-lucide="palette"></i></span><b>Style Cards</b><small>Choose a visual style with a preview</small></div>
+      <div class="pm-style-grid" data-choice-group="style">
+        <button type="button" data-choice="Realistic Cinematic"><span class="pm-style-thumb pm-style-realistic"></span><b>Realistic Cinematic</b></button>
+        <button type="button" data-choice="Anime"><span class="pm-style-thumb pm-style-anime"></span><b>Anime</b></button>
+        <button type="button" data-choice="3D Pixar"><span class="pm-style-thumb pm-style-pixar"></span><b>3D Pixar</b></button>
+        <button type="button" data-choice="Vintage Nollywood"><span class="pm-style-thumb pm-style-vintage"></span><b>Vintage Nollywood</b></button>
+        <button type="button" data-choice="Dubai Luxury"><span class="pm-style-thumb pm-style-dubai"></span><b>Dubai Luxury</b></button>
+      </div>
+    </div>
+    <div class="pm-movie-card pm-card-group">
+      <div class="pm-card-heading"><span class="pm-card-icon"><i data-lucide="timer"></i></span><b>Duration / Format Cards</b><small>Choose the movie format before generating</small></div>
+      <div class="pm-duration-grid" data-choice-group="duration">
+        <button type="button" data-duration="15">Short 15s<span>TikTok / Reels</span></button>
+        <button type="button" data-duration="60">Trailer 60s<span>Cinematic trailer</span></button>
+        <button type="button" data-duration="180">Full Movie 3min<span>Long-form movie</span></button>
+        <button type="button" data-duration="storyboard">Storyboard<span>4 scenes</span></button>
+      </div>
+    </div>
+  </section>
+  <input id="pmImageInput" type="file" accept="image/*" hidden>
+
+  <input id="pmImageInput" type="file" accept="image/*" hidden>
+
   <section class="pm-recent" data-page="my-movies">
     <div class="pm-section-title"><h2>Recent Movies</h2><span>Your latest creations</span></div>
     <div class="pm-projects" id="pmProjects"><div class="pm-empty">No movies yet</div></div>
