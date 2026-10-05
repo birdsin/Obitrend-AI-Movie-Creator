@@ -60,14 +60,36 @@ module.exports=async(req,res)=>{
   if(req.method==="GET"){
     const id=req.query&&req.query.taskId;
     if(!id)return json(res,400,{error:"taskId is required."});
+    const cancel=String(req.query&&req.query.cancel||"") === "1";
     try{
+      if(cancel){
+        // Cancel the provider task before releasing the OBITREND reservation.
+        const cr=await runwayRequest("/tasks/"+encodeURIComponent(id),{method:"DELETE",headers:{}});
+        if(!cr.ok&&cr.status!==404){
+          return json(res,502,{error:"The video provider could not cancel the stuck task. Your movie credit remains protected.",creditReleaseDeferred:true});
+        }
+        try{
+          await fetch(supabaseUrl+"/functions/v1/movie-credit",{
+            method:"POST",
+            headers:{
+              "content-type":"application/json",
+              "apikey":publishable,
+              "Authorization":auth
+            },
+            body:JSON.stringify({action:"release",token:String(reservation)})
+          });
+        }catch(_){}
+        return json(res,200,{status:"CANCELED",videoUrl:null,reservationReleased:true});
+      }
+
       const r=await runwayRequest("/tasks/"+encodeURIComponent(id),{method:"GET",headers:{}});
       const d=await r.json().catch(()=>({}));
       if(!r.ok)return json(res,502,{error:"Video status is temporarily unavailable. Please try again."});
       const output=d.output;
       const videoUrl=Array.isArray(output)?output[0]:output&&typeof output==="object"?(output.video_url||output.url):output||d.videoUrl||null;
+      const terminal=d.status==="FAILED"||d.status==="CANCELED"||d.status==="CANCELLED";
 
-      if(d.status==="FAILED"||d.status==="CANCELED"){
+      if(terminal){
         try{
           await fetch(supabaseUrl+"/functions/v1/movie-credit",{
             method:"POST",
@@ -81,7 +103,12 @@ module.exports=async(req,res)=>{
         }catch(_){}
       }
 
-      return json(res,200,{status:d.status,videoUrl,reservationReleased:(d.status==="FAILED"||d.status==="CANCELED")});
+      return json(res,200,{
+        status:d.status,
+        videoUrl,
+        failureCode:d.failureCode||null,
+        reservationReleased:terminal
+      });
     }catch(e){
       return json(res,500,{error:"Could not check video status. Please try again."});
     }
