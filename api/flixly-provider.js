@@ -22,6 +22,9 @@ function ratioValue(r){
 async function request(path,options={}){
   const key=String(process.env.FLIXLY_API_KEY||"").trim();
   if(!key)throw new Error("Flixly video generation is not configured yet. Add FLIXLY_API_KEY in the Preview environment.");
+  // Fail before fetch if the secret contains a Unicode character or is not a Flixly API key.
+  // This prevents the browser/Node ByteString header error and gives a clear setup message.
+  if(!/^flx_live_[A-Za-z0-9_-]+$/.test(key))throw new Error("FLIXLY_API_KEY is invalid for Flixly. It must start with flx_live_ and contain only ASCII letters, numbers, hyphens or underscores.");
   return fetch(BASE+path,{
     ...options,
     headers:{
