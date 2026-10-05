@@ -103,15 +103,50 @@ function setMovieCredits(){updateAndroidStats();return getMovieCredits()}
 async function reserveMovieCredit(){
   await window.movieAuthReady;
   const token=await window.getMovieAccessToken();
-  const r=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-credit",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({action:"reserve"})});
-  const d=await r.json().catch(()=>({}));
-  if(!r.ok)throw new Error(d.error||"No movie credits available. Please upgrade your Pro plan.");
-  movieServerEntitlement=movieServerEntitlement||{};
-  movieServerEntitlement.credits=Number(d.remaining_credits||0);
-  updateAndroidStats();
-  const reservationToken=String(d?.reservation_token||d?.reservationToken||d?.token||"").trim();
-  if(!reservationToken) throw new Error("Could not create a secure movie credit reservation. Please try again.");
-  return reservationToken;
+
+  // A reservation is temporary. Validate it immediately before handing it to
+  // the video endpoint so an expired/stale token can never reach generation.
+  // If validation fails, release/refund that reservation and create one fresh.
+  for(let attempt=0;attempt<2;attempt++){
+    const r=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-credit",{
+      method:"POST",
+      headers:{"content-type":"application/json","Authorization:"Bearer "+token},
+      body:JSON.stringify({action:"reserve"})
+    });
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(d.error||"No movie credits available. Please upgrade your Pro plan.");
+
+    movieServerEntitlement=movieServerEntitlement||{};
+    movieServerEntitlement.credits=Number(d.remaining_credits||0);
+    updateAndroidStats();
+
+    const reservationToken=String(d?.reservation_token||d?.reservationToken||d?.token||"").trim();
+    if(!reservationToken)throw new Error("Could not create a secure movie credit reservation. Please try again.");
+
+    const vr=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-credit",{
+      method:"POST",
+      headers:{"content-type":"application/json","Authorization:"Bearer "+token},
+      body:JSON.stringify({action:"validate",token:reservationToken})
+    });
+    const vd=await vr.json().catch(()=>({}));
+
+    if(vr.ok&&vd.valid===true)return reservationToken;
+
+    // The reservation was not usable. Release it if possible so the user's
+    // credit is never lost, then obtain one clean reservation.
+    try{
+      await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-credit",{
+        method:"POST",
+        headers:{"content-type":"application/json","Authorization:"Bearer "+token},
+        body:JSON.stringify({action:"release",token:reservationToken})
+      });
+    }catch(_){}
+
+    if(attempt===1){
+      throw new Error("Could not create a valid movie credit reservation. Please try again.");
+    }
+  }
+  throw new Error("Could not create a valid movie credit reservation. Please try again.");
 }
 async function movieProductionRequest(action,payload={}){
   await window.movieAuthReady;
