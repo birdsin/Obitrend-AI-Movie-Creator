@@ -164,7 +164,7 @@ module.exports=async(req,res)=>{
 
     const safePrompt=prompt.length>1000?prompt.slice(0,997)+"...":prompt;
     if(imageDataUri){
-      const validImage=/^data:image\\/(?:jpe?g|png|webp);base64,[A-Za-z0-9+/=]+$/i.test(imageDataUri);
+      const validImage=/^data:image\/(?:jpe?g|png|webp);base64,[A-Za-z0-9+/=]+$/i.test(imageDataUri);
       if(!validImage){
         try{await fetch(supabaseUrl+"/functions/v1/movie-credit",{method:"POST",headers:{"content-type":"application/json","apikey":publishable,"Authorization":auth},body:JSON.stringify({action:"release",token:String(reservation)})})}catch(_){}
         return json(res,400,{error:"The selected image is invalid. Please choose a JPG, PNG or WebP image and try again.",reservationReleased:true});
