@@ -682,3 +682,33 @@ document.addEventListener("DOMContentLoaded",()=>{
     menuBtn.addEventListener("click",()=>drawer.classList.toggle("open"));
   }
 });
+
+/* Premium navigation helpers — UI routing only; auth, credits, payments and generation are untouched. */
+function closeDrawer(){
+  try{
+    document.querySelector("#pmDrawer")?.classList.remove("open");
+    document.querySelector("#pmDrawer")?.setAttribute("aria-hidden","true");
+    document.querySelector("#sidebar")?.classList.remove("open");
+    if(typeof menuClose==="function")menuClose();
+  }catch(_){}
+}
+function navigateTo(page){
+  closeDrawer();
+  try{
+    const pages=document.querySelectorAll("[data-page]");
+    pages.forEach(p=>p.style.display="none");
+    const target=document.querySelector('[data-page="'+String(page).replace(/"/g,'&quot;')+'"]');
+    if(!target)throw new Error("Page not found");
+    target.style.display="block";
+  }catch(_){
+    try{
+      document.querySelectorAll("[data-page]").forEach(p=>p.style.display="none");
+      const home=document.querySelector('[data-page="home"]');
+      if(home)home.style.display="block";
+    }catch(__){}
+  }finally{
+    try{window.lucide?.createIcons?.()}catch(_){}
+  }
+}
+window.closeDrawer=closeDrawer;
+window.navigateTo=navigateTo;
