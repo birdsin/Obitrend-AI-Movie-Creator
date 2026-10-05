@@ -268,7 +268,7 @@
 
           await window.setMovieProductionStatus(productionId,"generating").catch(()=>{});
           window.openShot(item.si,item.hi);
-          await window.window.generateShot();
+          await window.generateShot();
 
           const shotStatus=(document.getElementById("shotStatus")?.textContent||"").trim();
           const video=document.getElementById("shotVideo");
