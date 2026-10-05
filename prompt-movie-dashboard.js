@@ -149,23 +149,7 @@
 
   function renderDemos(){
     if(!recent)return;
-    recent.innerHTML='<div class="pm-empty pm-demo-empty">No movies yet<br><button class="pm-player-cta" type="button" id="pmFirstMovieCta">Generate your first movie →</button></div><div class="pm-demo-grid">'+demoMovies.map((m,i)=>
-      '<button class="pm-project pm-demo" type="button" data-demo-index="'+i+'">'+
-        '<div class="pm-project-art pm-demo-art" style="background-image:url('+m.image+')">'+
-          '<span class="pm-genre">'+m.genre+'</span><span class="pm-badge">'+m.length+' min</span>'+
-          '<span class="pm-play"><i data-lucide="play"></i></span><span class="pm-demo-label">DEMO MOVIE</span>'+
-          '<span class="pm-poster-title">'+m.title+'</span>'+
-        '</div><div class="pm-demo-copy"><b>'+m.title+'</b><span>'+m.genre+' · Tap to use this story</span></div>'+
-      '</button>'
-    ).join("")+'</div>';
-    recent.querySelector("#pmFirstMovieCta")?.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
-    recent.querySelectorAll("[data-demo-index]").forEach(card=>card.addEventListener("click",()=>fillPrompt(demoMovies[Number(card.dataset.demoIndex)]?.prompt)));
-    recent.querySelectorAll(".pm-demo .pm-play").forEach(play=>play.addEventListener("click",e=>{
-      e.preventDefault();e.stopPropagation();
-      const card=play.closest(".pm-demo"), demo=demoMovies[Number(card?.dataset.demoIndex)];
-      openPlayerModal(demo,demo?.image,demo?.title);
-    }));
-    iconRefresh();
+    recent.innerHTML='<div class="movie-empty">No movies made yet.<br><span>Your generated movies will appear here.</span></div>';
   }
 
   function closePlayerModal(){
@@ -190,32 +174,31 @@
     backdrop.addEventListener("click",e=>{if(e.target===backdrop)closePlayerModal()});
     backdrop.querySelector(".pm-player-cta")?.addEventListener("click",()=>{closePlayerModal();fillPrompt(item?.prompt||item?.blueprint?.logline||title||"");});
   }
-  document.addEventListener("keydown",e=>{if(e.key==="Escape")closePlayerModal()});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape")closePlayerModal()});\n  window.openMoviePreview=openPlayerModal;
 
   function loadRecent(){
-    let history=[];try{history=JSON.parse(localStorage.getItem("obitrend_movie_history")||"[]")}catch{}
+    let history=[];
+    try{history=JSON.parse(localStorage.getItem("obitrend_movie_history")||"[]")}catch{}
     if(!Array.isArray(history)||!history.length){renderDemos();return}
-    recent.innerHTML=history.slice(0,3).map((x,i)=>{
+    recent.innerHTML=history.slice(0,6).map((x,i)=>{
       const b=x?.blueprint||{};
       const title=String(b.title||x.title||"Untitled Movie").replace(/[&<>]/g,"");
       const genre=String(b.genre||x.genre||"Cinematic").replace(/[&<>]/g,"");
       const length=String(b.length||x.length||15).replace(/[&<>]/g,"");
       const image=posterImages[i%posterImages.length];
-      return '<button class="pm-project" type="button" data-movie-index="'+i+'"><div class="pm-project-art" style="background-image:url('+image+')"><span class="pm-genre">'+genre+'</span><span class="pm-badge">'+length+' min</span><span class="pm-play"><i data-lucide="play"></i></span><span class="pm-poster-title">'+title+'</span></div><b>'+title+'</b><span>'+genre+' · '+length+' min</span></button>';
+      return '<button class="movie-thumb" type="button" data-movie-index="'+i+'" aria-label="Preview '+title+'">'+
+        '<span class="movie-thumb-media" style="background-image:url("'+image+'")">'+
+          '<span class="play" aria-hidden="true"><i data-lucide="play"></i></span>'+
+          '<span class="movie-pill">'+genre+' • '+length+'s</span>'+
+        '</span>'+
+        '<strong>'+title+'</strong>'+
+        '<small>Tap to preview</small>'+
+      '</button>';
     }).join("");
-    recent.querySelectorAll(".pm-project").forEach((card,i)=>card.addEventListener("click",()=>{
-      const item=history[i];
-      if(item?.blueprint){
-        try{localStorage.setItem("obitrend_movie_blueprint",JSON.stringify(item.blueprint));state.blueprint=item.blueprint}catch(_){}
-        fillPrompt(item.prompt||item.blueprint.logline||item.blueprint.title||"");
-        status.textContent="Movie loaded from your recent creations.";
-      }
-    }));
-    recent.querySelectorAll(".pm-play").forEach((play,i)=>play.addEventListener("click",e=>{
-      e.preventDefault();e.stopPropagation();
-      let history=[];try{history=JSON.parse(localStorage.getItem("obitrend_movie_history")||"[]")}catch{}
+    recent.querySelectorAll(".movie-thumb").forEach((card,i)=>card.addEventListener("click",()=>{
       const item=history[i]||null;
-      const title=item?.blueprint?.title||item?.title||"OBITREND Movie";
+      const b=item?.blueprint||{};
+      const title=b.title||item?.title||"OBITREND Movie";
       openPlayerModal(item,posterImages[i%posterImages.length],title);
     }));
     iconRefresh();
