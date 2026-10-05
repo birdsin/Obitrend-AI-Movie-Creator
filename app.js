@@ -99,7 +99,7 @@ let movieServerEntitlement=null;
 async function refreshMovieEntitlement(){
   await window.movieAuthReady;
   const token=await window.getMovieAccessToken();
-  const r=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-credit",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({action:"status"})});
+  const r=await fetch("/api/movie-credit",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({action:"status"})});
   const d=await r.json().catch(()=>({}));
   if(!r.ok)throw new Error(d.error||"Could not load your movie entitlement.");
   movieServerEntitlement=d||{plan_name:"Free",credits:0,active:false};
@@ -119,7 +119,7 @@ async function reserveMovieCredit(){
   // the video endpoint so an expired/stale token can never reach generation.
   // If validation fails, release/refund that reservation and create one fresh.
   for(let attempt=0;attempt<2;attempt++){
-    const r=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-credit",{
+    const r=await fetch("/api/movie-credit",{
       method:"POST",
       headers:{"content-type":"application/json","Authorization":"Bearer "+token},
       body:JSON.stringify({action:"reserve"})
@@ -134,7 +134,7 @@ async function reserveMovieCredit(){
     const reservationToken=String(d?.reservation_token||d?.reservationToken||d?.token||"").trim();
     if(!reservationToken)throw new Error("Could not create a secure movie credit reservation. Please try again.");
 
-    const vr=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-credit",{
+    const vr=await fetch("/api/movie-credit",{
       method:"POST",
       headers:{"content-type":"application/json","Authorization":"Bearer "+token},
       body:JSON.stringify({action:"validate",token:reservationToken})
@@ -146,7 +146,7 @@ async function reserveMovieCredit(){
     // The reservation was not usable. Release it if possible so the user's
     // credit is never lost, then obtain one clean reservation.
     try{
-      await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-credit",{
+      await fetch("/api/movie-credit",{
         method:"POST",
         headers:{"content-type":"application/json","Authorization":"Bearer "+token},
         body:JSON.stringify({action:"release",token:reservationToken})
@@ -162,7 +162,7 @@ async function reserveMovieCredit(){
 async function movieProductionRequest(action,payload={}){
   await window.movieAuthReady;
   const token=await window.getMovieAccessToken();
-  const r=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-credit",{
+  const r=await fetch("/api/movie-credit",{
     method:"POST",
     headers:{"content-type":"application/json","Authorization":"Bearer "+token},
     body:JSON.stringify({action,...payload})
@@ -231,7 +231,7 @@ async function resumeSavedMovieAfterPayment(){
 
 async function finishMovieCredit(action,token){
   const access=await window.getMovieAccessToken();
-  const r=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-credit",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+access},body:JSON.stringify({action,token})});
+  const r=await fetch("/api/movie-credit",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+access},body:JSON.stringify({action,token})});
   const d=await r.json().catch(()=>({}));
   if(!r.ok||!d.ok)throw new Error(d.error||("Could not "+action+" movie credit."));
   try{await refreshMovieEntitlement()}catch(_){/* The credit operation already succeeded; never retry it automatically. */}
