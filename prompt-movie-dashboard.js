@@ -107,7 +107,7 @@
 
   function getCreditDuration(credits){
     const c=Math.max(0,Math.floor(Number(credits)||0));
-    const seconds=c*30;
+    const seconds=c*15;
     const minutes=seconds/60;
     return {credits:c,seconds,minutes};
   }
@@ -337,11 +337,11 @@
   document.querySelectorAll('[data-choice-group="duration"] button').forEach(btn=>{
     btn.addEventListener("click",()=>{
       const seconds=btn.dataset.duration||"";
-      window.__obitrendMovieDuration=seconds==="storyboard"?30:Math.max(2,Math.min(30,Number(seconds)||30));
+      window.__obitrendMovieDuration=seconds==="storyboard"?15:15;
       document.querySelectorAll('[data-choice-group="duration"] button').forEach(x=>x.classList.toggle("selected",x===btn));
       let format;
       if(seconds==="storyboard"){
-        format=setMovieFormatSelection(120,30,4,"4-scene storyboard","storyboard");
+        format=setMovieFormatSelection(120,15,8,"4-scene storyboard","storyboard");
         applyMovieFormatLength(format);
         status.textContent="Storyboard selected — 4 cinematic segments will be generated in story order.";
       }else{
@@ -441,8 +441,8 @@
         const segmentProgress=Math.max(40,Math.min(92,Math.round((i/Math.max(1,targetCount))*52)+40));
         showGenerationCard("Generating",segmentProgress,"Generating movie segment "+(i+1)+" of "+targetCount+"…");
         const selectedFormat=getMovieFormatSelection();
-        const totalSeconds=selectedFormat?Number(selectedFormat.totalSeconds):targetCount*30;
-        const segmentDuration=selectedFormat?Number(selectedFormat.segmentDuration):30;
+        const totalSeconds=selectedFormat?Number(selectedFormat.totalSeconds):targetCount*15;
+        const segmentDuration=selectedFormat?Number(selectedFormat.segmentDuration):15;
         const durationLabel=totalSeconds<60?totalSeconds+"-second":(totalSeconds/60)+"-minute";
         status.textContent="Producing your "+durationLabel+" movie — "+segmentDuration+"-second segment "+(i+1)+" of "+targetCount+"…";
 
