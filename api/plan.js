@@ -209,14 +209,16 @@ module.exports = async function handler(req, res) {
       key, model: requestedModel, prompt, length, genre, style, ratio, count
     });
 
-    // Recover automatically if Vercel still contains an old/invalid model name.
-    if (!response.ok && requestedModel !== "gpt-6-luna" &&
-        (response.status === 400 || response.status === 404)) {
+    // Recover automatically from model availability/configuration errors.
+    // Keep the normal Luna path first; only fall back when the provider rejects
+    // the selected model, so ordinary API/billing errors are not masked.
+    if (!response.ok && (response.status === 400 || response.status === 404 || response.status === 403)) {
       const firstError = await response.text();
       console.error("Movie model fallback:", requestedModel, firstError.slice(0, 800));
 
+      const fallbackModel = requestedModel === "gpt-6-luna" ? "gpt-6-sol" : "gpt-6-luna";
       response = await callOpenAI({
-        key, model: "gpt-6-luna", prompt, length, genre, style, ratio, count
+        key, model: fallbackModel, prompt, length, genre, style, ratio, count
       });
     }
 
