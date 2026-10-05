@@ -127,7 +127,7 @@ module.exports=async(req,res)=>{
     const si=Number(x.sceneIndex);
     const hi=Number(x.shotIndex);
     const ratio=x.ratio||"16:9";
-    const duration=Math.max(3,Math.min(15,Math.round(Number(x.duration)||15)));
+    const duration=Math.max(3,Math.min(KLING_MAX_DURATION,Math.round(Number(x.duration)||15)));
     const imageDataUri=typeof x.imageDataUri==="string"?x.imageDataUri.trim():"";
     const scene=b&&b.scenes&&b.scenes[si];
     const shot=scene&&scene.shots&&scene.shots[hi];
@@ -180,7 +180,7 @@ module.exports=async(req,res)=>{
       }
     }
 
-    const requestedDuration=Math.max(3,Math.min(15,Math.round(Number(x.duration)||15)));
+    const requestedDuration=Math.max(3,Math.min(KLING_MAX_DURATION,Math.round(Number(x.duration)||15)));
     if(requestedDuration>KLING_MAX_DURATION){
       await releaseReservation(supabaseUrl,publishable,auth,reservation);
       return json(res,400,{
