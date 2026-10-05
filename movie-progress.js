@@ -87,7 +87,7 @@
     setText("movieProgressPercent","0%");
     const fill=document.getElementById("movieProgressFill");if(fill)fill.style.width="0%";
     setText("movieProgressShots","0 / 0");
-    setText("movieProgressProvider","Flixly · ready");
+    setText("movieProgressProvider","Provider · ready");
     setText("movieProgressStatus","No movie generation is currently running.");
   }
 
@@ -111,7 +111,8 @@
     setText("movieProgressPercent",percent+"%");
     const fill=document.getElementById("movieProgressFill");if(fill)fill.style.width=percent+"%";
     setText("movieProgressShots",completed+" / "+total);
-    setText("movieProgressProvider","Flixly · "+(status==="failed"?"failed":status==="completed"?"ready":(provider==="processing"?"processing":provider)));
+    const taskProvider=String(p?.provider_task_id||"").toLowerCase().startsWith("kling:")?"Kling":"Flixly";
+    setText("movieProgressProvider",taskProvider+" · "+(status==="failed"?"failed":status==="completed"?"ready":(provider==="processing"?"processing":provider)));
     let message;
     if(status==="completed")message="All shots generated successfully. Your movie is ready for the next final-cut step.";
     else if(status==="failed")message=p?.last_error||"Movie generation failed. Your reserved credit was protected.";
