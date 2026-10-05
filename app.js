@@ -194,6 +194,14 @@ async function saveMovieProductionSegment(productionId,segmentIndex,videoUrl){
     video_url:String(videoUrl||"")
   });
 }
+async function bindMovieProviderTask(productionId,taskId,reservationToken){
+  if(!productionId||!taskId)return null;
+  return movieProductionRequest("production_bind_provider_task",{
+    production_id:productionId,
+    task_id:String(taskId),
+    reservation_token:String(reservationToken||"")
+  });
+}
 async function setMovieProductionStatus(productionId,productionStatus){
   if(!productionId)return null;
   return movieProductionRequest("production_status_update",{
@@ -681,7 +689,7 @@ async function generateAssemblyItem(item){
     const r=await fetch("/api/generate-shot",{
       method:"POST",
       headers:{"content-type":"application/json","Authorization":"Bearer "+token,"x-movie-reservation":reservation},
-      body:JSON.stringify({blueprint:state.blueprint,sceneIndex:item.si,shotIndex:item.hi,ratio:$("ratio").value,duration:shotDuration,continuationVideoUrl,reservationToken:reservation})
+      body:JSON.stringify({blueprint:state.blueprint,sceneIndex:item.si,shotIndex:item.hi,ratio:$("ratio").value,duration:shotDuration,continuationVideoUrl,reservationToken:reservation,productionId:localStorage.getItem("obitrend_movie_active_production_id")||""})
     });
     const d=await r.json().catch(()=>({}));
     if(!r.ok){
@@ -695,6 +703,12 @@ async function generateAssemblyItem(item){
       return d.videoUrl;
     }
     if(!d.taskId)throw new Error("The video provider did not return a task.");
+    const activeProduction=localStorage.getItem("obitrend_movie_active_production_id")||"";
+    if(activeProduction){
+      const providerTask=String(d.taskId).replace(/^flixly:/,"");
+      await bindMovieProviderTask(activeProduction,providerTask,reservation);
+    }
+    if(window.movieBackgroundGeneration)return d.videoUrl||null;
 
     for(let i=0;i<360;i++){
       $("assemblyStatus").textContent="Generating Scene "+(item.si+1)+" Shot "+(item.hi+1)+"… "+Math.min(99,Math.round((i+1)/360*100))+"%";
@@ -726,16 +740,41 @@ async function runAssembly(full){
  if(assemblyState.running||!state.blueprint)return;
  if(!assemblyState.queue.length)buildAssemblyQueue();
  const items=assemblyState.queue.filter(x=>x.state!=="ready");
- const targets=full?items:items.slice(0,1);
- if(!targets.length){$("assemblyStatus").textContent="All movie shots are already generated.";return}
+ if(!items.length){$("assemblyStatus").textContent="All movie shots are already generated.";return}
+ if(full){
+   try{
+     const existing=localStorage.getItem("obitrend_movie_active_production_id")||"";
+     if(!existing){
+       const id=await createMovieProduction(state.blueprint,assemblyState.queue.length);
+       localStorage.setItem("obitrend_movie_active_production_id",id);
+     }
+     window.movieBackgroundGeneration=true;
+     $("generateFullMovieBtn").disabled=true;
+     $("generateNextShotBtn").disabled=true;
+     $("assemblyStatus").textContent="Movie generation started. You can leave the app — generation will continue in the background.";
+     await generateAssemblyItem(items[0]);
+     $("assemblyStatus").textContent="Movie generation is continuing in the background. You can safely leave the app.";
+   }catch(e){
+     $("assemblyStatus").textContent=e?.message||"Could not start background movie generation.";
+   }finally{
+     $("generateFullMovieBtn").disabled=false;
+     $("generateNextShotBtn").disabled=false;
+   }
+   return;
+ }
  assemblyState.running=true;
- $("generateNextShotBtn").disabled=true;$("generateFullMovieBtn").disabled=true;
+ $("generateNextShotBtn").disabled=true;
  try{
-  for(const item of targets){
-   try{item.url=await generateAssemblyItem(item);item.state="ready";assemblyState.urls[item.key]=item.url;renderAssembly();$("assemblyStatus").textContent="Scene "+(item.si+1)+" Shot "+(item.hi+1)+" ready.";localStorage.setItem("obitrend_movie_assembly",JSON.stringify(assemblyState.urls))}
-   catch(e){item.state="failed";renderAssembly();$("assemblyStatus").textContent=e.message;break}
-  }
- }finally{assemblyState.running=false;$("generateNextShotBtn").disabled=false;$("generateFullMovieBtn").disabled=false;renderAssembly()}
+   const item=items[0];
+   item.url=await generateAssemblyItem(item);
+   item.state="ready";assemblyState.urls[item.key]=item.url;renderAssembly();
+   $("assemblyStatus").textContent="Scene "+(item.si+1)+" Shot "+(item.hi+1)+" ready.";
+   localStorage.setItem("obitrend_movie_assembly",JSON.stringify(assemblyState.urls));
+ }catch(e){
+   $("assemblyStatus").textContent=e?.message||"Shot generation failed.";
+ }finally{
+   assemblyState.running=false;$("generateNextShotBtn").disabled=false;renderAssembly();
+ }
 }
 document.addEventListener("DOMContentLoaded",()=>{
  $("generateNextShotBtn")?.addEventListener("click",()=>runAssembly(false));
