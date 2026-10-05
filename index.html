@@ -256,6 +256,10 @@ async function start(){
     setStage(3,"active","Starting shots");
     setStatus("Cast locked. Starting Shot 1, then each shot will continue from the previous final video.");
     $("generateFullMovieBtn").click();
+    if(window.movieBackgroundGeneration){
+      setStatus("Movie generation has started. You can leave the app — it will continue in the background and notify you when the movie is ready.");
+      return;
+    }
     const urls=await waitForAssembly();
     setStatus("All shots generated. Creating the final cut…");
     await makeFinalCut(urls);
@@ -271,7 +275,8 @@ setStage(0,"idle","Waiting");
 </script>
 
 <script type="module" src="/movie-auth.js?v=20261004-4"></script>
-<script src="/app.js?v=20261005-8"></script>
+<script src="/app.js?v=20261005-9"></script>
+<script src="/background-generation.js?v=20261005-1"></script>
 <script src="/mobile-pro-fix.js?v=20260927-1"></script>
 
 <script>
