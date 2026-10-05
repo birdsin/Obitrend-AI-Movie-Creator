@@ -5,6 +5,34 @@
   window.setTimeout(()=>startup?.classList.add("hide"),1700);
 
   const prompt=q("#pmPrompt"), enginePrompt=q("#moviePrompt"), generate=q("#pmGenerate"), engineBuild=q("#buildBtn"), status=q("#pmStatus"), composer=q(".pm-composer");
+  let selectedMovieImageDataUri="";
+  function getMovieFormatSelection(){
+    try{
+      const saved=JSON.parse(localStorage.getItem("obitrend_movie_format")||"null");
+      if(saved&&Number(saved.totalSeconds)>0&&Number(saved.segmentDuration)>0&&Number(saved.segments)>0)return saved;
+    }catch(_){}
+    return null;
+  }
+  function setMovieFormatSelection(totalSeconds,segmentDuration,segments,label,mode="duration"){
+    const value={mode,totalSeconds:Number(totalSeconds),segmentDuration:Number(segmentDuration),segments:Number(segments),label:String(label||"")};
+    localStorage.setItem("obitrend_movie_format",JSON.stringify(value));
+    window.__obitrendMovieDuration=value.segmentDuration;
+    return value;
+  }
+  function applyMovieFormatLength(format){
+    const length=q("#length");
+    if(!length||!format)return;
+    const mins=Number(format.totalSeconds)/60;
+    let option=[...length.options].find(o=>o.value===String(mins));
+    if(!option){
+      option=document.createElement("option");
+      option.value=String(mins);
+      option.textContent=format.totalSeconds<60?format.totalSeconds+" seconds":(format.totalSeconds%60===0?(format.totalSeconds/60)+" minute"+(format.totalSeconds/60===1?"":"s"):format.totalSeconds+" seconds");
+      option.dataset.cardDuration="true";
+      length.appendChild(option);
+    }
+    length.value=String(mins);
+  }
   const iconRefresh=()=>window.lucide?.createIcons?.();
   iconRefresh();
 
@@ -251,16 +279,16 @@
       document.querySelectorAll('[data-choice-group="duration"] button').forEach(x=>x.classList.toggle("selected",x===btn));
       let format;
       if(seconds==="storyboard"){
-        format=setMovieFormatSelection(120,30,4,"4-scene storyboard","storyboard");
+        format=setMovieFormatSelection(60,15,4,"4-scene storyboard","storyboard");
         applyMovieFormatLength(format);
-        status.textContent="Storyboard selected — 4 cinematic segments will be generated in story order.";
+        status.textContent="Storyboard selected — 4 cinematic 15-second segments will be generated in story order.";
       }else{
-        const total=Number(seconds)||30;
-        const segment=total<=30?total:30;
+        const total=Number(seconds)||15;
+        const segment=15;
         const segments=Math.ceil(total/segment);
         format=setMovieFormatSelection(total,segment,segments,total+"-second format","duration");
         applyMovieFormatLength(format);
-        status.textContent=total+"-second format selected.";
+        status.textContent=total+"-second format selected — "+segments+" x 15-second segments.";
       }
     });
   });
@@ -298,9 +326,16 @@
         throw new Error("You have no movie credits. Choose a Pro plan to generate your movie.");
       }
 
+      const selectedFormat=getMovieFormatSelection();
       const requestedSegments=productionId
         ? null
-        : Math.min(Math.max(1,availableCredits),20);
+        : selectedFormat
+          ? Number(selectedFormat.segments)
+          : Math.min(Math.max(1,availableCredits),20);
+
+      if(!productionId&&selectedFormat&&availableCredits<Number(selectedFormat.segments)){
+        throw new Error("You need "+Number(selectedFormat.segments)+" movie credits for the "+selectedFormat.label+". You currently have "+availableCredits+".");
+      }
 
       if(!productionId){
         productionId=await createMovieProduction(blueprint,requestedSegments);
@@ -342,9 +377,11 @@
         status.className="pm-status";
         const segmentProgress=Math.max(40,Math.min(92,Math.round((i/Math.max(1,targetCount))*52)+40));
         showGenerationCard("Generating",segmentProgress,"Generating movie segment "+(i+1)+" of "+targetCount+"…");
-        const totalSeconds=targetCount*30;
+        const selectedFormat=getMovieFormatSelection();
+        const totalSeconds=selectedFormat?Number(selectedFormat.totalSeconds):targetCount*15;
+        const segmentDuration=selectedFormat?Math.max(3,Math.min(15,Number(selectedFormat.segmentDuration)||15)):15;
         const durationLabel=totalSeconds<60?totalSeconds+"-second":(totalSeconds/60)+"-minute";
-        status.textContent="Producing your "+durationLabel+" movie — 30-second segment "+(i+1)+" of "+targetCount+"…";
+        status.textContent="Producing your "+durationLabel+" movie — "+segmentDuration+"-second segment "+(i+1)+" of "+targetCount+"…";
 
         try{
           if(typeof window.openShot!=="function"||typeof window.generateShot!=="function"){
@@ -353,7 +390,7 @@
 
           await setMovieProductionStatus(productionId,"generating").catch(()=>{});
           window.openShot(item.si,item.hi);
-          await window.generateShot();
+          await window.generateShot(segmentDuration,selectedMovieImageDataUri);
 
           const shotStatus=(document.getElementById("shotStatus")?.textContent||"").trim();
           const video=document.getElementById("shotVideo");
@@ -374,7 +411,9 @@
           if(i<targetCount-1 && getMovieCredits()<=0){
             await setMovieProductionStatus(productionId,"paused").catch(()=>{});
             status.className="pm-status";
-            status.textContent="Movie paused after "+((i+1)*30)+" seconds. Your credits are finished. Purchase more credits to continue from the next 30-second segment.";
+            const selectedFormat=getMovieFormatSelection();
+            const segmentDuration=selectedFormat?Math.max(3,Math.min(15,Number(selectedFormat.segmentDuration)||15)):15;
+            status.textContent="Movie paused after "+((i+1)*segmentDuration)+" seconds. Your credits are finished. Purchase more credits to continue from the next "+segmentDuration+"-second segment.";
             loadRecent();
             return;
           }
@@ -403,9 +442,11 @@
 
       const remaining=getMovieCredits();
       status.className="pm-status";
-      const completedSeconds=targetCount*30;
+      const selectedFormat=getMovieFormatSelection();
+      const segmentDuration=selectedFormat?Math.max(3,Math.min(15,Number(selectedFormat.segmentDuration)||15)):15;
+      const completedSeconds=selectedFormat?Number(selectedFormat.totalSeconds):(targetCount*segmentDuration);
       const completedLabel=completedSeconds<60?completedSeconds+" seconds":(completedSeconds/60)+" minute"+(completedSeconds/60===1?"":"s");
-      status.textContent="Your "+completedLabel+" movie is complete. "+targetCount+" x 30-second segments were generated using exactly "+targetCount+" movie credit"+(targetCount===1?"":"s")+".";
+      status.textContent="Your "+completedLabel+" movie is complete. "+targetCount+" x "+segmentDuration+"-second segments were generated using exactly "+targetCount+" movie credit"+(targetCount===1?"":"s")+".";
       hideGenerationCard();
       loadRecent();
     }catch(error){
