@@ -313,9 +313,24 @@ module.exports = async function handler(req, res) {
     console.error("Movie planner exception:", error?.stack || error?.message || error);
 
     if (error?.name === "AbortError") {
+      // The request fields are scoped inside the main try block, so rebuild them
+      // from req here before creating the timeout fallback.
+      const fallbackBody = getRequestBody(req);
+      const fallbackPrompt = typeof fallbackBody.prompt === "string" ? fallbackBody.prompt.trim() : "";
+      const fallbackLength = Number(fallbackBody.length || 15);
+      const fallbackGenre = String(fallbackBody.genre || "Drama");
+      const fallbackStyle = String(fallbackBody.visualStyle || "Cinematic realism");
+      const fallbackRatio = String(fallbackBody.ratio || "16:9");
+
       console.warn("Movie planner timed out; using lightweight fallback blueprint.");
       return send(res, 200, {
-        blueprint: buildTimeoutFallback({ prompt, length, genre, style, ratio }),
+        blueprint: buildTimeoutFallback({
+          prompt: fallbackPrompt,
+          length: fallbackLength,
+          genre: fallbackGenre,
+          style: fallbackStyle,
+          ratio: fallbackRatio
+        }),
         plannerFallback: true
       });
     }
