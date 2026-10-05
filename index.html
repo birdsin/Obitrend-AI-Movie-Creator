@@ -141,7 +141,7 @@ import { FFmpeg } from "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.15/dist
 import { fetchFile, toBlobURL } from "https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.2/dist/esm/index.js";
 
 const $=id=>document.getElementById(id);
-let selectedProvider="kling";
+let selectedProvider=localStorage.getItem("obitrend_movie_provider")||"kling";
 window.obitrendMovieProvider=selectedProvider;
 const nativeFetch=window.fetch.bind(window);
 window.fetch=async function(input,init={}){
