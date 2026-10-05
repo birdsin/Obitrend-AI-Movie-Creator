@@ -20,6 +20,16 @@
     <div class="pm-loader"><i></i></div>
   </div>
 </div>
+<script>
+/* Startup failsafe: the splash must never block the dashboard if another script fails. */
+(function(){
+  var s=document.getElementById("obitrendStartup");
+  if(!s)return;
+  function reveal(){s.classList.add("hide");s.setAttribute("aria-hidden","true");}
+  window.setTimeout(reveal,3000);
+  window.addEventListener("pageshow",function(){window.setTimeout(reveal,500);},{once:true});
+})();
+</script>
 
 <main class="pm-dashboard" id="promptDashboard">
   <header class="pm-topbar">
