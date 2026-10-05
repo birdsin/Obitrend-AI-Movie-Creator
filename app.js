@@ -318,7 +318,12 @@ async function generateShot(){
     reservation=await reserveMovieCredit();
     const token=await window.getMovieAccessToken();
     status("shotStatus","Sending shot to the video generator…");
-    const r=await fetch("/api/generate-shot",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token,"x-movie-reservation":reservation},body:JSON.stringify({blueprint:state.blueprint,sceneIndex:state.sceneIndex,shotIndex:state.shotIndex,ratio:$("ratio").value,duration:Number(state.blueprint?.length)===1?30:15,reservationToken:reservation})});
+    const movieMinutes=Number(state.blueprint?.length)||0.5;
+    const shotDuration=movieMinutes>=1?30:Math.max(4,Math.round(movieMinutes*60));
+    const currentIndex=assemblyState.queue.findIndex(q=>q.si===state.sceneIndex&&q.hi===state.shotIndex);
+    const previousItem=currentIndex>0?assemblyState.queue[currentIndex-1]:null;
+    const continuationVideoUrl=previousItem?.url||"";
+    const r=await fetch("/api/generate-shot",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token,"x-movie-reservation":reservation},body:JSON.stringify({blueprint:state.blueprint,sceneIndex:state.sceneIndex,shotIndex:state.shotIndex,ratio:$("ratio").value,duration:shotDuration,continuationVideoUrl,reservationToken:reservation})});
     const d=await r.json().catch(()=>({}));
     if(!r.ok){
       const e=new Error(d.error||"Shot generation failed.");
@@ -668,10 +673,15 @@ async function generateAssemblyItem(item){
     reservation=await reserveMovieCredit();
     const token=await window.getMovieAccessToken();
     item.state="generating";renderAssembly();
+    const movieMinutes=Number(state.blueprint?.length)||0.5;
+    const shotDuration=movieMinutes>=1?30:Math.max(4,Math.round(movieMinutes*60));
+    const itemIndex=assemblyState.queue.findIndex(q=>q===item);
+    const previousItem=itemIndex>0?assemblyState.queue[itemIndex-1]:null;
+    const continuationVideoUrl=previousItem?.url||"";
     const r=await fetch("/api/generate-shot",{
       method:"POST",
       headers:{"content-type":"application/json","Authorization":"Bearer "+token,"x-movie-reservation":reservation},
-      body:JSON.stringify({blueprint:state.blueprint,sceneIndex:item.si,shotIndex:item.hi,ratio:$("ratio").value,duration:Number(state.blueprint?.length)===1?30:15,reservationToken:reservation})
+      body:JSON.stringify({blueprint:state.blueprint,sceneIndex:item.si,shotIndex:item.hi,ratio:$("ratio").value,duration:shotDuration,continuationVideoUrl,reservationToken:reservation})
     });
     const d=await r.json().catch(()=>({}));
     if(!r.ok){
