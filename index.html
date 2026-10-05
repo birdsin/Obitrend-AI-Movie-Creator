@@ -43,23 +43,74 @@
     </div>
   </section>
 
-  <section class="pm-composer" aria-labelledby="promptTitle">
+  <section class="pm-composer premium-composer" aria-labelledby="promptTitle">
     <div class="pm-composer-head">
-      <div><h2 id="promptTitle">What movie do you want to make?</h2><p>No forms. No complicated settings. Just describe your movie.</p></div>
-      <div class="pm-auto">✦ EVERYTHING AUTOMATIC</div>
+      <div>
+        <div class="pm-composer-eyebrow"><span class="pm-live-dot"></span> AI MOVIE STUDIO</div>
+        <h2 id="promptTitle">What movie do you want to make?</h2>
+        <p>Describe your idea once. OBITREND handles the story, cast, camera, scenes, lighting and continuity.</p>
+      </div>
+      <div class="pm-auto"><span class="pm-auto-dot"></span> EVERYTHING AUTOMATIC</div>
     </div>
     <div class="pm-prompt-wrap">
-      <textarea id="pmPrompt" class="pm-prompt" maxlength="8000" placeholder="Example: A young man returns to Lagos after many years and discovers that his family business is in danger. Make it emotional, cinematic and realistic..."></textarea>
+      <textarea id="creativePrompt" class="pm-prompt" maxlength="8000" placeholder="Example: A young man returns to Lagos after many years and discovers that his family business is in danger..."></textarea>
+      <div class="pm-prompt-meta"><span>Write naturally — AI fills in the cinematic details.</span><span class="pm-secure">✦ AI DIRECTOR</span></div>
     </div>
     <div class="pm-composer-foot">
-      <button id="pmGenerate" class="pm-generate" type="button"><i data-lucide="sparkles"></i> Generate My Movie</button>
+      <button id="pmGenerate" class="pm-generate" type="button"><i data-lucide="sparkles"></i><span>Generate My Movie</span><b>✨</b></button>
       <span class="pm-shortcut">Ctrl / ⌘ + Enter</span>
     </div>
+    <div class="pm-social-proof"><span id="pmFormatNote">15-second format selected</span><span>🔥 2,431 movies generated today</span></div>
     <div id="pmStatus" class="pm-status" aria-live="polite"></div>
     <div class="pm-examples" aria-label="Example prompts">
       <button class="pm-example" type="button" data-prompt="A powerful African family drama about a young woman returning home to save her father's struggling hotel business. Cinematic realism, emotional and inspiring.">African family drama</button>
       <button class="pm-example" type="button" data-prompt="A thrilling Lagos crime story about an honest detective who discovers a conspiracy inside the city. Dark, realistic and cinematic.">Lagos crime thriller</button>
       <button class="pm-example" type="button" data-prompt="A beautiful romantic story between two strangers who meet during a rainy evening in Abuja and slowly fall in love. Warm cinematic realism.">Romantic story</button>
+    </div>
+  </section>
+
+  <section class="pm-control-deck" aria-label="Movie creation options">
+    <div class="pm-mode-switch">
+      <button class="pm-mode-card active" type="button" data-create-mode="text"><span class="pm-mode-icon"><i data-lucide="type"></i></span><span><b>Text-to-Movie</b><small>Turn one idea into a complete cinematic movie.</small></span><i data-lucide="check-circle-2" class="pm-mode-check"></i></button>
+      <button class="pm-mode-card" type="button" data-create-mode="image"><span class="pm-mode-icon"><i data-lucide="image"></i></span><span><b>Image-to-Movie</b><small>Start from a visual reference or character image.</small></span><i data-lucide="upload" class="pm-mode-check"></i></button>
+    </div>
+    <input id="pmImageInput" class="pm-image-input" type="file" accept="image/*">
+    <div id="pmImagePreview" class="pm-image-preview" hidden>
+      <img alt="Selected movie reference">
+      <div><b>Reference image ready</b><span>Use it as visual inspiration for your movie.</span></div>
+      <button id="pmImageRemove" type="button" aria-label="Remove image">×</button>
+    </div>
+
+    <div class="pm-option-section">
+      <div class="pm-option-head"><div><span class="pm-option-kicker">QUICK START</span><h3>Genre Quick Cards</h3></div><span>Tap a genre to shape the story</span></div>
+      <div class="pm-genre-grid">
+        <button class="pm-genre-card active" type="button" data-genre-prompt="Create a realistic action movie with high-energy movement, cinematic stunts and intense pacing."><span>⚡</span><b>Action</b><small>High energy</small></button>
+        <button class="pm-genre-card" type="button" data-genre-prompt="Create a grounded African crime drama with suspense, moral conflict and realistic Lagos atmosphere."><span>◈</span><b>Crime</b><small>Dark & tense</small></button>
+        <button class="pm-genre-card" type="button" data-genre-prompt="Create an emotional romantic drama with believable chemistry, warm lighting and a powerful ending."><span>♡</span><b>Romance</b><small>Emotional</small></button>
+        <button class="pm-genre-card" type="button" data-genre-prompt="Create a funny modern comedy with natural dialogue, memorable characters and fast pacing."><span>✦</span><b>Comedy</b><small>Feel good</small></button>
+        <button class="pm-genre-card" type="button" data-genre-prompt="Create a suspenseful thriller with mystery, realistic characters and escalating tension."><span>⌁</span><b>Thriller</b><small>Suspense</small></button>
+        <button class="pm-genre-card" type="button" data-genre-prompt="Create an inspiring family drama with strong relationships, emotional conflict and a hopeful ending."><span>◇</span><b>Drama</b><small>Human story</small></button>
+      </div>
+    </div>
+
+    <div class="pm-option-section">
+      <div class="pm-option-head"><div><span class="pm-option-kicker">VISUAL DIRECTION</span><h3>Style Cards</h3></div><span>Choose the look</span></div>
+      <div class="pm-style-row">
+        <button class="pm-style-card active" type="button" data-style="Realistic Cinematic"><span class="pm-style-art pm-art-realistic"></span><b>Realistic</b><small>Cinematic</small></button>
+        <button class="pm-style-card" type="button" data-style="Anime Cinema"><span class="pm-style-art pm-art-anime"></span><b>Anime</b><small>Stylized</small></button>
+        <button class="pm-style-card" type="button" data-style="Premium 3D Animation"><span class="pm-style-art pm-art-3d"></span><b>3D</b><small>Animated</small></button>
+        <button class="pm-style-card" type="button" data-style="Vintage Film"><span class="pm-style-art pm-art-vintage"></span><b>Vintage</b><small>Classic</small></button>
+      </div>
+    </div>
+
+    <div class="pm-option-section">
+      <div class="pm-option-head"><div><span class="pm-option-kicker">FORMAT</span><h3>Duration</h3></div><span id="pmDurationHint">15 seconds selected</span></div>
+      <div class="pm-duration-grid">
+        <button class="pm-duration-card" type="button" data-duration="5"><b>05s</b><span>Quick shot</span></button>
+        <button class="pm-duration-card active" type="button" data-duration="15"><b>15s</b><span>Short format</span></button>
+        <button class="pm-duration-card" type="button" data-duration="30"><b>30s</b><span>Full segment</span></button>
+        <button class="pm-duration-card" type="button" data-duration="60"><b>60s</b><span>Extended story</span></button>
+      </div>
     </div>
   </section>
 
