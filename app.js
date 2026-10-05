@@ -310,7 +310,7 @@ async function generateShot(){
     reservation=await reserveMovieCredit();
     const token=await window.getMovieAccessToken();
     status("shotStatus","Sending shot to the video generator…");
-    const r=await fetch("/api/generate-shot",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token,"x-movie-reservation":reservation},body:JSON.stringify({blueprint:state.blueprint,sceneIndex:state.sceneIndex,shotIndex:state.shotIndex,ratio:$("ratio").value,reservationToken:reservation})});
+    const r=await fetch("/api/generate-shot",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token,"x-movie-reservation":reservation},body:JSON.stringify({blueprint:state.blueprint,sceneIndex:state.sceneIndex,shotIndex:state.shotIndex,ratio:$("ratio").value,duration:15,reservationToken:reservation})});
     const d=await r.json().catch(()=>({}));
     if(!r.ok){
       const e=new Error(d.error||"Shot generation failed.");
