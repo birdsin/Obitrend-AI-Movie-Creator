@@ -755,7 +755,9 @@ async function runAssembly(full){
      await generateAssemblyItem(items[0]);
      $("assemblyStatus").textContent="Movie generation is continuing in the background. You can safely leave the app.";
    }catch(e){
-     $("assemblyStatus").textContent=e?.message||"Could not start background movie generation.";
+     const message=e?.message||"Could not start background movie generation.";
+     $("assemblyStatus").textContent=message;
+     setStatus(message,true);
    }finally{
      $("generateFullMovieBtn").disabled=false;
      $("generateNextShotBtn").disabled=false;
