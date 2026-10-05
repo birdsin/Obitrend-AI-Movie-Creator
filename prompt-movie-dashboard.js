@@ -66,10 +66,28 @@
     return d;
   }
 
+  let selectedDurationSeconds=null;
+
   function setAutoDefaults(credits){
     if(enginePrompt)enginePrompt.value=prompt.value.trim();
     const values={genre:"Drama",visualStyle:"Cinematic realism",ratio:"16:9"};
     Object.entries(values).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v});
+    if(selectedDurationSeconds){
+      const mins=selectedDurationSeconds/60;
+      const el=document.getElementById("length");
+      if(el){
+        let option=[...el.options].find(o=>o.value===String(mins));
+        if(!option){
+          option=document.createElement("option");
+          option.value=String(mins);
+          option.textContent=selectedDurationSeconds+" seconds";
+          option.dataset.cardDuration="true";
+          el.appendChild(option);
+        }
+        el.value=String(mins);
+      }
+      return {credits:Math.floor(Number(credits)||0),seconds:selectedDurationSeconds,minutes:mins};
+    }
     return applyCreditDuration(credits);
   }
 
@@ -153,6 +171,9 @@
     generate.disabled=true;
     composer?.classList.add("pm-loading");
     try{
+      // Clear any stale legacy payment message before starting the movie workflow.
+      status.className="pm-status";
+      status.textContent="";
       await waitForMovieEngine();
       await window.refreshMovieEntitlement();
       const credits=window.getMovieCredits();
@@ -259,6 +280,7 @@
   document.querySelectorAll('[data-choice-group="duration"] button').forEach(btn=>{
     btn.addEventListener("click",()=>{
       const seconds=btn.dataset.duration||"";
+      selectedDurationSeconds=seconds==="storyboard"?120:(Number(seconds)||30);
       document.querySelectorAll('[data-choice-group="duration"] button').forEach(x=>x.classList.toggle("selected",x===btn));
       const length=q("#length");
       if(seconds==="storyboard"){
