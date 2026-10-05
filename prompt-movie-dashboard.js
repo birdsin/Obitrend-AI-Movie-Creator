@@ -43,7 +43,7 @@
 
   function getCreditDuration(credits){
     const c=Math.max(0,Math.floor(Number(credits)||0));
-    const seconds=c*30;
+    const seconds=c*15;
     const minutes=seconds/60;
     return {credits:c,seconds,minutes};
   }
@@ -364,9 +364,9 @@
         status.className="pm-status";
         const segmentProgress=Math.max(40,Math.min(92,Math.round((i/Math.max(1,targetCount))*52)+40));
         showGenerationCard("Generating",segmentProgress,"Generating movie segment "+(i+1)+" of "+targetCount+"…");
-        const totalSeconds=targetCount*30;
+        const totalSeconds=targetCount*15;
         const durationLabel=totalSeconds<60?totalSeconds+"-second":(totalSeconds/60)+"-minute";
-        status.textContent="Producing your "+durationLabel+" movie — 30-second segment "+(i+1)+" of "+targetCount+"…";
+        status.textContent="Producing your "+durationLabel+" movie — 15-second segment "+(i+1)+" of "+targetCount+"…";
 
         try{
           if(typeof window.openShot!=="function"||typeof window.generateShot!=="function"){
@@ -396,7 +396,7 @@
           if(i<targetCount-1 && window.getMovieCredits()<=0){
             await window.setMovieProductionStatus(productionId,"paused").catch(()=>{});
             status.className="pm-status";
-            status.textContent="Movie paused after "+((i+1)*30)+" seconds. Your credits are finished. Purchase more credits to continue from the next 30-second segment.";
+            status.textContent="Movie paused after "+((i+1)*15)+" seconds. Your credits are finished. Purchase more credits to continue from the next 30-second segment.";
             loadRecent();
             return;
           }
@@ -425,9 +425,9 @@
 
       const remaining=window.getMovieCredits();
       status.className="pm-status";
-      const completedSeconds=targetCount*30;
+      const completedSeconds=targetCount*15;
       const completedLabel=completedSeconds<60?completedSeconds+" seconds":(completedSeconds/60)+" minute"+(completedSeconds/60===1?"":"s");
-      status.textContent="Your "+completedLabel+" movie is complete. "+targetCount+" x 30-second segments were generated using exactly "+targetCount+" movie credit"+(targetCount===1?"":"s")+".";
+      status.textContent="Your "+completedLabel+" movie is complete. "+targetCount+" x 15-second segments were generated using exactly "+targetCount+" movie credit"+(targetCount===1?"":"s")+".";
       hideGenerationCard();
       loadRecent();
     }catch(error){
