@@ -163,6 +163,19 @@ module.exports=async(req,res)=>{
     }catch(e){
       console.error("Flixly start failed:",e?.message||e);
       await releaseReservation(supabaseUrl,publishable,auth,reservation);
+      // If this is a background movie production, immediately persist the
+      // provider-start failure so the Movie Generation card cannot remain
+      // falsely stuck at "waiting"/"queued".
+      const productionId=String(body?.productionId||"").trim();
+      if(productionId){
+        try{
+          await fetch(supabaseUrl+"/functions/v1/movie-credit",{
+            method:"POST",
+            headers:{"content-type":"application/json","apikey":publishable,"Authorization":auth},
+            body:JSON.stringify({action:"production_status_update",production_id:productionId,status:"failed"})
+          });
+        }catch(_){}
+      }
       const code=String(e?.providerCode||"");
       const message=String(e?.message||"").trim();
       const insufficient=code==="insufficient_credits"||/credit|balance|quota/i.test(message);
