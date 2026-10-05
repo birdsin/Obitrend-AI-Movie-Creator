@@ -131,7 +131,15 @@
       if(!window.getMovieProduction)return;
       try{
         const p=await window.getMovieProduction(id);
-        if(p){updateCard(p);return;}
+        if(p){
+          if(String(p.status||"").toLowerCase()==="failed"){
+            localStorage.removeItem("obitrend_movie_active_production_id");
+            localStorage.removeItem(SNAPSHOT_KEY);
+            renderIdle();
+            return;
+          }
+          updateCard(p);return;
+        }
       }catch(_){}
     }
     const snapshot=readSnapshot();
