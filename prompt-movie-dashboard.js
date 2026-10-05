@@ -337,6 +337,7 @@
   document.querySelectorAll('[data-choice-group="duration"] button').forEach(btn=>{
     btn.addEventListener("click",()=>{
       const seconds=btn.dataset.duration||"";
+      window.__obitrendMovieDuration=seconds==="storyboard"?30:Math.max(2,Math.min(30,Number(seconds)||30));
       document.querySelectorAll('[data-choice-group="duration"] button').forEach(x=>x.classList.toggle("selected",x===btn));
       let format;
       if(seconds==="storyboard"){
