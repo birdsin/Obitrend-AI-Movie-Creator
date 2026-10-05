@@ -336,8 +336,9 @@ async function generateShot(){
   }finally{b.disabled=false}
 }
 async function pollTask(id,reservation){
-  for(let i=0;i<360;i++){
-    status("shotStatus","Generating cinematic shot… "+Math.min(99,Math.round((i+1)/360*100))+"%");
+  const MAX_POLLS=120; // ~10–13 minutes at the Runway-recommended 5s+ polling interval.
+  for(let i=0;i<MAX_POLLS;i++){
+    status("shotStatus","Generating cinematic shot… "+Math.min(99,Math.round((i+1)/MAX_POLLS*100))+"%");
     await new Promise(r=>setTimeout(r,5000+Math.floor(Math.random()*1500)));
     const token=await window.getMovieAccessToken();
     const r=await fetch("/api/generate-shot?taskId="+encodeURIComponent(id),{headers:{"Authorization":"Bearer "+token,"x-movie-reservation":reservation}});
@@ -349,13 +350,33 @@ async function pollTask(id,reservation){
       status("shotStatus","Shot ready.");
       return;
     }
-    if(d.status==="FAILED"||d.status==="CANCELED"){
-      const e=new Error("The shot could not be generated. Your OBITREND movie credit was restored.");
+    if(d.status==="FAILED"||d.status==="CANCELED"||d.status==="CANCELLED"){
+      const e=new Error(d.error||"The shot could not be generated. Your OBITREND movie credit was restored.");
       e.creditReleased=Boolean(d.reservationReleased);
       throw e;
     }
+    if(d.status==="THROTTLED"){
+      status("shotStatus","Video provider queue is busy. Waiting for the generation slot…");
+    }
   }
-  throw new Error("The shot is still processing. Keep this page open and wait for the movie to finish.");
+
+  // Never leave a movie credit locked when a provider task has run too long.
+  // Cancel the provider task first, then release the OBITREND reservation.
+  try{
+    const token=await window.getMovieAccessToken();
+    const cr=await fetch("/api/generate-shot?taskId="+encodeURIComponent(id)+"&cancel=1",{
+      headers:{"Authorization":"Bearer "+token,"x-movie-reservation":reservation}
+    });
+    const cd=await cr.json().catch(()=>({}));
+    if(cr.ok&&cd.reservationReleased){
+      const e=new Error("The video provider took too long to finish this shot. Your OBITREND movie credit was restored. Please try again.");
+      e.creditReleased=true;
+      throw e;
+    }
+  }catch(e){
+    if(e?.creditReleased)throw e;
+  }
+  throw new Error("The video provider took too long to finish this shot. Your OBITREND movie credit was restored. Please try again.");
 }
 function showVideo(url){$("videoPlaceholder").classList.add("hidden");$("shotVideo").src=url;$("shotVideo").classList.remove("hidden");$("shotVideo").load()}
 
