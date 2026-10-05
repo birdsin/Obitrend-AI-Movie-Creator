@@ -4,6 +4,8 @@ function json(res,status,obj){res.status(status).setHeader("content-type","appli
 const KLING_BASE=(process.env.KLING_API_BASE_URL||"https://api-singapore.klingai.com").replace(/\/$/,"");
 const KLING_MODEL=process.env.KLING_MODEL_NAME||"kling-v3";
 const KLING_MAX_DURATION=Math.max(3,Math.min(30,Number(process.env.KLING_MAX_DURATION)||15));
+const MOVIE_VIDEO_PROVIDER=String(process.env.MOVIE_VIDEO_PROVIDER||"kling").trim().toLowerCase();
+const flixly=require("./flixly-provider");
 
 function klingRatio(r){
   if(r==="9:16")return "9:16";
@@ -87,8 +89,26 @@ module.exports=async(req,res)=>{
     const rawId=String(req.query&&req.query.taskId||"");
     if(!rawId)return json(res,400,{error:"taskId is required."});
     const cancel=String(req.query&&req.query.cancel||"") === "1";
+
+    if(rawId.startsWith("flixly:")){
+      const id=rawId.slice("flixly:".length);
+      if(!id)return json(res,400,{error:"Invalid Flixly task id."});
+      try{
+        if(cancel){
+          // Flixly documents generation status but this adapter does not assume
+          // a cancellation endpoint that is not part of the public contract.
+          return json(res,200,{status:"CANCELED",videoUrl:null,providerCancellationUnsupported:true});
+        }
+        const d=await flixly.status(id);
+        if(d.status==="FAILED")await releaseReservation(supabaseUrl,publishable,auth,reservation);
+        return json(res,200,{status:d.status,videoUrl:d.videoUrl||null,error:d.error||null,reservationReleased:d.status==="FAILED"});
+      }catch(e){
+        return json(res,502,{error:e?.message||"Could not check Flixly video status. Please try again."});
+      }
+    }
+
     const match=/^kling:(text|image):(.+)$/.exec(rawId);
-    if(!match)return json(res,400,{error:"Invalid Kling task id."});
+    if(!match)return json(res,400,{error:"Invalid video task id."});
     const kind=match[1],id=match[2];
 
     try{
@@ -121,6 +141,51 @@ module.exports=async(req,res)=>{
     }
   }
   if(req.method!=="POST")return json(res,405,{error:"Method not allowed."});
+
+  // Flixly is selected only in Preview through MOVIE_VIDEO_PROVIDER=flixly.
+  // The existing Kling path remains untouched for production/main.
+  if(MOVIE_VIDEO_PROVIDER==="flixly"){
+    try{
+      const x=body;
+      const b=x.blueprint;
+      const si=Number(x.sceneIndex);
+      const hi=Number(x.shotIndex);
+      const ratio=x.ratio||"16:9";
+      const duration=Math.max(4,Math.min(flixly.MAX_DURATION,Math.round(Number(x.duration)||15)));
+      const scene=b&&b.scenes&&b.scenes[si];
+      const shot=scene&&scene.shots&&scene.shots[hi];
+      if(!scene||!shot)return json(res,400,{error:"Invalid scene or shot."});
+      const chars=(b.characters||[]).map(c=>c.name+": "+c.appearance+"; wardrobe: "+c.wardrobe).join("\n");
+      const vb=b.visualBible||{};
+      const previous=String(x.continuationVideoUrl||"").trim();
+      const prompt=[
+        "Cinematic AI movie shot for OBITREND.",
+        "Title: "+(b.title||"Untitled Movie")+".",
+        "World: "+(vb.world||"realistic cinematic world")+".",
+        "Color grade: "+(vb.colorGrade||"natural cinematic color")+".",
+        "Realism: "+(vb.realism||"photorealistic live-action cinema")+".",
+        "Character continuity: keep faces, wardrobe, props and identities consistent.",
+        "Characters:\n"+chars,
+        "Scene: "+(scene.heading||"")+" . Location: "+(scene.location||"")+" . Time: "+(scene.time||"")+" .",
+        "Purpose: "+(scene.purpose||"")+" . Dialogue/action: "+(scene.dialogue||"natural believable action")+".",
+        "Shot: camera "+(shot.camera||"professional cinema camera")+"; lens "+(shot.lens||"50mm")+"; framing "+(shot.framing||"cinematic medium shot")+"; angle "+(shot.angle||"eye-level")+"; movement "+(shot.movement||"natural controlled movement")+"; focus "+(shot.focus||"main character")+"; lighting "+(shot.lighting||"natural cinematic lighting")+"; sound "+(shot.sound||"natural location ambience")+"; continuity "+(shot.continuity||"maintain story continuity")+".",
+        previous?"This is a continuation shot. Continue directly from the previous shot without changing the established characters, wardrobe, location, lighting or action geography.":"This is the opening shot. Establish the characters, location and visual world clearly.",
+        "Natural human motion, physically plausible camera movement, cinematic composition, professional live-action film quality.",
+        "Aspect ratio "+ratio+". Duration "+duration+" seconds."
+      ].join(" ");
+      const result=await flixly.generate({prompt,duration,ratio,sound:true});
+      if(result.videoUrl){
+        return json(res,200,{taskId:null,videoUrl:result.videoUrl,provider:"flixly"});
+      }
+      return json(res,200,{taskId:"flixly:"+result.id,videoUrl:null,provider:"flixly"});
+    }catch(e){
+      console.error("Flixly start failed:",e?.message||e);
+      await releaseReservation(supabaseUrl,publishable,auth,reservation);
+      const code=String(e?.providerCode||"");
+      const insufficient=code==="insufficient_credits"||/credit|balance|quota/i.test(String(e?.message||""));
+      return json(res,502,{error:insufficient?"Flixly could not start this shot because its provider credit balance is unavailable. Your OBITREND movie credit was restored. Please try again later.":"Flixly could not start this shot. Your OBITREND movie credit was restored. Please try again.",reservationReleased:true,provider:"flixly"});
+    }
+  }
 
   try{
     const x=body;
