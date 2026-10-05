@@ -117,6 +117,25 @@
     if(card)card.classList.remove("visible");
   }
 
+  // Robust movie-engine bridge: wait for app.js to expose the API instead of
+  // assuming script timing. This prevents the prompt dashboard from breaking
+  // when authentication/module loading finishes in a different order.
+  async function waitForMovieEngine(){
+    const started=Date.now();
+    while(Date.now()-started<10000){
+      if(typeof window.refreshMovieEntitlement==="function" &&
+         typeof window.getMovieCredits==="function" &&
+         typeof window.createMovieProduction==="function" &&
+         typeof window.getMovieProduction==="function" &&
+         typeof window.setMovieProductionStatus==="function" &&
+         typeof window.generateShot==="function"){
+        return true;
+      }
+      await new Promise(resolve=>setTimeout(resolve,100));
+    }
+    throw new Error("Movie engine is still loading. Please wait a moment and try again.");
+  }
+
   function showEmptyPromptError(){
     status.textContent="Describe your movie first";
     status.className="pm-status error";
