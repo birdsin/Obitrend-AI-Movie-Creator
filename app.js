@@ -683,8 +683,11 @@ async function generateAssemblyItem(item){
   await window.movieAuthReady;
   await refreshMovieEntitlement();
   let reservation=null;
+  const pipeline=()=>window.obitrendPipelineStage;
   try{
     reservation=await reserveMovieCredit();
+    pipeline()?.("stageCredit","done","Credit reserved");
+    pipeline()?.("stageProvider","active",(window.obitrendMovieProvider==="flixly"?"Preparing Flixly":"Preparing Kling"));
     const token=await window.getMovieAccessToken();
     item.state="generating";renderAssembly();
     const movieMinutes=Number(state.blueprint?.length)||0.5;
@@ -692,6 +695,7 @@ async function generateAssemblyItem(item){
     const itemIndex=assemblyState.queue.findIndex(q=>q===item);
     const previousItem=itemIndex>0?assemblyState.queue[itemIndex-1]:null;
     const continuationVideoUrl=previousItem?.url||"";
+    pipeline()?.("stageShot","active","Sending Shot "+(itemIndex+1));
     const r=await fetch("/api/generate-shot",{
       method:"POST",
       headers:{"content-type":"application/json","Authorization":"Bearer "+token,"x-movie-reservation":reservation,"x-movie-provider":(window.obitrendMovieProvider==="flixly"?"flixly":"kling")},
@@ -703,9 +707,27 @@ async function generateAssemblyItem(item){
       e.creditReleased=Boolean(d.reservationReleased);
       throw e;
     }
+    pipeline()?.("stageProvider","done","Provider job accepted");
+
+    const persistSegment=async videoUrl=>{
+      const activeProduction=localStorage.getItem("obitrend_movie_active_production_id")||"";
+      if(!activeProduction||!videoUrl)return;
+      pipeline()?.("stageStorage","active","Saving Shot "+(itemIndex+1));
+      try{
+        await saveMovieProductionSegment(activeProduction,itemIndex,videoUrl);
+        pipeline()?.("stageStorage","done","Shot "+(itemIndex+1)+" saved");
+      }catch(storageError){
+        console.warn("Movie segment storage:",storageError);
+        pipeline()?.("stageStorage","error","Shot result kept locally; storage retry available");
+      }
+    };
+
     if(d.videoUrl){
+      pipeline()?.("stageJob","done","Job completed");
+      pipeline()?.("stageResult","done","Shot result received");
       await finishMovieCredit("commit",reservation);
       reservation=null;
+      await persistSegment(d.videoUrl);
       return d.videoUrl;
     }
     if(!d.taskId)throw new Error("The video provider did not return a task.");
@@ -714,9 +736,11 @@ async function generateAssemblyItem(item){
       const providerTask=String(d.taskId);
       await bindMovieProviderTask(activeProduction,providerTask,reservation);
     }
+    pipeline()?.("stageJob","active","Task "+String(d.taskId).slice(0,28)+"…");
     if(window.movieBackgroundGeneration)return d.videoUrl||null;
 
     for(let i=0;i<360;i++){
+      pipeline()?.("stageJob","active","Processing Shot "+(itemIndex+1)+" · "+Math.min(99,Math.round((i+1)/360*100))+"%");
       $("assemblyStatus").textContent="Generating Scene "+(item.si+1)+" Shot "+(item.hi+1)+"… "+Math.min(99,Math.round((i+1)/360*100))+"%";
       await new Promise(r=>setTimeout(r,5000+Math.floor(Math.random()*1500)));
       const pollToken=await window.getMovieAccessToken();
@@ -724,8 +748,11 @@ async function generateAssemblyItem(item){
       const x=await s.json().catch(()=>({}));
       if(!s.ok){const e=new Error(x.error||"Video status check failed. Your movie credit remains protected while the provider status is checked.");e.creditReleaseDeferred=true;throw e;}
       if(x.status==="SUCCEEDED"&&x.videoUrl){
+        pipeline()?.("stageJob","done","Job completed");
+        pipeline()?.("stageResult","done","Shot result received");
         await finishMovieCredit("commit",reservation);
         reservation=null;
+        await persistSegment(x.videoUrl);
         return x.videoUrl;
       }
       if(x.status==="FAILED"||x.status==="CANCELED"){
@@ -736,9 +763,12 @@ async function generateAssemblyItem(item){
     }
     throw new Error("The shot is still processing. Keep this page open and wait for the movie to finish.");
   }catch(e){
+    const msg=e?.message||"Shot generation failed.";
     if(reservation&&!e?.creditReleased&&!e?.creditReleaseDeferred){
       try{await finishMovieCredit("release",reservation)}catch(_){}
     }
+    const active=Array.from(document.querySelectorAll(".exact-pipeline .stage.active")).pop();
+    if(active&&pipeline())pipeline()(active.id,"error",msg);
     throw e;
   }
 }
