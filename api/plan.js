@@ -126,7 +126,7 @@ async function callOpenAI({ key, model, prompt, length, genre, style, ratio, cou
     "Visual style: " + style + "\n" +
     "Aspect ratio: " + ratio + "\n" +
     "Target length: " + length + " minutes.\n" +
-    (length === 1 ? "Create exactly 2 scenes and exactly 1 practical shot per scene for a one-minute movie, with each shot designed as a continuous 30-second production segment. " : "Create exactly " + count + " scenes and exactly 2 practical shots per scene. ") +
+    (length === 0.25 ? "Create exactly 1 scene and exactly 1 practical shot for a 15-second movie, designed as a continuous 15-second production segment. " : length === 1 ? "Create exactly 2 scenes and exactly 1 practical shot per scene for a one-minute movie, with each shot designed as a continuous 30-second production segment. " : "Create exactly " + count + " scenes and exactly 2 practical shots per scene. ") +
     "Keep dialogue concise. Make every camera direction filmable and visually specific.";
 
   const body = {
@@ -183,7 +183,7 @@ module.exports = async function handler(req, res) {
 
     const parsedLength = Number(x.length);
     const length = Number.isFinite(parsedLength)
-      ? Math.min(10, Math.max(0.5, parsedLength))
+      ? Math.min(10, Math.max(0.25, parsedLength))
       : 1;
 
     const genre = typeof x.genre === "string" && x.genre.trim()
