@@ -2,6 +2,10 @@ document.addEventListener("DOMContentLoaded",()=>{
   if(state.blueprint && localStorage.getItem("obitrend_movie_blueprint")){
     renderBlueprint(state.blueprint);
   }
+  // Paystack can return with ?reference=... (and some checkout flows also
+  // expose trxref). Do not depend on the success flag alone: mobile browsers
+  // can strip query parameters during a redirect while the pending reference
+  // is still safely stored locally. In that case, retry verification on load.
   verifyMoviePaymentReturn();
 });
 const state={blueprint:null,sceneIndex:0,shotIndex:0};
@@ -67,8 +71,12 @@ async function startMoviePayment(planKey){
 }
 async function verifyMoviePaymentReturn(){
   const q=new URLSearchParams(window.location.search);
-  if(q.get("movie_payment")!=="success")return;
-  const reference=q.get("reference")||localStorage.getItem("obitrend_movie_pending_reference")||"";
+  const callbackFlag=q.get("movie_payment")==="success";
+  const reference=(q.get("reference")||q.get("trxref")||localStorage.getItem("obitrend_movie_pending_reference")||"").trim();
+  // If the callback flag is missing after a mobile redirect, a pending
+  // reference is enough to safely ask the server to verify it. The server
+  // remains the source of truth and only a verified success can add credits.
+  if(!callbackFlag && !reference)return;
   if(!reference)return;
   status("status","Verifying your movie payment…");
   try{
