@@ -95,6 +95,69 @@ function getMovieModel() {
   return configured;
 }
 
+function buildTimeoutFallback({ prompt, length, genre, style, ratio }) {
+  const cleanPrompt = String(prompt || "A cinematic story").trim().slice(0, 500);
+  const title = cleanPrompt
+    .replace(/[.!?]+$/g, "")
+    .split(/\\s+/)
+    .slice(0, 7)
+    .join(" ")
+    .replace(/^./, c => c.toUpperCase()) || "Untitled Movie";
+
+  const sceneLength = Number(length) <= 0.5 ? "30 seconds" : String(length) + " minutes";
+  return {
+    title,
+    logline: cleanPrompt,
+    genre: genre || "Drama",
+    visualBible: {
+      world: "Realistic cinematic world based directly on the user's story idea.",
+      colorGrade: "Natural cinematic color grade.",
+      lighting: "Professional cinematic lighting appropriate to the location and time.",
+      realism: "Photorealistic live-action film.",
+      continuity: "Keep the main character, wardrobe, location and action consistent."
+    },
+    characters: [{
+      name: "Main Character",
+      role: "Lead",
+      appearance: "Realistic adult appearance appropriate to the story.",
+      wardrobe: "Natural wardrobe appropriate to the story and location.",
+      personality: "Expressive, believable and grounded."
+    }],
+    scenes: [{
+      heading: title,
+      purpose: cleanPrompt,
+      location: "A realistic location appropriate to the story.",
+      time: "Daytime",
+      duration: sceneLength,
+      dialogue: "",
+      shots: [
+        {
+          camera: "Full-frame cinema camera",
+          lens: "35mm",
+          framing: "Medium-wide cinematic shot",
+          angle: "Eye-level",
+          movement: "Smooth tracking movement",
+          focus: "Main character and environment",
+          lighting: "Natural professional cinematic lighting",
+          sound: "Natural location ambience",
+          continuity: "Establish the story world and main character."
+        },
+        {
+          camera: "Full-frame cinema camera",
+          lens: "50mm",
+          framing: "Medium cinematic shot",
+          angle: "Eye-level",
+          movement: "Slow controlled push-in",
+          focus: "Main character",
+          lighting: "Natural professional cinematic lighting",
+          sound: "Natural ambience with subtle cinematic atmosphere",
+          continuity: "Continue directly from the previous shot and preserve character and wardrobe."
+        }
+      ]
+    }]
+  };
+}
+
 function extractContent(data) {
   const content = data?.choices?.[0]?.message?.content;
   if (typeof content === "string") return content;
@@ -143,11 +206,12 @@ async function callOpenAI({ key, model, prompt, length, genre, style, ratio, cou
         schema
       }
     },
-    max_completion_tokens: 12000
+    // Keep the planner fast enough for mobile movie creation.
+    max_completion_tokens: 5000
   };
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 60000);
+  const timer = setTimeout(() => controller.abort(), 45000);
 
   try {
     return await fetch("https://api.openai.com/v1/chat/completions", {
@@ -277,8 +341,13 @@ module.exports = async function handler(req, res) {
     console.error("Movie planner exception:", error?.stack || error?.message || error);
 
     if (error?.name === "AbortError") {
-      return send(res, 504, {
-        error: "Movie blueprint generation took too long. Please try again."
+      // Never leave the movie creator stuck on Planning. If the AI planner
+      // exceeds the mobile timeout, return a valid lightweight blueprint so
+      // the existing Kling generation workflow can continue.
+      console.warn("Movie planner timed out; using lightweight fallback blueprint.");
+      return send(res, 200, {
+        blueprint: buildTimeoutFallback({ prompt, length, genre, style, ratio }),
+        plannerFallback: true
       });
     }
 
