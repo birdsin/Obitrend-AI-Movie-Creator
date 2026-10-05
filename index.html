@@ -30,6 +30,12 @@ body{min-height:100vh}
 .shot-card.ready{border-color:rgba(109,206,159,.35)}.shot-card.generating{border-color:rgba(230,185,94,.5)}.shot-card.failed{border-color:rgba(255,100,100,.4)}
 .final-wrap{padding-top:15px}.final-wrap video{width:100%;max-height:560px;background:#000;border-radius:16px}.final-actions{display:flex;gap:10px;margin-top:12px}.final-actions a,.final-actions button{flex:1;text-align:center;padding:13px;border-radius:13px;border:1px solid rgba(255,255,255,.12);background:#111722;color:#f7f7f8;text-decoration:none;cursor:pointer}.final-actions a.primary{background:#e6b95e;color:#111;border-color:#e6b95e;font-weight:800}
 .engine-hidden{display:none!important}
+/* The new movie pipeline is the complete visible app. Hide every legacy dashboard/navigation control
+   while keeping the hidden production engine available to the pipeline. */
+#menuBtn,#androidMenuBtn,.android-bottom-nav,.android-header,.android-topbar,.android-drawer,#drawerOverlay,
+#legacyMovieDashboard,#menuWorkspace,.menu-workspace,.sidebar,.mobile-header,.desktop-sidebar,
+[data-android-action],.android-projects,.android-home,.android-dashboard{display:none!important}
+body{overflow-x:hidden}
 @media(max-width:600px){.pipeline-shell{padding:12px 12px 36px}.pipeline-hero{padding-top:30px}.pipeline-input{padding:13px}.pipeline-input textarea{min-height:135px}.pipeline-lock{display:none}}
 </style>
 </head>
