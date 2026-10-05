@@ -67,7 +67,7 @@ body.pm-mode{background:radial-gradient(circle at 75% 0%,rgba(194,142,39,.12),tr
 @keyframes pmGeneratePulse{0%,100%{box-shadow:0 14px 34px rgba(218,169,57,.18)}50%{box-shadow:0 16px 42px rgba(218,169,57,.34)}}
 @media(max-width:900px){.pm-projects{grid-template-columns:1fr}}
 @media(max-width:600px){.pm-hero:before{border-radius:0}.pm-cinema-lens{width:110px;height:110px}.pm-floating-icon{width:36px;height:36px}.pm-project{min-height:230px}.pm-project-art{height:155px}}
-@media(prefers-reduced-motion:reduce){.pm-cinema-lens,.pm-floating-icon,.pm-feature-icon,.pm-generate{animation:none}}
+@media(prefers-reduced-motion:reduce){.pm-cinema-lens,.pm-floating-icon,.pm-generate{animation:none}}
 
 .pm-drawer{position:fixed;left:0;top:0;bottom:0;width:min(86vw,330px);z-index:100;background:rgba(8,11,16,.98);border-right:1px solid rgba(212,175,55,.28);box-shadow:24px 0 70px rgba(0,0,0,.55);padding:20px 14px;transform:translateX(-105%);transition:transform .25s ease;backdrop-filter:blur(18px)}
 .pm-drawer.open{transform:translateX(0)}
