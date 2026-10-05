@@ -57,7 +57,7 @@ async function startMoviePayment(planKey){
     status("status","Opening secure Paystack checkout…");
     await window.movieAuthReady;
     const token=await window.getMovieAccessToken();
-    const r=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-payment",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({action:"initialize",plan:planKey,email})});
+    const r=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-payment-test",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({action:"initialize",plan:planKey,email})});
     const d=await r.json().catch(()=>({}));
     if(!r.ok)throw new Error(d.error||"Could not start payment.");
     localStorage.setItem("obitrend_movie_pending_reference",d.reference);
@@ -74,7 +74,7 @@ async function verifyMoviePaymentReturn(){
   try{
     await window.movieAuthReady;
     const token=await window.getMovieAccessToken();
-    const r=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-payment",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({action:"verify",reference})});
+    const r=await fetch("https://vjlitqujcujwsislprfg.supabase.co/functions/v1/movie-payment-test",{method:"POST",headers:{"content-type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({action:"verify",reference})});
     const d=await r.json().catch(()=>({}));
     if(!r.ok||!d.success)throw new Error(d.error||"Payment verification failed.");
     localStorage.setItem("obitrend_movie_verified_reference",reference);
