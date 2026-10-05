@@ -122,6 +122,8 @@ module.exports=async(req,res)=>{
     const si=Number(x.sceneIndex);
     const hi=Number(x.shotIndex);
     const ratio=x.ratio||"16:9";
+    const duration=Math.max(2,Math.min(30,Math.round(Number(x.duration)||30)));
+    const imageDataUri=typeof x.imageDataUri==="string"?x.imageDataUri.trim():"";
     const scene=b&&b.scenes&&b.scenes[si];
     const shot=scene&&scene.shots&&scene.shots[hi];
 
@@ -161,17 +163,29 @@ module.exports=async(req,res)=>{
     ].join(" ");
 
     const safePrompt=prompt.length>1000?prompt.slice(0,997)+"...":prompt;
+    if(imageDataUri){
+      const validImage=/^data:image\\/(?:jpe?g|png|webp);base64,[A-Za-z0-9+/=]+$/i.test(imageDataUri);
+      if(!validImage){
+        try{await fetch(supabaseUrl+"/functions/v1/movie-credit",{method:"POST",headers:{"content-type":"application/json","apikey":publishable,"Authorization":auth},body:JSON.stringify({action:"release",token:String(reservation)})})}catch(_){}
+        return json(res,400,{error:"The selected image is invalid. Please choose a JPG, PNG or WebP image and try again.",reservationReleased:true});
+      }
+      if(imageDataUri.length>5*1024*1024){
+        try{await fetch(supabaseUrl+"/functions/v1/movie-credit",{method:"POST",headers:{"content-type":"application/json","apikey":publishable,"Authorization":auth},body:JSON.stringify({action:"release",token:String(reservation)})})}catch(_){}
+        return json(res,413,{error:"The selected image is too large for movie generation. Please choose a smaller image and try again.",reservationReleased:true});
+      }
+    }
+
     const runwayBody={
       model:"wan3",
       promptText:safePrompt,
       audio:true,
-      duration:30,
+      duration,
       ratio:ratio==="9:16"?"720:1280":"1280:720"
     };
+    if(imageDataUri)runwayBody.promptImage=imageDataUri;
 
-    // Gen-4.5 text-only movie shots must use Runway's text-to-video endpoint.
-    // This keeps prompt-only generation independent of promptImage validation.
-    const r=await runwayRequest("/text_to_video",{
+    const endpoint=imageDataUri?"/image_to_video":"/text_to_video";
+    const r=await runwayRequest(endpoint,{
       method:"POST",
       body:JSON.stringify(runwayBody)
     });
