@@ -19,7 +19,7 @@ body{min-height:100vh}
 .pipeline-hero{padding:42px 0 26px}.pipeline-kicker{color:#e6b95e;letter-spacing:.28em;text-transform:uppercase;font-size:11px;font-weight:700}.pipeline-hero h1{font-size:clamp(34px,6vw,62px);line-height:.98;margin:14px 0 14px;letter-spacing:-.045em}.pipeline-hero h1 em{font-style:normal;color:#e6b95e}.pipeline-hero p{max-width:680px;color:#9aa2b2;font-size:16px;line-height:1.7;margin:0}
 .pipeline-input{background:#0c1018;border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:18px;box-shadow:0 20px 70px rgba(0,0,0,.28)}
 .pipeline-input textarea{width:100%;min-height:150px;resize:vertical;background:#070a10;color:#f7f7f8;border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:18px;font:inherit;font-size:16px;line-height:1.65;outline:none}.pipeline-input textarea:focus{border-color:#e6b95e}
-.pipeline-controls{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:14px}.duration-btn{background:#090c12;color:#aeb5c2;border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:10px 14px;cursor:pointer}.duration-btn.active{color:#111;background:#e6b95e;border-color:#e6b95e}
+.pipeline-controls{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-top:14px}.duration-btn{background:#090c12;color:#aeb5c2;border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:10px 14px;cursor:pointer}.duration-btn.active{color:#111;background:#e6b95e;border-color:#e6b95e}.provider-label{width:100%;color:#e6b95e;font-size:10px;font-weight:800;letter-spacing:.18em;margin:2px 0 0}.provider-btn{background:#090c12;color:#aeb5c2;border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:10px 15px;cursor:pointer;font-weight:800}.provider-btn.active{color:#111;background:#e6b95e;border-color:#e6b95e;box-shadow:0 0 0 3px rgba(230,185,94,.08)}.provider-btn span{margin-right:5px}
 .pipeline-generate{margin-top:16px;width:100%;border:0;border-radius:16px;padding:16px;background:linear-gradient(100deg,#f3cc72,#e6b95e);color:#101116;font-weight:800;font-size:17px;cursor:pointer}.pipeline-generate:disabled{opacity:.55;cursor:not-allowed}
 .pipeline-status{min-height:24px;margin-top:12px;color:#9aa2b2;font-size:13px}.pipeline-status.error{color:#ff8e8e}
 .pipeline-flow{margin-top:28px;display:grid;gap:12px}
@@ -94,7 +94,7 @@ body{overflow-x:hidden}
 <main class="pipeline-shell" id="moviePipeline">
   <header class="pipeline-top">
     <div class="pipeline-brand"><div class="pipeline-brand-mark">♛</div><div><b>OBITREND</b><span>AI MOVIE CREATOR</span></div></div>
-    <div class="pipeline-lock">PREVIEW · FLIXLY</div>
+    <div class="pipeline-lock" id="providerBadge">AI ENGINE · KLING</div>
   </header>
 
   <section class="pipeline-hero">
@@ -106,6 +106,9 @@ body{overflow-x:hidden}
   <section class="pipeline-input">
     <textarea id="pipelinePrompt" maxlength="8000" placeholder="Describe your movie..."></textarea>
     <div class="pipeline-controls" aria-label="Movie duration">
+      <div class="provider-label">AI VIDEO ENGINE</div>
+      <button class="provider-btn active" data-provider="kling" type="button"><span>✦</span> Kling</button>
+      <button class="provider-btn" data-provider="flixly" type="button"><span>◆</span> Flixly</button>
       <button class="duration-btn" data-seconds="30" type="button">30s · 1 credit</button>
       <button class="duration-btn active" data-seconds="60" type="button">1 min · 2 credits</button>
       <button class="duration-btn" data-seconds="120" type="button">2 min · 4 credits</button>
@@ -138,6 +141,20 @@ import { FFmpeg } from "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.15/dist
 import { fetchFile, toBlobURL } from "https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.2/dist/esm/index.js";
 
 const $=id=>document.getElementById(id);
+let selectedProvider="kling";
+window.obitrendMovieProvider=selectedProvider;
+const nativeFetch=window.fetch.bind(window);
+window.fetch=async function(input,init={}){
+  try{
+    const url=typeof input==="string"?input:(input&&input.url)||"";
+    if(url.includes("/api/generate-shot")){
+      const headers=new Headers(init.headers||((input&&input.headers)||{}));
+      headers.set("X-Movie-Provider",window.obitrendMovieProvider||"kling");
+      init={...init,headers};
+    }
+  }catch(_){}
+  return nativeFetch(input,init);
+};
 let selectedSeconds=60;
 let blueprint=null;
 let finalObjectUrl="";
@@ -269,6 +286,13 @@ async function start(){
     if(source)setStatus(source,true);
   }finally{$("pipelineGenerate").disabled=false}
 }
+document.querySelectorAll(".provider-btn").forEach(btn=>btn.addEventListener("click",()=>{
+  selectedProvider=btn.dataset.provider==="flixly"?"flixly":"kling";
+  window.obitrendMovieProvider=selectedProvider;
+  const badge=document.getElementById("providerBadge"); if(badge)badge.textContent="AI ENGINE · "+(selectedProvider==="kling"?"KLING":"FLIXLY");
+  document.querySelectorAll(".provider-btn").forEach(x=>x.classList.toggle("active",x===btn));
+  setStatus((selectedProvider==="kling"?"Kling":"Flixly")+" selected — cinematic generation is ready.");
+}));
 document.querySelectorAll(".duration-btn").forEach(btn=>btn.addEventListener("click",()=>{selectedSeconds=Number(btn.dataset.seconds)||60;document.querySelectorAll(".duration-btn").forEach(x=>x.classList.toggle("active",x===btn));}));
 $("pipelineGenerate").addEventListener("click",start);
 setStage(0,"idle","Waiting");
