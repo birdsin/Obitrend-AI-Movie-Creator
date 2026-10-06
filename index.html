@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="/styles.css?v=20261004-2">
 <link rel="stylesheet" href="/dashboard-enhancements.css">
 <link rel="stylesheet" href="/prompt-movie-dashboard.css?v=20261004-2">
+<link rel="stylesheet" href="/live-credit-panel.css?v=20261006-1">
 </head>
 <body>
 <div id="obitrendStartup" class="pm-startup" aria-label="OBITREND FILM STUDIO starting">
@@ -57,6 +58,27 @@
       <button class="pm-avatar pm-nav-btn" id="pmProfileBtn" type="button" aria-label="Profile">P</button>
     </div>
   </header>
+
+  <section class="ob-live-wrap" aria-label="OBITREND live system status">
+<div id="obLivePanel" class="ob-live-panel">
+<div class="ob-live-head">
+<div class="ob-live-brand"><div class="ob-live-crown" aria-hidden="true">♛</div><div><b>OBITREND</b><span>MOVIE AI V2</span></div></div>
+<div class="ob-live-center"><div id="obLiveConnection" class="ob-live-connection"><span class="ob-live-dot"></span> Secure backend connected</div><span id="obLiveConnectionSub" class="ob-live-sub">All systems operational</span></div>
+<div class="ob-live-time"><div class="ob-live-badge"><span class="ob-live-dot"></span> LIVE</div><div id="obLiveDate" class="ob-live-date">Loading date…</div><div id="obLiveTopClock" class="ob-live-clock">Loading time…</div></div>
+</div>
+<div class="ob-live-grid">
+<div class="ob-live-stat"><div class="ob-live-icon"><i data-lucide="coins"></i></div><div><div class="ob-live-label">Credits</div><div id="obLiveCredits" class="ob-live-value gold">—</div><div class="ob-live-small">Available Credits</div></div></div>
+<div class="ob-live-stat"><div class="ob-live-icon"><i data-lucide="lock-keyhole"></i></div><div><div class="ob-live-label">Reserved</div><div id="obLiveReserved" class="ob-live-value">—</div><div class="ob-live-small">Pending Usage</div></div></div>
+<div class="ob-live-stat"><div class="ob-live-icon"><i data-lucide="clock-3"></i></div><div><div id="obLiveResetLabel" class="ob-live-label">Free Reset</div><div id="obLiveReset" class="ob-live-value">—</div><div id="obLiveResetDate" class="ob-live-small">Checking entitlement…</div></div></div>
+<div class="ob-live-stat ob-live-location"><div class="ob-live-icon"><i data-lucide="map-pin"></i></div><div><div class="ob-live-label">Live Location</div><div id="obLiveLocation" class="ob-live-value">Nigeria <span class="ob-ng-flag"><i></i><i></i><i></i></span></div><div id="obLiveLocationSmall" class="ob-live-small">Africa/Lagos · WAT · UTC+1</div></div></div>
+</div>
+<div class="ob-live-bottom">
+<div class="ob-live-bottom-item"><div class="ob-live-icon"><i data-lucide="server"></i></div><div><div class="ob-live-bottom-title">Server Status</div><div id="obLiveServer" class="ob-live-bottom-value ok">Connecting…</div></div></div>
+<div class="ob-live-bottom-item"><div class="ob-live-icon"><i data-lucide="wifi"></i></div><div><div class="ob-live-bottom-title">Current Time (WAT)</div><div id="obLiveBottomClock" class="ob-live-bottom-value">Loading…</div></div></div>
+<div class="ob-live-bottom-item"><div class="ob-live-icon"><i data-lucide="globe-2"></i></div><div><div class="ob-live-bottom-title">Time Zone</div><div class="ob-live-bottom-value">West Africa Time (WAT)</div><div class="ob-live-bottom-small">UTC +1</div></div></div>
+</div>
+<div id="obLiveSync" class="ob-live-sync">Live sync starting…</div>
+</div></section>
 
   <section class="pm-hero">
     <div>
@@ -174,6 +196,7 @@
 </section>
 
 <script src="https://unpkg.com/lucide@latest"></script>
+<script src="/live-credit-panel.js?v=20261006-1"></script>
 <script type="module" src="/movie-auth.js?v=20261004-4"></script>
 <script src="/app.js?v=20261005-7"></script>
 <script src="/mobile-pro-fix.js?v=20260927-1"></script>
