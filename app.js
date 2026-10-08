@@ -178,7 +178,11 @@ async function getMovieProduction(productionId){
   if(!productionId)return null;
   const d=await movieProductionRequest("production_status",{production_id:productionId});
   return d&&d.id?d:null;
+}\nasync function listMovieProductions(limit=12){
+  const d=await movieProductionRequest("production_list",{limit:Number(limit||12)});
+  return Array.isArray(d?.productions)?d.productions:[];
 }
+
 async function saveMovieProductionSegment(productionId,segmentIndex,videoUrl){
   return movieProductionRequest("production_segment",{
     production_id:productionId,
@@ -231,6 +235,7 @@ window.generateShot=generateShot;
 window.getMovieCredits=getMovieCredits;
 window.createMovieProduction=createMovieProduction;
 window.getMovieProduction=getMovieProduction;
+window.listMovieProductions=listMovieProductions;
 window.setMovieProductionStatus=setMovieProductionStatus;
 window.saveMovieProductionSegment=saveMovieProductionSegment;
 window.saveHistory=saveHistory;
