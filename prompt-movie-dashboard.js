@@ -527,33 +527,88 @@
   }
   document.addEventListener("keydown",e=>{if(e.key==="Escape")closePlayerModal()});
 
-  function loadRecent(){
-    let history=[];try{history=JSON.parse(localStorage.getItem("obitrend_movie_history")||"[]")}catch{}
+  async function loadRecent(){
+    let serverMovies=[];
+    try{
+      if(typeof window.listMovieProductions==="function"){
+        serverMovies=await window.listMovieProductions(12);
+      }
+    }catch(error){
+      console.warn("Could not load account movie productions:",error);
+    }
+
+    const completed=Array.isArray(serverMovies)
+      ? serverMovies.filter(x=>x&&x.status==="completed"&&Array.isArray(x.video_urls)&&x.video_urls.some(Boolean))
+      : [];
+
+    if(completed.length){
+      const history=completed.slice(0,6).map(x=>{
+        const b=x.blueprint||{};
+        return {
+          id:x.id,
+          title:x.title||b.title||"Untitled Movie",
+          genre:b.genre||"Cinematic",
+          length:x.length_minutes||b.length||"",
+          created:x.created_at,
+          generated:true,
+          videoUrl:x.video_urls?.find(Boolean)||"",
+          videoUrls:Array.isArray(x.video_urls)?x.video_urls.filter(Boolean):[],
+          blueprint:b,
+          prompt:b.logline||b.prompt||b.title||x.title||""
+        };
+      });
+      renderMovieCards(history,true);
+      return;
+    }
+
+    let history=[];
+    try{history=JSON.parse(localStorage.getItem("obitrend_movie_history")||"[]")}catch{}
     history=Array.isArray(history)?history.filter(x=>x&&x.generated===true&&x.videoUrl):[];
     if(!history.length){renderDemos();return}
-    recent.innerHTML=history.slice(0,3).map((x,i)=>{
+    renderMovieCards(history,false);
+  }
+
+  function renderMovieCards(history,accountBacked){
+    recent.innerHTML=history.slice(0,6).map((x,i)=>{
       const b=x?.blueprint||{};
       const title=String(x.title||b.title||"Untitled Movie").replace(/[&<>]/g,"");
       const genre=String(b.genre||x.genre||"Cinematic").replace(/[&<>]/g,"");
       const length=String(b.length||x.length||15).replace(/[&<>]/g,"");
+      const playlist=Array.isArray(x.videoUrls)?x.videoUrls.filter(Boolean):[];
+      const firstVideo=String(x.videoUrl||playlist[0]||"").trim();
       const image=posterImages[i%posterImages.length];
-      return '<button class="pm-project" type="button" data-movie-index="'+i+'"><div class="pm-project-art" style="background-image:url('+image+')"><span class="pm-genre">'+genre+'</span><span class="pm-badge">'+length+' min</span><span class="pm-play"><i data-lucide="play"></i></span><span class="pm-poster-title">'+title+'</span></div><b>'+title+'</b><span>'+genre+' · '+length+' min</span></button>';
+      const media=firstVideo
+        ? '<video class="pm-project-video" muted playsinline preload="metadata" src="'+firstVideo.replace(/"/g,"&quot;")+'"></video>'
+        : '<div class="pm-project-art" style="background-image:url('+image+')"></div>';
+      return '<button class="pm-project" type="button" data-movie-index="'+i+'">'+
+        '<div class="pm-project-art">'+media+
+        '<span class="pm-genre">'+genre+'</span>'+
+        '<span class="pm-badge">'+length+' min</span>'+
+        (accountBacked?'<span class="pm-live-output">LIVE OUTPUT</span>':'')+
+        '<span class="pm-play"><i data-lucide="play"></i></span>'+
+        '<span class="pm-poster-title">'+title+'</span></div>'+
+        '<b>'+title+'</b><span>'+genre+' · '+length+' min</span></button>';
     }).join("");
+
     recent.querySelectorAll(".pm-project").forEach((card,i)=>card.addEventListener("click",()=>{
       const item=history[i];
       if(item?.blueprint){
         try{localStorage.setItem("obitrend_movie_blueprint",JSON.stringify(item.blueprint));state.blueprint=item.blueprint}catch(_){}
         fillPrompt(item.prompt||item.blueprint.logline||item.blueprint.title||"");
-        status.textContent="Movie loaded from your recent creations.";
+        status.textContent=accountBacked?"Movie loaded from your OBITREND account.":"Movie loaded from your recent creations.";
       }
     }));
     recent.querySelectorAll(".pm-play").forEach((play,i)=>play.addEventListener("click",e=>{
       e.preventDefault();e.stopPropagation();
-      let history=[];try{history=JSON.parse(localStorage.getItem("obitrend_movie_history")||"[]")}catch{}
       const item=history[i]||null;
       const title=item?.blueprint?.title||item?.title||"OBITREND Movie";
       openPlayerModal(item,posterImages[i%posterImages.length],title);
     }));
+    recent.querySelectorAll(".pm-project-video").forEach(video=>{
+      video.addEventListener("mouseenter",()=>video.play().catch(()=>{}));
+      video.addEventListener("mouseleave",()=>{video.pause();try{video.currentTime=0}catch(_){}});
+      video.addEventListener("touchstart",()=>video.play().catch(()=>{}),{passive:true});
+    });
     iconRefresh();
   }
 
